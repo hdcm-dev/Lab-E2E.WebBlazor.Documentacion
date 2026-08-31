@@ -202,6 +202,41 @@ se volvió la opción por defecto:
 >   Esas son candidatas a E2E.
 > - ¿Podés nombrar una regla de tu dominio que estés verificando por navegador y que estaría mejor
 >   cubierta por una unitaria?
+>
+> **Cómo leer estas preguntas**
+>
+> 1. *Qué defecto llegaría a producción.* La pregunta obliga a nombrar el aporte propio del nivel,
+>    no a defenderlo en general. En el laboratorio la respuesta es concreta: el alta no termina
+>    cuando la fila aparece, recarga la página y vuelve a contar
+>    **[E: tests/MovilidadUrbana.E2ETests/LocalidadesTests.cs, líneas 60-63]**; sin esa recarga
+>    pasaría igual un dato que solo vive en el estado del circuito y nunca llegó a la base
+>    ([§5.2](#52-qué-cubre-el-laboratorio-y-por-qué)). Y `ToHaveTextAsync("89.000")` verifica el
+>    formato de la cultura `es-AR` que fija la aplicación
+>    **[E: src/MovilidadUrbana.Web/Program.cs, líneas 12-16]**: ninguna unitaria sobre las reglas
+>    se entera de que ese formato se rompió. **Reparo:** la pregunta invita a contestar «todo», y
+>    ahí deja de servir. Si mañana desaparecieran las E2E, los bordes de cada validación seguirían
+>    cubiertos por las 49 unitarias que corren en 27 milisegundos **[V]**. Borrar el caso del
+>    nombre de dos caracteres casi no cuesta nada; borrar el que comprueba que el error llega a la
+>    pantalla cuesta el cableado entero. La pregunta rinde caso por caso, no sobre la suite como
+>    bloque —que es exactamente lo que hace la primera pregunta de
+>    [§5](#5-qué-testear-y-qué-no)—.
+> 2. *Lo que repetís siempre igual.* Separa lo automatizable de lo exploratorio: la E2E automatiza
+>    lo conocido y repetitivo, descubrir lo desconocido sigue siendo trabajo humano
+>    ([§1.2](#12-qué-no-es)). «Siempre igual» es el criterio operativo: una secuencia fija con un
+>    resultado observable se transcribe a un caso. **Reparo:** repetir no alcanza para justificar
+>    una E2E. Verificar a mano que un código postal de cuatro dígitos se rechaza es repetitivo y
+>    siempre igual, y aun así vive mejor en `tests/MovilidadUrbana.UnitTests`: lo dice el tercer
+>    filtro de [§5.1](#51-el-criterio-de-selección) —si una unitaria barata lo cubre igual de bien,
+>    la E2E sobra—. Repetitivo dice «automatizable», no «automatizable acá».
+> 3. *La regla que estás verificando por navegador.* Es la anterior al revés, y es la que ordena la
+>    proporción de [§1.3](#13-dónde-se-ubica). El costo del error se mide: 22 casos E2E tardan 7
+>    segundos en chromium y 49 unitarias 27 milisegundos **[V]**, tres órdenes de magnitud.
+>    **Reparo:** la pregunta induce a borrar la E2E completa, y no es eso lo que hay que borrar. El
+>    laboratorio conserva a propósito un caso de validación por pantalla
+>    **[E: tests/MovilidadUrbana.E2ETests/LocalidadesTests.cs, líneas 21-35]**, porque la regla se
+>    prueba abajo pero el camino de la regla hasta el DOM —el aviso, el mensaje al pie del campo, y
+>    que la tabla siga con dos filas— no lo ve ninguna unitaria. Lo que baja de nivel son los
+>    bordes, no el caso.
 
 ---
 
@@ -539,6 +574,43 @@ negociación con otro archivo y otra persona.
 > - Para cada caso de tu suite: si lo borro, ¿qué defecto deja de detectarse? Si no hay respuesta, sobra.
 > - ¿Cuántos de tus casos fallarían si alguien renombra una clase de CSS?
 > - ¿Qué supuesto de tu infraestructura de pruebas no está verificado por ninguna prueba?
+>
+> **Cómo leer estas preguntas**
+>
+> 1. *Si lo borro, ¿qué defecto deja de detectarse?* Son los tres filtros de
+>    [§5.1](#51-el-criterio-de-selección) aplicados hacia atrás, sobre la suite que ya existe: en
+>    lugar de preguntar qué escribir, pregunta qué sostener. Su virtud es que exige nombrar un
+>    defecto, no un área. **Reparo:** tomada al pie de la letra borra casos que tienen que quedarse.
+>    *«Cada prueba trabaja sobre su propio conjunto de datos»*
+>    **[E: LocalidadesTests.cs, líneas 148-165]** no detecta ningún defecto del producto: verifica
+>    el supuesto de aislamiento del que depende todo el paralelismo
+>    ([§5.2](#52-qué-cubre-el-laboratorio-y-por-qué)). La pregunta necesita una segunda mitad: qué
+>    defecto deja de detectarse **en el producto o en la propia infraestructura de pruebas**.
+> 2. *Cuántos casos fallarían si se renombra una clase de CSS.* Mide el acoplamiento con la
+>    presentación, que es el antipatrón de los selectores de diseño
+>    ([§5.4](#54-antipatrones)). En el laboratorio la respuesta es casi cero por la regla de
+>    [§5.3](#53-el-contrato-de-selección) —el `data-testid` se escribe junto con la vista—, con una
+>    sola excepción declarada: `Page.Locator(".navbar-toggler")`
+>    **[E: PruebaE2E.cs, línea 94]**, y está justificada porque ese marcado es de un tercero.
+>    **Reparo:** cero no es la meta, y el número puede engañar. `data-testid` mueve el acoplamiento,
+>    no lo elimina: la suite se rompe igual si alguien renombra `fila` o `campo-nombre`, solo que
+>    ese renombre es deliberado y el retoque de CSS no. Y una suite que no se inmuta ante ningún
+>    cambio de interfaz probablemente esté verificando poco: `NavegacionTests` depende del título de
+>    la página y del atributo `aria-current`
+>    **[E: tests/MovilidadUrbana.E2ETests/NavegacionTests.cs]**, que también son contrato de
+>    interfaz —y está bien que lo sean—.
+> 3. *Qué supuesto de la infraestructura no está verificado.* Generaliza el caso del andamiaje de
+>    [§5.2](#52-qué-cubre-el-laboratorio-y-por-qué). El laboratorio verifica dos supuestos por
+>    caminos distintos: el aislamiento tiene su propia prueba, y la emulación móvil no tiene prueba
+>    sino una falla explícita al armar el contexto si falta el descriptor
+>    **[E: PruebaE2E.cs, líneas 31-35]**. **Reparo:** no todo supuesto merece un caso, y la pregunta
+>    no lo dice. Hay uno que no cubre ninguno de los dos caminos: que el binario que se prueba sea
+>    el de esta corrida. El fixture publica antes de arrancar
+>    **[E: ServidorDeLaAplicacion.cs, líneas 121-162]**, pero en CI corre con
+>    `PUBLICAR_ANTES_DE_PROBAR=false` sobre el artefacto que descargó
+>    **[E: .github/workflows/e2e.yml, línea 226]**, y nada dentro de la suite comprueba esa
+>    correspondencia. La pregunta rinde cuando se acepta que la respuesta puede ser «ninguna prueba,
+>    y está bien» tanto como «ninguna prueba, y es un agujero».
 
 ---
 
@@ -669,6 +741,43 @@ real solo debería correr un subconjunto de solo lectura. **[C]**
 >   de esperarlo con `Expect`?
 > - ¿De dónde salen los datos con los que arranca cada caso: los siembra la aplicación, los crea la
 >   prueba, o dependen de lo que quedó en la base de la corrida anterior?
+>
+> **Cómo leer estas preguntas**
+>
+> 1. *Qué `data-testid` publica tu pantalla.* Aterriza la regla de
+>    [§5.3](#53-el-contrato-de-selección): los atributos de prueba los escribe quien escribe la
+>    vista, y agregarlos después convierte cada caso nuevo en una negociación con otro archivo. El
+>    ejemplo a copiar es la fila del ABM, que publica marcas anidadas —`fila`, `celda-nombre`,
+>    `data-id`— **[E: src/MovilidadUrbana.Web/Components/Pages/Localidades.razor, línea 92]**, que
+>    es justamente lo que habilita el encadenado `fila.GetByTestId("boton-editar")` de
+>    [§6.2](#62-localizadores-el-contrato-con-la-interfaz). **Reparo:** «cuáles tendría que agregar»
+>    empuja a la respuesta «uno por elemento», y eso también se paga. El laboratorio localiza por
+>    posición sobre las opciones de la encuesta **[E: EncuestaTests.cs, línea 54]** y por CSS sobre
+>    `.navbar-toggler`: en el primer caso el orden es parte del contrato y en el segundo el marcado
+>    no es nuestro, así que un atributo nuevo no habría comprado nada. El criterio no es cubrir la
+>    pantalla de atributos, sino qué necesita nombrar el caso que querés escribir.
+> 2. *Cuántas verificaciones usan `Assert` en vez de `Expect`.* El costo del `Assert` sobre un valor
+>    leído no es de estilo: es una carrera con el repintado que llega por el circuito
+>    ([§7.1](#71-el-circuito-de-blazor-en-dos-frases)), y por eso la regla de
+>    [§6.3](#63-aserciones-que-esperan) es verificar siempre con la aserción que reintenta.
+>    **Reparo:** esa regla está marcada **[C]** y no es una prohibición del framework. Un `Assert`
+>    sobre un valor que ya quedó estabilizado por un `Expect` anterior no introduce intermitencia
+>    alguna. Y contar `Assert` no protege del otro fallo, que es más silencioso: `Not.` reintenta
+>    igual y se cumple sobre una pantalla en blanco, porque «nunca apareció» satisface una ausencia
+>    ([§6.3](#63-aserciones-que-esperan)). La pregunta que falta al lado de esta es cuántas de tus
+>    aserciones son solo negativas.
+> 3. *De dónde salen los datos de cada caso.* Ubica tu proyecto en la tabla de
+>    [§6.4](#64-datos-sembrar-no-depender). La respuesta del laboratorio es «los siembra la
+>    aplicación», pero la parte interesante es *cuándo*: no hay middleware ni siembra al arrancar,
+>    cada operación del repositorio empieza llamando a `AsegurarAsync` y es esa llamada la que crea
+>    la marca de sesión y las dos filas
+>    **[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/RepositorioDeLocalidades.cs, líneas 20-22]**.
+>    **Reparo:** las tres opciones que ofrece la pregunta no son excluyentes ni valen lo mismo según
+>    dónde corras. Contra un entorno ya desplegado (**CTX-03**) la restricción es otra —no destruir
+>    estado ajeno— y «los siembra la aplicación» recién es una respuesta aceptable porque el
+>    aislamiento por sesión existe en el producto, no en la suite. Sin él, la misma corrida contra
+>    homologación **[E: .github/workflows/verificacion-entorno.yml]** dejaría de ser una prueba de
+>    humo para ser un problema.
 
 ---
 
@@ -1015,6 +1124,41 @@ antes obligaba a agregar capturas de pantalla a mano y adivinar el resto.
 >   dice que la pantalla ya responde?
 > - ¿Dónde vive el estado que dos pruebas simultáneas se podrían pisar, y qué lo particiona?
 > - Si el servidor no arrancara, ¿tu suite lo diría en un mensaje o lo mostraría como 20 timeouts?
+>
+> **Cómo leer estas preguntas**
+>
+> 1. *Cuál es tu testigo de interactividad.* Busca la señal **observable desde el DOM y provista por
+>    la aplicación**, no inferida por la prueba: en el laboratorio es un elemento oculto del layout
+>    cuyo atributo refleja `RendererInfo.IsInteractive`
+>    **[E: src/MovilidadUrbana.Web/Components/Layout/MainLayout.razor, línea 47]**, que cambia
+>    exactamente cuando la página empieza a responder
+>    ([§7.2](#72-esperar-a-que-la-página-sea-interactiva)). **Reparo:** el testigo es la mitad menos
+>    importante de la solución, y es la única que la pregunta pide. Publicarlo y que cada caso se
+>    acuerde de esperarlo no resuelve nada: lo que lo vuelve difícil de olvidar es que la espera
+>    viva dentro del helper de navegación **[E: PruebaE2E.cs, líneas 72-87]**, de modo que quien
+>    escribe una prueba nueva la hereda sin saber que existe. La pregunta completa es: cuál es tu
+>    testigo, y qué hace que nadie pueda escribir un caso sin esperarlo.
+> 2. *Dónde vive el estado que dos pruebas se podrían pisar.* En el laboratorio vive en un único
+>    archivo SQLite y lo particiona una cookie que emite un middleware y por la que filtran todos
+>    los repositorios **[E: src/MovilidadUrbana.Web/Infraestructura/Sesiones/MiddlewareDeSesion.cs]**:
+>    la partición está en la aplicación, no en las pruebas
+>    ([§7.3](#73-aislar-el-estado-cuando-vive-en-el-servidor)). **Reparo:** la partición lógica no
+>    alcanza, y contestar solo eso deja pasar el fallo. Que cada prueba vea únicamente sus filas no
+>    habilita que varias escriban a la vez sobre el mismo archivo: hizo falta además `journal_mode=WAL`
+>    y `Default Timeout=30` en la cadena de conexión
+>    **[E: PreparadorDeBaseDeDatos.cs, línea 28; ServidorDeLaAplicacion.cs, línea 68]**. La pregunta
+>    tiene dos respuestas —qué particiona los datos y qué tolera la concurrencia física— y todavía un
+>    techo que ninguna de las dos mueve: `ParallelScope.Fixtures` paraleliza clases, no casos
+>    ([§7.7](#77-paralelismo-hasta-dónde-llega)).
+> 3. *Un mensaje o veinte timeouts.* No pregunta por corrección sino por diagnóstico: las dos suites
+>    detectan que el servidor no arrancó, pero una cuesta un minuto de lectura y la otra una tarde.
+>    Por eso el fixture sondea el puerto y aborta con un mensaje explícito si el proceso muere antes
+>    de escuchar **[E: ServidorDeLaAplicacion.cs, líneas 240-264]**. **Reparo:** un arranque
+>    verificado no es un arranque correcto, y el mensaje claro no cubre la falla vecina. Si el
+>    binario se lanza desde otra carpeta, el servidor arranca, escucha y responde `200`: lo que sale
+>    vacío son los recursos estáticos, sin `404` y sin error rojo en la consola
+>    ([§7.4](#74-la-aplicación-hay-que-compilarla-antes-de-probarla)). Ahí no salva el sondeo del
+>    puerto sino el testigo de la pregunta 1, que falla diciendo qué atributo esperaba.
 
 ---
 
@@ -1360,6 +1504,42 @@ argumento de lanzamiento o más `--shm-size` para el contenedor.
 >   un job nuevo?
 > - Si un PR viene de un fork, ¿qué jobs de tu CI fallarían por permisos?
 > - ¿Cuánto tarda tu CI en decirle a quien abrió el PR que algo no compila?
+>
+> **Cómo leer estas preguntas**
+>
+> 1. *El único check obligatorio.* La respuesta buscada es un nombre estable frente a la matriz: el
+>    laboratorio exige `CI aprobada`, un job que solo comprueba que ni `compilacion` ni `e2e`
+>    fallaron **[E: .github/workflows/ci.yml, líneas 127-147]**, para no tener que enumerar
+>    `Pruebas (chromium)`, `Pruebas (firefox)`… en la configuración del repositorio
+>    ([§8.4](#84-atar-las-pruebas-al-merge-del-pull-request)). La segunda mitad de la pregunta ya
+>    tiene su respuesta escrita: `ci-ok` no descubre jobs solo, hay que sumarlos a mano al `needs` y
+>    al bucle. **Reparo:** «un solo check» no es la respuesta correcta en abstracto, es un canje. Se
+>    cambia un olvido visible —agregar un navegador nuevo a la lista de checks del repositorio— por
+>    uno invisible: agregarlo al `needs` del YAML, en el mismo pull request que lo introduce. Lo que
+>    sostiene el diseño no es el job sino las dos líneas que lo acompañan: `if: always()`, sin el
+>    cual un fallo previo lo saltea y un check salteado no bloquea el merge, y que `skipped` cuente
+>    como aceptable para los jobs que legítimamente no corren.
+> 2. *Un PR desde un fork.* Apunta a los permisos del token: el comentario en el pull request está
+>    limitado a ramas del propio repositorio **[E: ci.yml, líneas 79-82]**, porque un fork no recibe
+>    permisos de escritura y sin esa condición el job fallaría en cada contribución externa. Por lo
+>    mismo `comentario-en-pr` queda fuera de `ci-ok`: que no se pueda comentar no dice nada sobre el
+>    código. **Reparo:** la pregunta insinúa que la respuesta correcta es «ninguno», y no lo es. Lo
+>    correcto es «ninguno de los que bloquean el merge». El comentario efectivamente deja de
+>    funcionar desde un fork, y el laboratorio no lo arregla: lo desactiva. La consecuencia aceptada
+>    —quien contribuye desde afuera no ve el resultado en el PR y tiene que abrir la pestaña
+>    *Actions*— es parte de la respuesta, no un detalle que se omite.
+> 3. *Cuánto tarda en avisar que algo no compila.* Mide el orden del pipeline. En el laboratorio
+>    `compilacion` corre antes de gastar un runner con navegadores y hace tres cosas baratas
+>    —compilar con `-warnaserror`, correr las unitarias y listar las E2E con `--list-tests`—
+>    **[E: ci.yml, líneas 59-79]**: es lo barato primero, y lo caro dependiendo de lo barato, el
+>    mismo criterio de [§5.1](#51-el-criterio-de-selección) aplicado a la integración.
+>    **Reparo:** medir solo el «no compila» deja afuera el número que más duele. Un pull request
+>    corre únicamente chromium ([§8.3](#83-los-tres-workflows-del-laboratorio)), así que lo que esta
+>    pregunta cronometra es el rojo de una sola configuración; el defecto propio de WebKit no
+>    aparece en el PR, aparece al integrar o en la corrida programada de las 03:15 UTC
+>    **[E: e2e.yml, líneas 57-59]**. Una CI que avisa en un minuto que no compila puede tardar un
+>    día en avisar el resto —y en este laboratorio eso es una decisión explícita de costo, no un
+>    descuido **[C]**—.
 
 ---
 

@@ -84,6 +84,13 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   actualizaron las citas de línea de `ci.yml` y `e2e.yml`, desplazadas por la migración de runner.
 - **`Guides/Quick-Guide-ABM.md`** — §2.6 elimina `[assembly: LevelOfParallelism(3)]` del fragmento
   de paralelismo, en línea con el cambio anterior.
+- **`Guides/Beginner-Guide.md`** — los cinco bloques de preguntas guía (§1, §5, §6, §7 y §8) suman
+  un apartado «Cómo leer estas preguntas»: por cada pregunta, qué criterio busca formar, con qué
+  parte del texto y con qué archivo del laboratorio se responde, y un **reparo** que la discute con
+  un ejemplo concreto —la pregunta que invita a contestar «todo», la que confunde repetitivo con
+  automatizable en E2E, la que pediría borrar el caso de andamiaje, la que se conforma con la
+  partición lógica del estado, la que da por buena la respuesta «un solo check»—. Las preguntas
+  quedan tal como estaban; el análisis se agrega debajo, dentro de la misma cita.
 - **`README.md`** — deja de ser solo el título del repositorio: describe de qué laboratorio es la
   documentación, indexa las guías con su destinatario y lo que deja cada una, y señala el propósito
   de `PROMPTs/`.
