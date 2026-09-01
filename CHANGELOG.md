@@ -4,6 +4,52 @@ Todos los cambios relevantes de este repositorio de documentación se registran 
 
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [Sin publicar] - 2026-09-01
+
+### Añadido
+
+- **`ia-db/`** — base de conocimiento indexada, pensada para que un agente de IA responda sobre los
+  laboratorios sin recorrerlos enteros. Dos workspaces federados, cada uno con su `README.md` como
+  punto de entrada único y sus índices temáticos:
+  - **`ia-db/Root/`** — indexado de `/LAB/Lab-E2E.WebBlazor`. Diez índices: maestro, arquitectura,
+    dominio y reglas, sesiones y persistencia, interfaz y pantallas, pruebas, CI y workflows, guías,
+    decisiones y trampas, y glosario.
+  - **`ia-db/Base/`** — indexado de `/LAB/Lab-E2E.WebBlazor.Base`. Seis índices: maestro,
+    aplicaciones, autenticación, pruebas, CI y workflow, y estado y divergencias. Este último
+    registra lo que en ese repositorio está incompleto o copiado sin adaptar, y el `README.md`
+    advierte que se lo lea antes de afirmar que algo funciona.
+- **`PROMPTs/Indexado/Crear-Indexado.md`** y **`PROMPTs/Indexado/Actualizar-Indexado.md`** —
+  tool-prompts que generan y refrescan esos dos workspaces con el procedimiento de
+  `/IA/PROMPTs/IA.Prompts/Tool-Prompts/Indexado-Documentado/`.
+- **`PROMPTs/Analisis/01-Extraer-Template-SDD-Default/`** — tool-prompt que extrae, de la maqueta
+  generada por el Framework SDD, la forma constructiva de sus subagentes de UX y UI, más sus
+  `OUTPUTs/`: `Knowledge-Template-HTML-SDD-Default.md` (maqueta HTML/CSS/JS con los cuatro tipos de
+  diálogo), `Knowledge-Template-Blazor-Interactive-Server-SDD-Default.md` (el delta para realizarlo
+  en Blazor *interactive server* sin librería de componentes), `Index-Knowledge-Filas.md` con las
+  dos filas de índice, `Registro-De-Mesa.md` con la convocatoria, los veredictos y la deuda
+  declarada, y un `README.md` con el procedimiento de alta en un fork. El conocimiento vive acá a
+  propósito: **no se tocó el Framework SDD**.
+- **`PROMPTs/Features/01-Aplicar-Template-HTML/`** — tool-prompt que aplica esos dos conocimientos a
+  las aplicaciones `HolaMundo` y `Login` de `/LAB/Lab-E2E.WebBlazor.Base`.
+
+### Cambiado
+
+- **`PROMPTs/`** se reordena por tipo de encargo —`Solicitudes/`, `Analisis/`, `Features/`,
+  `Indexado/`— y cada tool-prompt con salidas propias pasa a tener su carpeta con `OUTPUTs/`.
+  `01-Crear-Una-Solucion.md` se mueve de `Indexado/` a `Solicitudes/`, que es lo que siempre fue.
+- **`README.md`** — refleja el nuevo contenido: las guías ya no viven acá y se las indexa en su
+  destino, y se suma la sección de `ia-db/` con los dos workspaces y su punto de entrada.
+
+### Quitado
+
+- **`Guides/Beginner-Guide.md`** y **`Guides/Quick-Guide-ABM.md`** — se mudaron al propio
+  laboratorio, a `/LAB/Lab-E2E.WebBlazor/Guides/E2E-Guide/`, donde quedan junto a las demás familias
+  de guías y al código que citan.
+- **`PROMPTs/Indexado/02-Crear-Developer-Guide.md`**,
+  **`PROMPTs/Indexado/03-Mejora-Continuar-Mesa-Evaluadora.md`** y
+  **`PROMPTs/Fixs/01-Mejoras-Documentacion.md`** — encargos de las guías que se fueron y del ciclo de
+  mesa que las revisó; siguen su rastro en los repositorios donde ahora se los ejecuta.
+
 ## [Sin publicar] - 2026-08-30
 
 ### Añadido

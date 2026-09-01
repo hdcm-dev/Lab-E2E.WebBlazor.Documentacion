@@ -15,7 +15,7 @@
 
 ## Objetivos
 
-  Se busca realmente es entender como integrar las pruebas E2E con playwrigth en la cadena de desarrollo en aplicaciónes .net Blazor. El prompt con que fue creado dicho ejemplo fue `/LAB/Lab-E2E.StaticHtml.Documentacion/PROMPTs/01-Crear-Una-Solucion.md`
+  Se busca realmente es entender como integrar las pruebas E2E con playwrigth en la cadena de desarrollo en aplicaciónes .net Blazor. El prompt con que fue creado dicho ejemplo fue `/LAB/Lab-E2E.WebBlazor.Documentacion/PROMPTs/Solicitudes/01-Crear-Una-Solucion.md`
 
 ---
 
