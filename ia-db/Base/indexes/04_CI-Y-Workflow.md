@@ -2,23 +2,29 @@
 
 > **Propósito**: describir el único workflow del repositorio y señalar qué partes están adaptadas y
 > cuáles siguen siendo del laboratorio grande.
-> **Fuente primaria**: `.github/workflows/e2e.yml`.
+> **Fuente primaria**: `.github/workflows/e2e.yml` (261 líneas) y `Guides/Notas.GitHub.md`.
+> **Vigencia**: 2026-09-02, commit `6af2049`. Ninguna corrida se observó desde esta máquina.
 
-Hay **un solo** workflow: `e2e.yml`, de 258 líneas, copiado de
-[`Lab-E2E.WebBlazor`](../../Root/indexes/06_CI-Y-Workflows.md) y adaptado a medias. Las divergencias
-concretas están en [05_Estado-Y-Divergencias.md](05_Estado-Y-Divergencias.md); acá se describe qué
-hace.
+Hay **un solo** workflow: `e2e.yml`, copiado de
+[`Lab-E2E.WebBlazor`](../../Root/indexes/06_CI-Y-Workflows.md). Dos de las tres divergencias
+bloqueantes que registraba el indexado inicial se corrigieron el 2026-09-01/02; queda una. El detalle
+está en [05_Estado-Y-Divergencias.md](05_Estado-Y-Divergencias.md); acá se describe qué hace.
 
 ## Disparadores
 
 | Disparador | Estado |
 | --- | --- |
+| `pull_request` | **Agregado** el 2026-09-01 (`65435e5`), sobre `branches: [main]` |
 | `workflow_dispatch` | Declarado, con entradas `navegadores` (choice) y `url-base` (string) |
 | `workflow_call` | **No declarado** (sí lo está en el original) |
 | `schedule` | **No declarado** en el YAML, aunque el bloque `env` y la guía lo mencionan |
 
-Tampoco hay bloques `concurrency` ni `permissions`, que el original sí declara: sin
-`permissions` explícitos rige el valor por defecto del repositorio o de la organización.
+Tampoco hay bloques `concurrency` ni `permissions`, que el original sí declara: sin `permissions`
+explícitos rige el valor por defecto del repositorio o de la organización.
+
+Con `pull_request` no hay `inputs`, así que las cuatro expresiones `inputs.*` caen en su valor por
+defecto y los `if: inputs.url-base == ''` se cumplen: la corrida publica la aplicación y prueba
+contra ella. **No verificado por ejecución.**
 
 ## Variables del bloque env
 
@@ -32,8 +38,17 @@ Tampoco hay bloques `concurrency` ni `permissions`, que el original sí declara:
 | `PROYECTO_PRUEBAS` | `tests/WebBlazor.E2E.Base.HolaMundo.E2ETests` |
 | `PATH_PROJECT_FILE` | `src/WebBlazor.E2E.Base.HolaMundo/WebBlazor.E2E.Base.HolaMundo.csproj` |
 
-`PROYECTO_PRUEBAS` y `PATH_PROJECT_FILE` **sí** están adaptados a este repositorio: solo se prueba
-`HolaMundo`, nunca `Login`.
+`PROYECTO_PRUEBAS` y `PATH_PROJECT_FILE` están adaptados a este repositorio: solo se prueba
+`HolaMundo`, nunca `Login` —lo cual, dado que el proyecto de pruebas del login no compila, es lo
+único que puede correr—.
+
+Desde `ca68245` las dos variables además **se usan** donde antes había rutas literales de
+`MovilidadUrbana`:
+
+| Paso | Antes | Ahora |
+| --- | --- | --- |
+| Caché del navegador | `hashFiles('tests/MovilidadUrbana.E2ETests/…csproj')` | `hashFiles(format('{0}/*.csproj', env.PROYECTO_PRUEBAS))` |
+| Permiso de ejecución | `chmod +x publicacion/MovilidadUrbana.Web` | `chmod +x "publicacion/$(basename "${PATH_PROJECT_FILE%.csproj}")"` |
 
 ## Los cuatro jobs
 
@@ -66,12 +81,25 @@ del laboratorio grande, donde están explicadas en detalle:
   juntar los contadores a mano.
 - El SDK se pide explícitamente con `actions/setup-dotnet` porque la imagen del runner no garantiza
   la versión que necesita el proyecto.
+- **Derivar del entorno en lugar de repetir la ruta**: `hashFiles(format(...))` y el `basename` del
+  `PATH_PROJECT_FILE` son la corrección de `ca68245`, y valen como ejemplo de por qué el nombre del
+  proyecto no se escribe dos veces.
+
+## El runner propio y los forks
+
+`Guides/Notas.GitHub.md` (sin versionar, 14 líneas) registra el riesgo que abre el disparador nuevo:
+el repositorio es **público** y los jobs corren en `i7infra-dev`, así que un pull request desde un
+fork ejecutaría código sin revisar en la máquina propia. La nota apunta a la configuración de la
+organización —*Settings → Actions → General → Fork pull request workflows*— con «Require approval for
+all outside collaborators» y, para repositorios privados o internos, el detalle de qué tildar. Es una
+nota de configuración, no un cambio en el repositorio: **no hay nada en el YAML que lo implemente**.
 
 ## Lo que no hay
 
-No existen `ci.yml` ni `verificacion-entorno.yml`: no hay verificación atada a `pull_request` ni a
-`push`, ni un check resumen para la protección de rama, ni comentario automático en los pull
+No existen `ci.yml` ni `verificacion-entorno.yml`: no hay verificación de compilación y pruebas
+unitarias, ni un check resumen para la protección de rama, ni comentario automático en los pull
 requests. Todo eso vive únicamente en `Lab-E2E.WebBlazor`.
 
 `Guides/E2E-Guides.md` transcribe este workflow en su sección «workflow de GitHub Actions», con un
-bloque `schedule` que el YAML del repositorio no tiene.
+bloque `schedule` que el YAML del repositorio no tiene, y sin el `pull_request` que sí tiene.
+`Guides/GitHub-Action.md`, que sería el lugar natural para explicarlo, sigue vacío.

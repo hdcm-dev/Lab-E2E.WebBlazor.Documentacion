@@ -4,6 +4,34 @@ Todos los cambios relevantes de este repositorio de documentación se registran 
 
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [Sin publicar] - 2026-09-03
+
+### Añadido
+
+- **`ia-db/Base/indexes/06_Template-Y-Superficies.md`** — índice nuevo: con qué forma constructiva
+  están escritas las dos aplicaciones desde que se les aplicó el template por defecto del Framework
+  SDD (commits `d32b4ab`…`6af2049`). Registra las tres bases de conocimiento aplicadas, las dos
+  hojas de estilo —`Tokens.css` y `Componentes.css`— como única fuente de valores visuales, y qué se
+  retiró a propósito: `app.css`, los `.razor.css` del andamiaje y la copia de Bootstrap. Existe para
+  que un agente que toque una superficie la escriba igual y no reintroduzca lo que se sacó.
+- **`PROMPTs/Analisis/02-Paginas-Authorized/`** — tool-prompt sobre cómo se prueba una página con
+  `[Authorize]` en `WebBlazor.E2E.Base.Login`, con su `OUTPUTs/Notas.md` (`doc_id: AUTH-00`,
+  `status: en-debate`): qué hay que hacer *antes* de que la página exista para el navegador de la
+  prueba, y el nudo de la cookie que la prueba no puede inventar.
+
+### Cambiado
+
+- **`ia-db/Base/` pasa a versión 1.1** (vigencia 2026-09-02, commit `6af2049`). Se rehicieron los
+  índices 00 a 05 por la aplicación del template SDD: el `README.md` cambia la advertencia de estado
+  —el repositorio avanzó, pero el proyecto de pruebas del login **no compila**—, el resumen ejecutivo
+  deja de decir «Bootstrap (plantilla estándar)», la estructura suma `evidencia/` y las restricciones
+  para IA suman «no reintroducir Bootstrap ni una segunda fuente de valores visuales».
+- **`ia-db/Root/` pasa a versión 1.1**: `07_Guias.md` se sincroniza con la consolidación de
+  `Guides/` —dos familias en cinco carpetas, un documento por guía, con su mapa de líneas y
+  `doc_id`— y deja registrada la duplicación en pie de los cinco anexos sueltos y el desalineo
+  entre el árbol de trabajo y `HEAD`. `09_Glosario.md` corrige una referencia. El resto de los
+  índices no registró cambios.
+
 ## [Sin publicar] - 2026-09-01
 
 ### Añadido

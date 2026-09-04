@@ -25,4 +25,4 @@
 | **Puerta** | En el pipeline, la verificación que bloquea un merge. Acá la puerta es el check `ci-ok` |
 | **Workflow reutilizable** | Uno invocable con `uses:` desde otro workflow (`workflow_call`). Acá es `e2e.yml` |
 | **Runner autoalojado** | El runner propio del laboratorio, etiquetado `i7infra-dev`. Queda comentado en los workflows |
-| **Modelo adoptado** | Tronco con ramas de release, documentado en `Guides/Estandares-Modelo-Ramas-Guide/06-Modelo-Adoptado.md`. **No** es GitFlow |
+| **Modelo adoptado** | Tronco con ramas de release, documentado en el bloque «Modelo adoptado» de `Guides/Estandares-Modelo-Ramas-Guide/Estandares-Modelo-Ramas.md`. **No** es GitFlow |

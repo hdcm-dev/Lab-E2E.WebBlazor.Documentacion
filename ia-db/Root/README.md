@@ -51,7 +51,7 @@ Lab-E2E.WebBlazor/
 │   ├── MovilidadUrbana.E2ETests/     22 casos Playwright + su infraestructura de fixture
 │   └── MovilidadUrbana.UnitTests/    49 casos sobre las reglas de dominio, sin navegador
 ├── scripts/                      dotnet.sh, publicar.sh, pruebas.sh (todo por contenedor)
-├── Guides/                       Cuatro familias de guías de estudio
+├── Guides/                       Guías de estudio: cinco carpetas, un documento por guía
 ├── .github/workflows/            ci.yml, e2e.yml (reutilizable), verificacion-entorno.yml
 ├── pruebas.runsettings           Navegador, timeouts y workers de las E2E
 ├── README.md                     Documento de referencia del repositorio (extenso)
@@ -83,6 +83,10 @@ Lab-E2E.WebBlazor/
 - Exclusiones  : `.git`, `.nuget/`, `.dotnet/`, `.navegadores/`, `publicacion/`, `datos-e2e/`,
   `bin/`, `obj/`, `wwwroot/vendor/` y `wwwroot/lib/` (Bootstrap vendorizado), y lo ignorado por
   `.gitignore`
-- Estado del repositorio : rama `main`, último commit `c870628` (2026-08-31)
+- Estado del repositorio : rama `main`, último commit `c870628` (2026-08-31). El árbol de trabajo
+  tiene sin commitear la consolidación de las guías (27 borrados, 3 documentos nuevos) — ver
+  [07_Guias.md](indexes/07_Guias.md)
 - Generado     : 2026-09-01 · Versión: 1.0
+- Actualizado  : 2026-09-02 · Versión: 1.1 — sincronizado `07_Guias.md` con la consolidación de
+  `Guides/` y corregida una referencia en `09_Glosario.md`; el resto de los índices no registró cambios
 - Actualizar   : `/IA/PROMPTs/IA.Prompts/Tool-Prompts/Indexado-Documentado/Actualizar-Indexado.md`
