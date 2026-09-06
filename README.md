@@ -26,6 +26,14 @@ Las guías de estudio viven en el propio laboratorio, junto al código que citan
 
 ## PROMPTs
 
-Los archivos de [PROMPTs/](PROMPTs/) registran las instrucciones con las que se generaron el
-laboratorio y esta documentación, ordenadas por tipo de encargo: `Solicitudes/`, `Analisis/`,
-`Features/` e `Indexado/`. Los que producen artefactos los dejan en su propia carpeta `OUTPUTs/`.
+Los archivos de [PROMPTs/](PROMPTs/) registran las instrucciones con las que se generaron los
+laboratorios y esta documentación, ordenadas por el workspace al que apuntan:
+
+| Carpeta | Encarga sobre |
+| --- | --- |
+| [PROMPTs/Root/](PROMPTs/Root/) | [Lab-E2E.WebBlazor](../Lab-E2E.WebBlazor) — `Inicio/` la creación de la solución, `Features/` los cambios posteriores |
+| [PROMPTs/Base/](PROMPTs/Base/) | [Lab-E2E.WebBlazor.Base](../Lab-E2E.WebBlazor.Base) — el andamiaje mínimo previo |
+| [PROMPTs/Analisis/](PROMPTs/Analisis/) | Estudios que no modifican código, con su resultado en `OUTPUTs/` |
+| [PROMPTs/Indexado/](PROMPTs/Indexado/) | La generación y el refresco de `ia-db/` |
+
+Los que producen artefactos los dejan en su propia carpeta `OUTPUTs/`.

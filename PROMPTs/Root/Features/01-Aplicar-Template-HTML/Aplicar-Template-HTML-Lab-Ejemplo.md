@@ -1,21 +1,20 @@
 
 
-# Tool-Prompt — Extracción de comportamientos. 
+# Tool-Prompt — Aplicar Template
 
-> **Invocación**: Leer y ejecutar `/LAB/Lab-E2E.WebBlazor.Documentacion/PROMPTs/Features/01-Aplicar-Template-HTML/Aplicar-Template-HTML.md`
+> **Invocación**: Leer y ejecutar `/LAB/Lab-E2E.WebBlazor.Documentacion/PROMPTs/Root/Features/01-Aplicar-Template-HTML/Aplicar-Template-HTML-Lab-Ejemplo.md`
 >
-> **Overview**:  Extracción de comportamientos del template de SDD Default
+> **Overview**:  Aplicar Template
 
 ---
 
 ## Contexto
 
-  Leer `/IA/SDD/IA.SDD/Conocimiento/Knowledge-Template-HTML-SDD-Default.md`, es una base de conocimientos que trata sobre formas de codear y diseñar HTML,css, javascript.
-  Leer `/IA/SDD/IA.SDD/Conocimiento/Knowledge-Template-Blazor-Interactive-Server-SDD-Default.md`, es una base de conocimientos que  trata sobre formas de codear Blazor .NET.
+  Leer `/Ng/Ng.Core/NG/Ng-PushDispatch/Promts/Conocimientos/Knowledge-Template-HTML-GDA-V2.md`, es una base de conocimientos que trata sobre formas de codear y diseñar HTML,css, javascript.
+  Leer `/Ng/Ng.Core/NG/Ng-PushDispatch/Promts/Conocimientos/Knowledge-Template-Blazor-Interactive-Server-GDA-V2.md`, es una base de conocimientos que  trata sobre formas de codear Blazor .NET.
 
-  Se hace necesaario a los siguientes proyectos:
-  - `/LAB/Lab-E2E.WebBlazor.Base/src/WebBlazor.E2E.Base.HolaMundo`
-  - `/LAB/Lab-E2E.WebBlazor.Base/src/WebBlazor.E2E.Base.Login`
+  Se hace necesaario a el siguiente proyecto:
+  - `/LAB/Lab-E2E.WebBlazor/src/MovilidadUrbana.Web`
 
   Aplicarles los estilos y formas de codeo dados 
 ---

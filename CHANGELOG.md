@@ -4,6 +4,35 @@ Todos los cambios relevantes de este repositorio de documentación se registran 
 
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [Sin publicar] - 2026-09-06
+
+### Añadido
+
+- **`PROMPTs/Root/Inicio/02-Crear-Una-Solucion.md`** — encarga replantear el ejemplo de páginas
+  estáticas de `/LAB/Lab-E2E.StaticHtml` como una aplicación .NET Blazor *interactive server* en
+  `/LAB/Lab-Ejemplo`, con SQLite, arquitectura Clean y un único proyecto en la solución.
+- **`PROMPTs/Root/Features/01-Aplicar-Template-HTML/`** — dos encargas nuevas de template, ambas
+  sobre `/LAB/Lab-E2E.WebBlazor/src/MovilidadUrbana.Web`, que se distinguen por la fuente:
+  `Aplicar-Template-HTML-Lab-E2E.WebBlazor.md` toma las dos bases de conocimiento del template SDD
+  por defecto, y `Aplicar-Template-HTML-Lab-Ejemplo.md` las de GDA V2
+  (`Knowledge-Template-HTML-GDA-V2.md` y `Knowledge-Template-Blazor-Interactive-Server-GDA-V2.md`).
+  Quedan así las dos formas constructivas como encargas separadas y comparables.
+
+### Cambiado
+
+- **`PROMPTs/` se reordena por workspace destino**: los tool-prompts que apuntan a
+  `/LAB/Lab-E2E.WebBlazor` pasan a `PROMPTs/Root/` —`Solicitudes/01-Crear-Una-Solucion.md` a
+  `Root/Inicio/`, y `Features/` a `Root/Features/`, ambos sin cambios de contenido— y los que
+  apuntan a `/LAB/Lab-E2E.WebBlazor.Base` viven bajo `PROMPTs/Base/`. `Analisis/` e `Indexado/`
+  no se movieron.
+- **`PROMPTs/Base/Features/01-Aplicar-Template-HTML/Aplicar-Template-HTML-Lab-E2E.WebBlazor.Base.md`**
+  — es el antiguo `PROMPTs/Features/01-Aplicar-Template-HTML/Aplicar-Template-HTML.md`, que siempre
+  apuntó a las dos aplicaciones de `/LAB/Lab-E2E.WebBlazor.Base` (`HolaMundo` y `Login`). Cambia de
+  nombre y de carpeta, y su título deja de decir «Extracción de comportamientos» para decir lo que
+  el cuerpo ya pedía: aplicar el template. El encargo en sí no cambió.
+- **`README.md`** — la sección «PROMPTs» describía el orden viejo (`Solicitudes/`, `Analisis/`,
+  `Features/` e `Indexado/`); pasa a describir el orden por workspace destino.
+
 ## [Sin publicar] - 2026-09-03
 
 ### Añadido
