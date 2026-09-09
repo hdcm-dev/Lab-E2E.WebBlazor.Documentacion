@@ -337,7 +337,63 @@ Y se verifica como toda promesa sobre la memoria: **yendo y volviendo, nunca ley
 ([Caso-Encuesta §4.2](Caso-Encuesta-Page.md)). Un recurso que fragmenta no lleva un caso: lleva el
 del acto, y el de que fragmentar no costó nada. **[C]**
 
-## 1.6 La cadena no es una tubería
+## 1.6 Qué promesas y qué estados trae cada recurso
+
+Elegido el recurso, buena parte de las promesas y de los estados **ya están decididos**: vienen con
+él. Pero no todas, y la distinción es la que ordena todo lo demás. **[C]**
+
+### 1.6.1 Las promesas son de dos familias
+
+| Familia | De dónde sale | ¿Sobrevive si cambio el recurso? |
+| --- | --- | --- |
+| **La promesa del acto** | Del acto mismo: «cargo mis datos y queda registrada» | **Sí.** Es la que sobrevive a que el asistente pase a ser un acordeón |
+| **Las promesas del recurso** | De haber elegido ese diálogo: «vuelvo atrás y no pierdo nada», «no puedo saltear un tramo» | **No.** Cambian o desaparecen con él |
+
+> **Si cambia el recurso, el caso de la promesa central queda intacto y los del recurso se reemplazan
+> en bloque.** Y si al cambiar el recurso se rompe el caso central, la promesa estaba mal escrita:
+> afirmaba el cómo ([Pregunta 4](Caso-HolaMundo-Page.md)).
+
+### 1.6.2 Lo que trae cada recurso
+
+Una superficie en todos los casos **salvo pestañas**, que son varias. La columna de promesas lista
+solo **las que agrega el recurso**: la del acto va aparte y es siempre una.
+
+| Recurso | Promesas que agrega el recurso | Estados |
+| --- | --- | --- |
+| **Formulario simple** | *(ninguna propia)* · Con datos inválidos no pasa nada y me dicen qué falta | vacío · con reclamo · enviando · hecho · falló |
+| **Asistente** | Arranco en el primer tramo y no puedo retroceder · **una validación por tramo**, porque cada uno falla por lo suyo · **vuelvo atrás y conservo** · el indicador dice dónde estoy · no puedo saltear un tramo | tramo 1…N *(cada tramo es un estado)* · con reclamo · registrando · registrada · falló el registro |
+| **Listado + ficha (ABM)** | Veo lo que hay · **encuentro lo que busco**, y al volver de la ficha **el filtro sigue puesto** · doy de alta y persiste · modifico y no duplica · cancelar la baja no hace nada · confirmar la baja borra **esa** fila | vacío · con datos · **filtrado sin resultados** · cargando · error |
+| **Modal** | Lo que hace el acto anidado · **al cerrar o cancelar sigo en el mismo acto, con lo que tenía** · cancelar no deja efecto | cerrado · abierto · procesando · error dentro del modal |
+| **Pestañas** | Una promesa **por pestaña**, porque son superficies distintas · **cambio y vuelvo, y conservo** · la activa se señala | los suyos, **independientes por pestaña** |
+| **Maestro-detalle** | Elijo un maestro y veo **solo** sus detalles · agrego un detalle y queda asociado al maestro correcto · cambio de maestro y el detalle acompaña · **vuelvo a un detalle y conservo** | sin maestro elegido · maestro sin detalles · con detalles · cargando el detalle |
+| **Página de llegada** | Una **por condición de llegada** —aprobado, rechazado, pendiente, incoherente— · la negativa: no se provoca desde la barra de direcciones | una por condición · indeterminado |
+
+**La conservación aparece en los cinco recursos que fragmentan y en ninguno de los dos que no**
+(§1.5.2). Es la forma más rápida de comprobar que la tabla dice lo que tiene que decir.
+
+### 1.6.3 Cómo se distingue una promesa de un estado
+
+| | Promesa | Estado |
+| --- | --- | --- |
+| Forma | **Verbo** en primera persona, con desenlace | **Sustantivo**: una situación |
+| Qué se hace con ella | Se **ejercita** | Se **observa** |
+| Adónde va | Un método `[Test]` | Una aserción dentro de un método |
+
+Y la prueba que los separa cuando hay duda: **un estado nunca lleva caso propio.** Aparece dentro de
+un caso, como punto de partida o de llegada. «Filtrado sin resultados» no se prueba solo: se llega
+filtrando —que es la promesa— y se verifica que la pantalla quedó así.
+
+### 1.6.4 Un rol distinto cambia los actos, y se nota
+
+P2 —¿quién hace el acto?— no es burocracia, y la encuesta lo muestra. Si la responde cada persona,
+un acto alcanza. Si la carga **un tercero** —alguien en la calle, un puesto—, aparece uno que con
+autocarga no existiría: **cargar varias seguidas**.
+
+De ahí sale el botón «Cargar otra encuesta» del laboratorio, con su caso propio, y con la mitad que
+se olvida: reinicia el acto **pero no borra lo ya registrado**
+**[E: ../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/EncuestaTests.cs]**.
+
+## 1.7 La cadena no es una tubería
 
 Los eslabones existen, pero no se recorren una sola vez ni en orden. Los retornos más frecuentes:
 
@@ -350,7 +406,7 @@ Los eslabones existen, pero no se recorren una sola vez ni en orden. Los retorno
 Lo que sí es firme es el **orden de dependencia**: no se puede elegir el recurso sin saber el acto,
 ni escribir el caso sin saber la promesa. El recorrido es de ida y vuelta; la dependencia no.
 
-## 1.7 Dos ejemplos trabajados
+## 1.8 Dos ejemplos trabajados
 
 Dos orígenes distintos, para que la sección no enseñe un solo camino.
 
@@ -419,7 +475,7 @@ Lo que cambia respecto de A, y conviene tenerlo escrito:
 —bicisendas, transporte aéreo—, el acto ya no es «responder por cómo viajo» sino también «decir cómo
 querría viajar». Son **dos actos**, y P3 los separa: cada uno se puede completar sin el otro.
 
-## 1.8 Qué **no** se decide en este tramo
+## 1.9 Qué **no** se decide en este tramo
 
 | No se decide acá | Se decide después |
 | --- | --- |
@@ -516,6 +572,8 @@ una contradicción esperando fecha»*, [Beginner §9.3](Beginner-Guide.md#93-dos
 | Qué recurso representa el acto | **E2E-Resumen §1.5** | — |
 | Los dos ejes: estructural y atencional | **E2E-Resumen §1.5.1** | — |
 | La promesa de conservación | **E2E-Resumen §1.5.2** | Caso-Encuesta §4.2 |
+| Promesas del acto contra promesas del recurso | **E2E-Resumen §1.6.1** | — |
+| Qué promesas y estados trae cada recurso | **E2E-Resumen §1.6.2** | — |
 | Definición de superficie y estado | Caso-HolaMundo §1 | Caso-Encuesta §1, este §2 |
 | Las cinco preguntas de la frase | Caso-HolaMundo §2.2 | este §1.4 |
 | Acto divisible y prueba de corte | Caso-Encuesta §1.2 y §3 | este §1.4 y §1.5 |
@@ -572,14 +630,19 @@ De §1, que es lo propio de este documento:
 14. **Conservar lo cargado no distingue ningún recurso: es transversal.** Y por eso es la promesa que
     más se da por sentada — cada vez que un recurso fragmenta un acto, nace una, y lo trivial es
     justamente lo que nadie escribe.
-15. **La cadena tiene retornos, pero la dependencia no**: no se elige recurso sin acto, ni se escribe
+15. **Las promesas son de dos familias**: la del acto sobrevive al cambio de recurso, las del
+    recurso se reemplazan con él. Si al cambiar el recurso se rompe el caso central, la promesa
+    afirmaba el cómo.
+16. **Un estado nunca lleva caso propio**: aparece dentro de un caso, como punto de partida o de
+    llegada.
+17. **La cadena tiene retornos, pero la dependencia no**: no se elige recurso sin acto, ni se escribe
     el caso sin promesa.
 
 Y de §2, para no perder el hilo con el resto del conjunto:
 
-16. **Una clase por superficie; un método por promesa; un motivo de falla por método.**
-17. **Un estado se observa, una promesa se ejercita.**
-18. **Una corrección se hace en el documento dueño del tema**, y los demás enlazan.
+18. **Una clase por superficie; un método por promesa; un motivo de falla por método.**
+19. **Un estado se observa, una promesa se ejercita.**
+20. **Una corrección se hace en el documento dueño del tema**, y los demás enlazan.
 
 ---
 

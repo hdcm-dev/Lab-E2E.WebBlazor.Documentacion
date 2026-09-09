@@ -28,6 +28,21 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   dos vocabularios —superficie/promesa/estado por un lado, escenario/contexto/actor por el otro,
   que hasta ahora no se mencionaban entre sí— y declara **quién es dueño de cada tema**, para que
   una corrección se haga en un solo lugar y las repeticiones no diverjan.
+- **`Guides/E2E-Guide/E2E-Resumen.md` §1.6, nueva** — qué promesas y qué estados trae cada recurso,
+  que es lo que faltaba para poder usar la elección de §1.5. Arranca separando las promesas en dos
+  familias: **la del acto sobrevive al cambio de recurso** —es la que sigue siendo cierta si el
+  asistente pasa a ser un acordeón— y **las del recurso se reemplazan en bloque con él**; si al
+  cambiar el recurso se rompe el caso central, la promesa estaba mal escrita porque afirmaba el cómo.
+  Sigue con la tabla por recurso —formulario, asistente, ABM, modal, pestañas, maestro-detalle y
+  página de llegada— con las promesas que cada uno agrega y los estados que trae, y con una
+  comprobación de que la tabla dice lo que tiene que decir: la conservación aparece en los cinco que
+  fragmentan y en ninguno de los dos que no. Cierra con cómo se distingue una promesa de un estado
+  —verbo contra sustantivo, se ejercita contra se observa, método contra aserción— y con la prueba
+  que los separa cuando hay duda: **un estado nunca lleva caso propio**, aparece dentro de un caso
+  como punto de partida o de llegada. Se agrega además §1.6.4, que muestra que P2 no es burocracia:
+  si la encuesta la carga un tercero y no cada persona, aparece el acto «cargar varias seguidas», y
+  de ahí sale el botón «Cargar otra encuesta» del laboratorio con la mitad que se olvida —reinicia el
+  acto pero no borra lo ya registrado—.
 - **`Guides/E2E-Guide/E2E-Resumen.md` §1.5.1 y §1.5.2** — la tabla de recursos usaba un solo eje y no
   alcanzaba: un mismo acto divisible se puede montar saltando de página, cambiando de panel o
   superponiendo, y el eje estructural no elige entre esas tres. Se agrega el **eje atencional** —qué
