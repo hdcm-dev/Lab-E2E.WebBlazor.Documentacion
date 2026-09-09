@@ -161,6 +161,36 @@ formas:
 Esa última fila es un diagnóstico que hay que saber dar: **todavía no hay con qué diseñar nada.** Es
 un resultado válido de una reunión, y mucho más barato que descubrirlo con el formulario hecho.
 
+### 1.3.4 Cuando el pedido ya trae las necesidades de datos
+
+No siempre hace falta el diagnóstico de altura. A veces el pedido llega ya formulado en datos —«quiero
+saber cuántas personas se mueven, dónde y con qué frecuencia»— y quien lo trae es el experto del
+dominio. Ahí **el propósito no hace falta para estructurar**: eso alcanza para P1 a P5, y entrar a
+interrogar la intención hace perder tiempo sin agregar nada. Se salta a §1.4 y listo.
+
+**Donde el propósito se sigue pagando es en otro lado: no para armar la pantalla, sino para decidir
+las reglas** — que es justamente lo que después verifica la prueba. La estructura no las determina:
+
+| Lo que la estructura no contesta | Por qué necesita el propósito |
+| --- | --- |
+| ¿La edad es obligatoria? | Depende de si se va a segmentar por edad |
+| «Frecuencia» ¿es *diaria/semanal* o *cantidad de viajes por semana*? | Depende de qué se va a calcular |
+| ¿Se acepta una respuesta incompleta? | Para contar porcentajes tal vez sí; para trazar recorridos no |
+| ¿La distancia se limita en 200 km? | El límite sale del dominio de la decisión, no del tipo de dato |
+
+Ninguna de esas cuatro es «¿para qué querés esto?». Son preguntas puntuales sobre un campo, y se
+hacen **solo donde la estructura queda indeterminada**. A eso conviene llamarlo el **propósito
+mínimo**: no relevar la intención entera, sino tirar del hilo ahí donde hay que elegir y el dato no
+elige solo. **[C]**
+
+> **El riesgo de no hacerlo** es tomar los nombres de campo como si fueran datos. *«Frecuencia»* es
+> una etiqueta, no una medida. Si nadie pregunta cómo se va a mirar, sale un panel prolijo que
+> produce datos que después no se pueden cruzar — y eso no se descubre hasta que alguien quiso
+> usarlos.
+
+**En resumen**, §1.3 aplica cuando el pedido llega vago. Cuando ya trae las necesidades de datos, se
+entra directo en §1.4 y se vuelve acá solo por lo que quedó indeterminado.
+
 ## 1.4 Las cinco preguntas de ida
 
 Con el criterio de relevancia en la mano, y todavía sin abrir un editor. **[C]**
@@ -230,7 +260,7 @@ deriva de dos propiedades del acto** — si es divisible, y si sus partes promet
 | **Pestañas** | **Varios** actos sobre el mismo sujeto, independientes entre sí | Puedo usar una y ninguna otra, y sigue teniendo sentido | Hay orden obligatorio → era un asistente |
 | **Maestro-detalle** | Dos actos anidados: el detalle no existe sin el maestro y se repite N veces para el mismo | Necesito ver el maestro **mientras** trabajo el detalle | El detalle es uno solo → era un campo más |
 | **Listado + ficha (ABM)** | Acto de administración recurrente sobre un catálogo | Antes de actuar hay que **encontrar** | No hay búsqueda posible → era un formulario |
-| **Modal de confirmación** | Un punto sin retorno dentro de otro acto | Hace falta una salida antes de cruzarlo | Nada se pierde si sigue → sobra el modal |
+| **Modal** | Un acto **anidado** que interrumpe otro sin abandonarlo: el punto de retorno se conserva | Al cerrarlo vuelvo exactamente a donde estaba, con lo que tenía | Al volver perdí el contexto → era una navegación disfrazada |
 | **Página de llegada** | No hay acto: hay una condición que llega de afuera | El verbo es *llego*, no *hago* | Hay algo que completar → es una superficie de acto |
 
 **El par que más se confunde es asistente contra pestañas**, y es instructivo porque se ven casi
@@ -244,6 +274,17 @@ igual —contenido partido en secciones— y son estructuralmente opuestos:
 | Clases de prueba | Una | Una por pestaña |
 
 Se distinguen con P3, hecha antes de dibujar: **si abandono en el medio, ¿queda algo hecho?**
+
+**Y una precisión sobre el modal, porque se lo suele reducir a la confirmación.** Confirmar un
+borrado es *un caso* de acto anidado; la propiedad general es más amplia y cubre, por ejemplo,
+«agregar una localidad que no está en la lista» sin perder los seis campos ya cargados. Lo que
+define al recurso no es la gravedad de lo que se pregunta sino que **el punto de retorno se
+conserve**.
+
+Eso tiene una consecuencia para las pruebas: **conservar el punto de retorno es en sí una promesa**,
+y se verifica como toda promesa sobre la memoria —yendo y volviendo, nunca leyendo el modelo
+([Caso-Encuesta §4.2](Caso-Encuesta-Page.md))—. Un modal no lleva un caso: lleva dos, lo que hace y
+que devuelve a la persona donde estaba. **[C]**
 
 ## 1.6 La cadena no es una tubería
 
@@ -419,6 +460,7 @@ una contradicción esperando fecha»*, [Beginner §9.3](Beginner-Guide.md#93-dos
 | --- | --- | --- |
 | El punto cero y las alturas de llegada | **E2E-Resumen §1.3** | — |
 | El criterio de relevancia | **E2E-Resumen §1.3.3** | — |
+| El propósito mínimo | **E2E-Resumen §1.3.4** | — |
 | Las cinco preguntas de ida | **E2E-Resumen §1.4** | — |
 | Qué recurso representa el acto | **E2E-Resumen §1.5** | — |
 | Definición de superficie y estado | Caso-HolaMundo §1 | Caso-Encuesta §1, este §2 |
@@ -461,23 +503,27 @@ De §1, que es lo propio de este documento:
 4. **A veces no se viene a decidir sino a respaldar.** Preguntar qué se hace si los datos dicen lo
    contrario, antes de construir.
 5. **Sin decisión ni hipótesis no hay con qué diseñar**, y decirlo es un resultado válido.
-6. **La superficie se deduce del acto, no de la pantalla.** La pantalla es una decisión posterior.
-7. **Un acto es lo que alguien necesita terminar**, con sujeto humano adelante del verbo. Un cajón
+6. **Si el pedido ya trae los datos, se estructura sin preguntar el propósito.** El propósito mínimo
+   se pide solo donde la estructura no determina una regla: obligatoriedad, granularidad, qué hacer
+   con lo incompleto y de dónde salen los límites.
+7. **La superficie se deduce del acto, no de la pantalla.** La pantalla es una decisión posterior.
+8. **Un acto es lo que alguien necesita terminar**, con sujeto humano adelante del verbo. Un cajón
    —«gestionar el módulo»— no es un acto.
-8. **Dos roles sobre el mismo dato casi siempre son dos superficies**, aunque la pantalla se parezca.
-9. **Si al abandonar en el medio no queda nada, era una sola superficie**, por más tramos que tenga.
-10. **La precondición descubre actos que nadie nombró.** Es la pregunta que más rinde.
-11. **Dos estados son distintos cuando la salida que se le ofrece a la persona es distinta.**
-12. **El recurso no se elige, se deriva** de si el acto es divisible y de si sus partes prometen algo
-    por separado. Asistente y pestañas se ven igual y son opuestos.
-13. **La cadena tiene retornos, pero la dependencia no**: no se elige recurso sin acto, ni se escribe
+9. **Dos roles sobre el mismo dato casi siempre son dos superficies**, aunque la pantalla se parezca.
+10. **Si al abandonar en el medio no queda nada, era una sola superficie**, por más tramos que tenga.
+11. **La precondición descubre actos que nadie nombró.** Es la pregunta que más rinde.
+12. **Dos estados son distintos cuando la salida que se le ofrece a la persona es distinta.**
+13. **El recurso no se elige, se deriva** de si el acto es divisible y de si sus partes prometen algo
+    por separado. Asistente y pestañas se ven igual y son opuestos; un modal se define porque
+    **conserva el punto de retorno**, no por la gravedad de lo que pregunta.
+14. **La cadena tiene retornos, pero la dependencia no**: no se elige recurso sin acto, ni se escribe
     el caso sin promesa.
 
 Y de §2, para no perder el hilo con el resto del conjunto:
 
-14. **Una clase por superficie; un método por promesa; un motivo de falla por método.**
-15. **Un estado se observa, una promesa se ejercita.**
-16. **Una corrección se hace en el documento dueño del tema**, y los demás enlazan.
+15. **Una clase por superficie; un método por promesa; un motivo de falla por método.**
+16. **Un estado se observa, una promesa se ejercita.**
+17. **Una corrección se hace en el documento dueño del tema**, y los demás enlazan.
 
 ---
 

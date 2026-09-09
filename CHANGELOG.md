@@ -28,6 +28,18 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   dos vocabularios —superficie/promesa/estado por un lado, escenario/contexto/actor por el otro,
   que hasta ahora no se mencionaban entre sí— y declara **quién es dueño de cada tema**, para que
   una corrección se haga en un solo lugar y las repeticiones no diverjan.
+- **`Guides/E2E-Guide/E2E-Resumen.md` §1.3.4 y §1.5** — dos ajustes que salieron de discutir la
+  sección. El **modal** estaba caracterizado por «un punto sin retorno dentro de otro acto», que es
+  el caso de la confirmación y no la propiedad general: se redefine como un **acto anidado que
+  interrumpe otro sin abandonarlo, conservando el punto de retorno**, lo que cubre además el caso de
+  agregar algo a un catálogo sin perder lo cargado, y da el desmentido exacto —si al volver se perdió
+  el contexto, era una navegación disfrazada—. Queda anotada su consecuencia para las pruebas:
+  conservar el punto de retorno es en sí una promesa, así que un modal lleva dos casos y no uno. Y se
+  agrega **§1.3.4, «Cuando el pedido ya trae las necesidades de datos»**: si quien pide llega con los
+  datos formulados, el propósito no hace falta para estructurar y se entra directo en §1.4; donde sí
+  se paga es en las reglas que la estructura no determina —obligatoriedad, granularidad, qué hacer
+  con lo incompleto y de dónde salen los límites—, que son cuatro preguntas puntuales sobre un campo
+  y no una entrevista sobre objetivos. A eso se lo llama el *propósito mínimo*.
 - **`Guides/E2E-Guide/E2E-Resumen.md` §1, reescrita y ampliada** — la primera versión empezaba con
   un cliente que decía «quiero saber cómo se mueve la gente», que ya es un pedido de información y
   no una necesidad: era la primera conclusión del analista puesta en boca de quien pide. La sección
