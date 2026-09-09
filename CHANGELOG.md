@@ -28,6 +28,21 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   dos vocabularios —superficie/promesa/estado por un lado, escenario/contexto/actor por el otro,
   que hasta ahora no se mencionaban entre sí— y declara **quién es dueño de cada tema**, para que
   una corrección se haga en un solo lugar y las repeticiones no diverjan.
+- **`Guides/E2E-Guide/E2E-Resumen.md` §1, reescrita y ampliada** — la primera versión empezaba con
+  un cliente que decía «quiero saber cómo se mueve la gente», que ya es un pedido de información y
+  no una necesidad: era la primera conclusión del analista puesta en boca de quien pide. La sección
+  ahora plantea el escenario real —alguien tira su problema encima, entero y desordenado, y hay que
+  ordenarlo— y se organiza así: por qué el eslabón se volvió necesario, con las tres eras del diseño
+  de formularios y la observación de que la era 3 agregó una decisión que las dos anteriores no
+  tenían que tomar (§1.1); quién interviene y qué se pregunta cada uno (§1.2); el punto cero, con
+  las cinco alturas a las que puede llegar un pedido y el movimiento que corresponde a cada una,
+  más el caso incómodo de quien ya decidió y viene a respaldar, y el exploratorio de quien no sabe
+  nada —donde la hipótesis reemplaza a la decisión y «¿qué te sorprendería?» es la pregunta que
+  rinde— (§1.3); las cinco preguntas de ida (§1.4); **qué recurso representa el acto**, que es la
+  regla que faltaba, con la tabla de qué propiedad justifica cada recurso y el par asistente/pestañas
+  que se ve igual y es opuesto (§1.5); los retornos, porque la cadena no es una tubería (§1.6); y dos
+  ejemplos trabajados de orígenes distintos, uno desde un síntoma y otro desde la exploración, para
+  que la sección no enseñe un solo camino (§1.7).
 - **`Guides/E2E-Guide/Quick-Guide-Primer-Proyecto.md`** — es el antiguo `E2E-Guides.md` de
   `Lab-E2E.WebBlazor.Base`, renombrado al mudarse para entrar en la familia de nombres de la
   carpeta y decir lo que hace. Conserva las tres capturas del Explorador de pruebas de Visual
