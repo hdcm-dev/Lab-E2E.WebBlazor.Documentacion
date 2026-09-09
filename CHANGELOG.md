@@ -4,6 +4,53 @@ Todos los cambios relevantes de este repositorio de documentación se registran 
 
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [Sin publicar] - 2026-09-09
+
+### Añadido
+
+- **`Guides/`** — la documentación de los dos laboratorios pasa a vivir acá, en una sola copia.
+  Llegan desde `Lab-E2E.WebBlazor` la guía de estudio (`Beginner-Guide.md`), la receta de ABM
+  (`Quick-Guide-ABM.md`), el caso de la encuesta y las cuatro guías de ramas e integración
+  continua; y desde `Lab-E2E.WebBlazor.Base` los casos de Hola Mundo y de acceso, el marco
+  conceptual, el template SDD aplicado, las notas de GitHub y las tres imágenes. El motivo de la
+  mudanza es que varias vivían duplicadas entre los dos repositorios de código.
+- **`Guides/E2E-Guide/E2E-Resumen.md`** — documento integrador nuevo, y puerta de entrada al
+  conjunto. Cubre el eslabón que ningún otro documento tenía: **del requerimiento hablado a la
+  superficie**, antes de que exista una pantalla que mirar. Los tres casos de diseño parten de una
+  pantalla ya construida y enseñan el camino de vuelta; el de ida —que es el original de la
+  tradición de la que sale el vocabulario, donde el contexto de interacción se define antes que la
+  ventana— queda escrito acá como cinco preguntas: qué actos hay que completar, quién los hace, si
+  al abandonar en el medio queda algo hecho, qué hace falta tener listo antes de empezar —la que
+  más rinde, porque descubre actos que el requerimiento no nombró— y qué puede faltar, fallar o
+  tardar. Va con un ejemplo trabajado que deduce la encuesta desde un requerimiento sin pantallas,
+  incluido el caso de borde que muestra si el criterio sirve: por qué «ver cuántas van» **no** es
+  una superficie propia. El documento hace además dos cosas que faltaban en el conjunto: une los
+  dos vocabularios —superficie/promesa/estado por un lado, escenario/contexto/actor por el otro,
+  que hasta ahora no se mencionaban entre sí— y declara **quién es dueño de cada tema**, para que
+  una corrección se haga en un solo lugar y las repeticiones no diverjan.
+- **`Guides/E2E-Guide/Quick-Guide-Primer-Proyecto.md`** — es el antiguo `E2E-Guides.md` de
+  `Lab-E2E.WebBlazor.Base`, renombrado al mudarse para entrar en la familia de nombres de la
+  carpeta y decir lo que hace. Conserva las tres capturas del Explorador de pruebas de Visual
+  Studio, que se mudaron con él.
+- **`Guides/Anexos/workflows/`** — los tres workflows de ejemplo y su README, que las guías de
+  ramas citaban y no estaban en ningún repositorio de esta familia. Se traen desde
+  `Lab-Documentos.Documentacion`, que es donde viven las cuatro guías de Git de las que estas son
+  copia, para que los enlaces resuelvan sin salir del repositorio.
+
+### Cambiado
+
+- **Referencias de todos los documentos mudados** — quedaron cien enlaces relativos rotos y se
+  corrigieron todos. Cincuenta y tres los rompió la mudanza: los que apuntaban al código de los dos
+  laboratorios ahora salen del repositorio (`../../../Lab-E2E.WebBlazor/src/…` y
+  `../../../Lab-E2E.WebBlazor.Base/src/…`), y los cruces entre documentos que antes vivían en
+  repositorios distintos ahora son enlaces entre hermanos de carpeta. Los cuarenta y siete
+  restantes estaban rotos de antes, en las cuatro guías de Git: apuntaban a una estructura de una
+  carpeta por guía —`../Estandares-Modelo-Ramas-Guide/`, `../GitFlow-Practice-Guide/`— que es la
+  del repositorio del que se copiaron y que acá nunca existió.
+- **`README.md`** — la sección «Guías» dejaba de estar al día: remitía a `Lab-E2E.WebBlazor` y
+  listaba dos documentos de los nueve. Ahora describe las dos carpetas propias con una fila por
+  documento y para quién es cada uno.
+
 ## [Sin publicar] - 2026-09-06
 
 ### Añadido

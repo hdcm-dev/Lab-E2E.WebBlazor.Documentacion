@@ -17,12 +17,35 @@ tabla de navegación indica qué índice cargar.
 
 ## Guías
 
-Las guías de estudio viven en el propio laboratorio, junto al código que citan:
+Toda la documentación de los dos laboratorios vive acá, en [Guides/](Guides/). Antes estaba
+repartida entre los dos repositorios de código, con el riesgo de que dos copias del mismo texto
+divergieran en silencio.
+
+### [Guides/E2E-Guide/](Guides/E2E-Guide/) — pruebas de extremo a extremo
 
 | Documento | Para quién | Qué deja |
 | --- | --- | --- |
-| [Beginner-Guide.md](../Lab-E2E.WebBlazor/Guides/E2E-Guide/Beginner-Guide.md) | Quien nunca escribió una prueba E2E | Anatomía del proyecto E2E en .NET, criterios sobre qué testear, cómo se escribe y estabiliza un caso, y cómo se atan las pruebas al merge de un pull request con GitHub Actions |
-| [Quick-Guide-ABM.md](../Lab-E2E.WebBlazor/Guides/E2E-Guide/Quick-Guide-ABM.md) | Quien ya escribió pruebas E2E y necesita el camino corto | Los siete pasos para montar las pruebas de un ABM, las trampas propias de Blazor *interactive server* y una lista de verificación |
+| [E2E-Resumen.md](Guides/E2E-Guide/E2E-Resumen.md) | Quien llega por primera vez | Del requerimiento al caso: cómo se deducen superficies, promesas y estados antes de que exista una pantalla, más el mapa del resto de los documentos |
+| [Quick-Guide-Primer-Proyecto.md](Guides/E2E-Guide/Quick-Guide-Primer-Proyecto.md) | Quien nunca creó un proyecto de pruebas | Cómo se crea el proyecto NUnit con Playwright y se escribe la primera prueba, con el Explorador de pruebas de Visual Studio |
+| [Beginner-Guide.md](Guides/E2E-Guide/Beginner-Guide.md) | Quien nunca escribió una prueba E2E | Anatomía del proyecto E2E en .NET, criterios sobre qué testear, cómo se escribe y estabiliza un caso, y cómo se atan las pruebas al merge de un pull request con GitHub Actions |
+| [Quick-Guide-ABM.md](Guides/E2E-Guide/Quick-Guide-ABM.md) | Quien ya escribió pruebas E2E y necesita el camino corto | Los siete pasos para montar las pruebas de un ABM, las trampas propias de Blazor *interactive server* y una lista de verificación |
+| [Caso-HolaMundo-Page.md](Guides/E2E-Guide/Caso-HolaMundo-Page.md) | Quien tiene que decidir **qué** probar | El caso mínimo: una superficie interactiva, sus estados y el testigo de hidratación |
+| [Caso-Login-Page.md](Guides/E2E-Guide/Caso-Login-Page.md) | Ídem, con postura de seguridad | Una superficie SSR detrás de un acceso, y la promesa negativa que se verifica comparando dos observaciones |
+| [Caso-Encuesta-Page.md](Guides/E2E-Guide/Caso-Encuesta-Page.md) | Ídem, con un acto divisible | Por qué los tres pasos de un asistente son **una** superficie y no tres |
+| [Marco-La-Superficie-Verificable.md](Guides/E2E-Guide/Marco-La-Superficie-Verificable.md) | Quien quiere ir más lejos | De qué tradición viene cada concepto, con bibliografía y con lo que se reinventó sin saberlo |
+| [Template-SDD-Aplicado.md](Guides/E2E-Guide/Template-SDD-Aplicado.md) | Quien construye la superficie | La forma constructiva: tokens, componentes propios y estados declarados |
+
+### [Guides/](Guides/) — ramas, integración y releases
+
+| Documento | De qué trata |
+| --- | --- |
+| [Estandares-Modelo-Ramas.md](Guides/Estandares-Modelo-Ramas.md) | La elección entre modelos de ramas, el adoptado y sus guardarraíles |
+| [Guia-Practica-GitFlow.md](Guides/Guia-Practica-GitFlow.md) | Ocho escenarios ejecutables sobre el modelo adoptado |
+| [Guia-Practica-GitHubFlow.md](Guides/Guia-Practica-GitHubFlow.md) | El modelo que **no** se adoptó, como línea de base |
+| [GitHub-Action-Guide.md](Guides/GitHub-Action-Guide.md) | La corrida en integración continua |
+
+Los documentos de `E2E-Guide/` citan el código de los dos laboratorios por ruta relativa, así que
+se leen mejor con los tres repositorios clonados como carpetas hermanas.
 
 ## PROMPTs
 
