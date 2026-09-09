@@ -32,7 +32,7 @@ No enseña a probar ni a diseñar: **manda a leer al que corresponde.**
 
 - [1. La cadena, en una pantalla](#1-la-cadena-en-una-pantalla)
 - [2. El vocabulario, en una cadena](#2-el-vocabulario-en-una-cadena)
-  - [2.1 La traducción](#21-la-traducción)
+  - [2.1 Los conceptos, y dónde aterriza cada uno](#21-los-conceptos-y-dónde-aterriza-cada-uno)
   - [2.2 Los criterios de la clase y del método](#22-los-criterios-de-la-clase-y-del-método)
   - [2.3 Los dos ejes del conjunto, y cómo se cruzan](#23-los-dos-ejes-del-conjunto-y-cómo-se-cruzan)
 - [3. El mapa del conjunto](#3-el-mapa-del-conjunto)
@@ -73,18 +73,39 @@ para qué y quién es dueño de cada tema (§3).**
 
 # 2. El vocabulario, en una cadena
 
-## 2.1 La traducción
+## 2.1 Los conceptos, y dónde aterriza cada uno
 
-Lo que se ve al mirar un producto, cómo lo nombra el conjunto, y adónde va a parar:
+El conjunto usa **nueve conceptos**, más dos que marcan el borde de lo que la prueba de extremo a
+extremo se queda. La tabla los lleva contra un caso concreto —el asistente de la encuesta— y contra
+el artefacto de prueba en el que termina cada uno.
 
-| Lo que ves | Se llama | Va a parar a |
-| --- | --- | --- |
-| Una página, un modal, un recorte con sentido propio | **Superficie** | Una clase `[TestFixture]` |
-| El punto donde siempre arrancás | **Estado de partida** | El `[SetUp]` |
-| «Acá puedo hacer esto» | **Promesa** | Un método `[Test]` |
-| «La pantalla puede quedar así» | **Estado** | Una aserción dentro de un método |
-| «Esto no se puede llegar a saber» | **Promesa negativa** | Un método que compara **dos** observaciones |
-| Lo que nombrás para poder actuar | **Identificador** | Un `data-testid` en la vista |
+| # | Concepto | Qué es | En el asistente se ve como | Qué se prueba de eso | Dónde vive en la prueba |
+| --- | --- | --- | --- | --- | --- |
+| 1 | **Acto** | La unidad de trabajo que alguien necesita terminar | «Responder la encuesta»: no se ve, es lo que la pantalla sirve | **Nada directamente**: es lo que define todo lo demás | — *(es previo al código)* |
+| 2 | **Superficie** | El recorte con una promesa propia | Toda la encuesta, sus tres rutas incluidas | Que cumpla lo que promete | La **clase** `[TestFixture]` |
+| 3 | **Recurso** | La forma de diálogo elegida | El asistente: «Anterior», «Siguiente», el indicador | **El recurso no se prueba**: se prueban las promesas que agrega | Los **helpers** de la clase y los identificadores del componente |
+| 4 | **Estado de partida** | La precondición del caso | Abrir la encuesta, en el primer tramo | Que sea siempre el mismo | El **`[SetUp]`** |
+| 5 | **Promesa del acto** | El compromiso central | «Queda registrada» | Recorriendo los tramos **y recargando** | Un **`[Test]`** |
+| 6 | **Promesas del recurso** | Lo que agrega haber elegido ese diálogo | «Vuelvo atrás y no pierdo nada», «el indicador dice dónde estoy» | Yendo y volviendo, nunca leyendo el modelo | Un **`[Test]`** por cada una |
+| 7 | **Promesa negativa** | Lo que **no** se puede hacer | «No puedo saltear un tramo» | Intentándolo y verificando que no ocurrió; a veces comparando dos observaciones | Un **`[Test]`** — este en particular **falta** ([Caso-Encuesta §6.1](Caso-Encuesta-Page.md)) |
+| 8 | **Estado** | La situación en la que la superficie queda | Tramo 1, 2 o 3; con reclamo; registrada | **No se prueba solo**: se observa dentro de un caso | Una **aserción** `Expect(...)` |
+| 9 | **Identificador** | El nombre para actuar desde afuera | `campo-nombre`, de la encuesta; `boton-siguiente`, del componente | Nada: es el medio, no el fin | `data-testid` en la vista → `GetByTestId` |
+| — | **Testigo** | La aplicación avisando que ya responde | Invisible, en el layout | Nada: es precondición de todo lo demás | La **clase base**, no cada caso |
+| — | **Regla de dominio** | «La edad mínima es 16» | El mensaje al pie del campo | **Abajo, no acá**: 49 casos en 27 ms **[V]** | Una prueba **unitaria** |
+
+**Las tres cosas que la tabla deja ver:**
+
+- **El recurso no tiene fila de prueba propia.** Se prueba por sus consecuencias —la fila 6—, nunca
+  en sí mismo. Por eso un `SiguienteAsync()` es un helper y no un caso
+  ([Caso-Encuesta §4.3](Caso-Encuesta-Page.md)).
+- **Los estados no llevan caso.** Son los extremos de la flecha; la promesa es la flecha. Un `[Test]`
+  llamado «MuestraElPaso2» es la señal de que algo se clasificó mal.
+- **Las dos últimas filas son el borde**, y son las que evitan que la suite crezca sin control: el
+  testigo sube a la clase base porque vale para **todas** las superficies
+  ([Beginner §7.2](Beginner-Guide.md#72-esperar-a-que-la-página-sea-interactiva)), y la regla de
+  dominio baja a unitarias porque cuesta tres órdenes de magnitud menos
+  ([Beginner §5.2](Beginner-Guide.md#52-qué-cubre-el-laboratorio-y-por-qué)). La E2E se queda con
+  **que la pantalla la aplique**, no con que la regla sea correcta.
 
 **La distinción que más ordena**: un estado se **observa**, una promesa se **ejercita**. Un estado se
 dice con un sustantivo; una promesa con un verbo en primera persona. Y la relación entre las dos:

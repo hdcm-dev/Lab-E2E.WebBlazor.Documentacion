@@ -28,6 +28,17 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   dos vocabularios —superficie/promesa/estado por un lado, escenario/contexto/actor por el otro,
   que hasta ahora no se mencionaban entre sí— y declara **quién es dueño de cada tema**, para que
   una corrección se haga en un solo lugar y las repeticiones no diverjan.
+- **`Guides/E2E-Guide/Mapa-Del-Conjunto.md` §2.1, ampliada** — la tabla de traducción listaba seis
+  conceptos y se quedaba corta: faltaban el **acto** —que es de donde se deduce todo y no tiene
+  artefacto de prueba propio—, el **recurso** —que tampoco se prueba en sí mismo, solo por las
+  promesas que agrega— y la separación de la promesa en sus dos familias. Ahora son nueve conceptos
+  más dos filas de borde, con una columna que los lleva contra el asistente de la encuesta y otra que
+  dice en qué artefacto de la prueba aterriza cada uno: clase, `[SetUp]`, método, aserción, helper o
+  identificador. Quedan escritas las tres lecturas que la tabla habilita: que el recurso no tiene
+  fila propia, que los estados no llevan caso —un `[Test]` llamado «MuestraElPaso2» es la señal de
+  que algo se clasificó mal— y que las dos filas de borde, el testigo y la regla de dominio, son las
+  que evitan que la suite crezca sin control: una sube a la clase base y la otra baja a unitarias.
+
 - **`E2E-Resumen.md` pasa a llamarse `Mapa-Del-Conjunto.md`** — el nombre decía «resumen», que es lo
   único que el documento no es: no resume a los demás, dice cuál abrir y por qué. El nombre nuevo
   coincide con el título que ya tenía y con lo que hace.
