@@ -399,6 +399,74 @@ De ahí sale el botón «Cargar otra encuesta» del laboratorio, con su caso pro
 se olvida: reinicia el acto **pero no borra lo ya registrado**
 **[E: ../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/EncuestaTests.cs]**.
 
+### 6.5. Cuando el acto anidado reutiliza otra superficie
+
+Un caso que aparece apenas el catálogo crece: el tramo pide el DNI de una persona, y para no
+obligar a saberlo de memoria se abre un buscador —el mismo listado que en otro lado es un ABM—.
+**¿Ese buscador es parte de la superficie de la encuesta, o de la del ABM?**
+
+**De la encuesta.** El fundamento es el mismo que sostiene todo lo anterior:
+
+> **La superficie no es el marcado: es el marcado más la promesa.**
+
+El mismo listado, puesto a servir otro acto, **es otro acto**, y no arrastra consigo la superficie del
+ABM. Lo que se reutiliza es el **componente**, no la superficie — igual que el `Asistente`, que se
+comparte y no es superficie de nadie ([Caso-Encuesta §1.1](Caso-Encuesta-Page.md)). Y encaja sin
+forzar nada: es un **acto anidado**, que es la definición de modal de §5.
+
+El laboratorio tiene la versión chica de este caso —un desplegable alimentado por el ABM— y con ella
+la regla ya escrita: *un caso vive donde está la promesa que verifica, no donde está el dato que
+usa* ([Caso-Encuesta §5.1](Caso-Encuesta-Page.md))
+**[E: ../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/EncuestaTests.cs]**. El buscador
+modal es esa misma regla un escalón más arriba: el desplegable se vuelve modal cuando el catálogo ya
+no entra en un `<select>`. **[C]**
+
+#### Tres cosas distintas, tres dueños
+
+| Qué | Qué es | Quién lo garantiza |
+| --- | --- | --- |
+| El **buscador**: marcado, filtro, paginado | **Componente** | Todo el proyecto; sus identificadores son contrato reutilizable ([Caso-Encuesta §4.3](Caso-Encuesta-Page.md)) |
+| **Elegir sin salir del acto** | **Acto anidado** de la superficie que lo abre | Esa superficie |
+| **Administrar el catálogo** | **Otra superficie**, con su propia suite | El ABM |
+
+#### Qué se prueba, y sobre todo qué no
+
+> **Cuando un componente se reutiliza en otro acto, lo que se prueba de nuevo es la costura, no el
+> componente.** **[C]**
+
+| No se prueba de nuevo | Sí se prueba, y es lo que suele faltar |
+| --- | --- |
+| Que el listado muestre lo que existe | Que lo elegido **aterrice en el campo correcto** |
+| Que el filtro filtre | Que **cerrar sin elegir** deje todo como estaba |
+| Que el paginado pagine | Que al volver **siga lo ya cargado** en los otros campos |
+
+Las tres de la izquierda ya están cubiertas en la suite del ABM; repetirlas es pagar dos veces por lo
+mismo, y con el costo más caro —el de una prueba de navegador—.
+
+#### Los dos peligros de reutilizar así
+
+**Viajan acciones que no deberían.** Si el buscador es el listado del ABM tal cual, trae los botones
+de editar y de borrar: alguien en el medio de una encuesta puede borrar un registro del catálogo. Eso
+es una **promesa negativa** y hay que escribirla —*desde el buscador no se puede modificar ni
+borrar*—. Es del tipo que **no rompe nada cuando se viola**: el sistema funciona y además deja hacer
+de más, así que ninguna prueba funcional la detecta
+([Marco §3.3](Marco-La-Superficie-Verificable.md)).
+
+**El buscador que además da de alta.** El patrón «buscá, y si no está, creala» mete un acto anidado
+dentro de otro acto anidado, y ahí nace la promesa que más se rompe:
+
+> **Si la creo desde el buscador, vuelvo con ella ya elegida.**
+
+Sin eso, la persona crea el registro, cierra el modal y encuentra el campo vacío — con la sensación
+de que no se guardó nada.
+
+#### Por qué estos recursos existen
+
+El asistente obliga a completar para avanzar; esa exigencia es una promesa suya (§6.2). El buscador
+existe **porque esa exigencia lo vuelve necesario**: en papel el encuestador escribía el nombre y
+seguía, y acá el sistema pide un identificador válido. La era 3 (§1) no trajo solo formas de
+dialogar: trajo formas de **ayudar a cumplir lo que el propio diálogo exige**. **[C]**
+
 ## 7. La cadena no es una tubería
 
 Los eslabones existen, pero no se recorren una sola vez ni en orden. Los retornos más frecuentes:
@@ -516,6 +584,7 @@ método que todavía no se ejercitó.
 | La promesa de conservación existe y se prueba yendo y volviendo | **[E: ../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/EncuestaTests.cs]** el caso `PermiteVolverAtrasConservandoLoCargado` |
 | Reiniciar el acto no borra lo registrado | **[E: ../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/EncuestaTests.cs]** el caso `NuevaEncuestaDevuelveElAsistenteAlPaso1` |
 | Un caso, un motivo de falla | **[E: ../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/EncuestaTests.cs]** las tres validaciones, una por tramo |
+| Un caso vive donde está la promesa que verifica, no donde está el dato que usa | **[E: ../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/EncuestaTests.cs]** el caso `ElDesplegableDeLocalidadesSeAlimentaDelAbm`, y [Caso-Encuesta §5.1](Caso-Encuesta-Page.md) |
 | La persistencia se verifica recargando | **[E: ../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/LocalidadesTests.cs]** el caso del alta |
 
 ## 10.2. Los cuatro recursos que los laboratorios ejercitan
@@ -541,6 +610,11 @@ descripción de algo observado. Concretamente, no están comprobadas:
 - que las promesas listadas sean las que efectivamente aparecen al construirlos;
 - que los estados listados sean todos los que hacen falta;
 - que la columna «qué lo desmiente» distinga de verdad, en un caso real, ese recurso del vecino.
+
+**Tampoco está construido el buscador modal de §6.5.** El laboratorio tiene su versión chica —un
+desplegable alimentado por el ABM— y de ahí sale la regla; el buscador que se abre, filtra, devuelve
+lo elegido y eventualmente da de alta **no existe en ningún laboratorio**, así que sus dos peligros y
+su tabla de qué se prueba y qué no son razonamiento, no observación. **[C]**
 
 **Quien los use, que los use como hipótesis.** Y si construye uno, lo que hace falta anotar es en qué
 falló el método —no el producto—, que es la única forma de subir la confianza de este documento.
@@ -588,5 +662,11 @@ salen de ordenar situaciones reconocibles, no de un relevamiento de casos regist
     cómo.
 16. **Un estado nunca lleva caso propio**: aparece dentro de un caso, como punto de partida o de
     llegada.
-17. **La cadena tiene retornos, pero la dependencia no**: no se elige recurso sin acto, ni se escribe
+17. **La superficie no es el marcado: es el marcado más la promesa.** Un componente reutilizado en
+    otro acto no arrastra la superficie de donde vino.
+18. **Cuando un componente se reutiliza, se prueba la costura y no el componente**: que lo elegido
+    aterrice donde va, que cerrar sin elegir no deje rastro, y que al volver siga lo ya cargado.
+19. **Lo que se reutiliza puede traer acciones de más**, y eso es una promesa negativa que hay que
+    escribir.
+20. **La cadena tiene retornos, pero la dependencia no**: no se elige recurso sin acto, ni se escribe
     el caso sin promesa.

@@ -28,6 +28,21 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   dos vocabularios —superficie/promesa/estado por un lado, escenario/contexto/actor por el otro,
   que hasta ahora no se mencionaban entre sí— y declara **quién es dueño de cada tema**, para que
   una corrección se haga en un solo lugar y las repeticiones no diverjan.
+- **`Guides/E2E-Guide/Del-Requerimiento-Al-Caso.md` §6.5, nueva** — el caso que aparece apenas el
+  catálogo crece: el tramo pide un identificador y se abre un buscador, que es el mismo listado que
+  en otro lado es un ABM. La respuesta es que **pertenece a la superficie que lo abre y no a la del
+  ABM**, con el fundamento explícito: la superficie no es el marcado, es el marcado más la promesa;
+  lo que se reutiliza es el componente. El laboratorio tiene la versión chica de este caso —un
+  desplegable alimentado por el ABM— y con ella la regla ya escrita, *un caso vive donde está la
+  promesa que verifica, no donde está el dato que usa*; el buscador modal es esa misma regla un
+  escalón más arriba. Quedan escritas la separación de los tres dueños —componente, acto anidado y
+  ABM—, la regla de qué se prueba de nuevo —**la costura, no el componente**: que lo elegido aterrice
+  en el campo correcto, que cerrar sin elegir no deje rastro y que al volver siga lo ya cargado— y
+  los dos peligros de reutilizar así: que viajen los botones de editar y borrar, que es una promesa
+  negativa de las que no rompen nada al violarse, y el patrón «buscá, y si no está, creala», donde la
+  promesa que más se rompe es volver con lo recién creado ya elegido. Se marca en §10.3 que el
+  buscador modal no existe en ningún laboratorio.
+
 - **`Guides/E2E-Guide/Del-Requerimiento-Al-Caso.md`, nuevo** — el tramo de análisis se separa a un
   documento propio. Había nacido como §1 de `E2E-Resumen.md` y creció hasta ocupar dos tercios del
   archivo, que dejó de ser una puerta de entrada para ser un tratado. El criterio con el que se
