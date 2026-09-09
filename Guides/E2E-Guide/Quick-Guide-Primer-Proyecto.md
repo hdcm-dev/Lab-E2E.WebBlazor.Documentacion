@@ -10,10 +10,10 @@
 
 La tabla de arriba dice de qué trata cada capítulo; esta lista lleva directo a cada sección.
 
-- **[1. Creación del proyecto](#1-creacion-del-proyecto)**
+- **[1. Creación del proyecto](#1-creación-del-proyecto)**
 - **[2. Ejemplo: Hola Mundo!](#2-ejemplo-hola-mundo)**
-- **[2.1 El testigo de hidratación](#el-testigo-de-hidratacion)**
-- **[3. Cómo se diseña un caso](#3-como-se-disena-un-caso)**
+- **[2.1 El testigo de hidratación](#el-testigo-de-hidratación)**
+- **[3. Cómo se diseña un caso](#3-cómo-se-diseña-un-caso)**
 - **[4. Anexos](#4-anexos)**
 
 ---

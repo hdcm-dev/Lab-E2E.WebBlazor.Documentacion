@@ -27,14 +27,14 @@ casos quedaron como quedaron.
 ## Índice
 
 - **[1. Definiciones](#1-definiciones)** — acto divisible, paso, estado direccionable
-- **[2. Qué promete esta superficie](#2-que-promete-esta-superficie)**
+- **[2. Qué promete esta superficie](#2-qué-promete-esta-superficie)**
 - **[3. La pregunta que este caso obliga a responder](#3-la-pregunta-que-este-caso-obliga-a-responder)** —
   ¿tres pasos son tres superficies?
-- **[4. Los criterios de diseño de estos casos](#4-los-criterios-de-diseno-de-estos-casos)**
+- **[4. Los criterios de diseño de estos casos](#4-los-criterios-de-diseño-de-estos-casos)**
 - **[5. El mapa de los casos](#5-el-mapa-de-los-casos)**
 - **[6. Dos promesas sin caso](#6-dos-promesas-sin-caso)** — hallazgos, no resueltos
 - **[7. Lo que estos casos deliberadamente no prueban](#7-lo-que-estos-casos-deliberadamente-no-prueban)**
-- **[8. Cómo se corren](#8-como-se-corren)**
+- **[8. Cómo se corren](#8-cómo-se-corren)**
 - **[9. Los criterios, en una lista](#9-los-criterios-en-una-lista)**
 
 ---

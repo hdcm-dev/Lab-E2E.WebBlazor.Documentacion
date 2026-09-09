@@ -13,15 +13,15 @@ superficie como esta, y por qué el caso quedó como quedó.
 - **[1. Definiciones](#1-definiciones)** — qué es una superficie, dónde está cada parte de
   la definición en el archivo real, cómo se relaciona con las historias, los casos de uso y
   las maquetas, y por qué sus estados no son superficies distintas
-- **[2. Qué promete esta superficie](#2-que-promete-esta-superficie)** — las cinco preguntas
+- **[2. Qué promete esta superficie](#2-qué-promete-esta-superficie)** — las cinco preguntas
   que se le hacen a una promesa, y doce superficies de ejemplo. Es la parte que **no depende
   de este proyecto**: sirve para cualquier pantalla.
-- **[3. Los criterios de diseño del caso](#3-los-criterios-de-diseno-del-caso)**
+- **[3. Los criterios de diseño del caso](#3-los-criterios-de-diseño-del-caso)**
 - **[4. El criterio propio de una superficie interactiva](#4-el-criterio-propio-de-una-superficie-interactiva)** — el testigo de hidratación, y cuándo hace falta
 - **[5. El caso, entero](#5-el-caso-entero)**
 - **[6. Lo que este caso deliberadamente no prueba](#6-lo-que-este-caso-deliberadamente-no-prueba)**
-- **[7. Cómo se corre](#7-como-se-corre)**
-- **[8. El criterio, en una línea](#8-el-criterio-en-una-linea)**
+- **[7. Cómo se corre](#7-cómo-se-corre)**
+- **[8. El criterio, en una línea](#8-el-criterio-en-una-línea)**
 - **[9. Y en la superficie de al lado](#9-y-en-la-superficie-de-al-lado)**
 
 > **De dónde viene todo esto:** el vocabulario de este documento —superficie, promesa,
@@ -271,7 +271,7 @@ vea sin ruido alrededor.
 Es además una promesa **positiva**: dice qué pasa. Las hay también **negativas** —dicen
 qué no se puede llegar a saber—, se prueban de otra manera y son las que más veces
 quedan sin caso; la del acceso tiene una, y está tratada en
-[§2.1 y §2.4 del caso de acceso](Caso-Login-Page.md#21-por-que-esta-frase-es-mas-larga-que-la-del-hola-mundo).
+[§2.1 y §2.4 del caso de acceso](Caso-Login-Page.md#21-por-qué-esta-frase-es-más-larga-que-la-del-hola-mundo).
 
 ### 2.1 Por qué la frase va primero
 
@@ -314,7 +314,7 @@ la promesa se escribe **dos veces** —una desde el usuario legítimo y otra des
 lo es—, y la segunda es la que se olvida. La de la superficie de acceso lo muestra: «con
 la credencial correcta se pasa» es la mitad del usuario; «lo que se dice no le enseña
 nada a quien está probando suerte» es la mitad del adversario. Está tratado en
-[§2.3 del caso de acceso](Caso-Login-Page.md#23-quien-es-el-sujeto-de-una-promesa-de-acceso).
+[§2.3 del caso de acceso](Caso-Login-Page.md#23-quién-es-el-sujeto-de-una-promesa-de-acceso).
 
 ---
 

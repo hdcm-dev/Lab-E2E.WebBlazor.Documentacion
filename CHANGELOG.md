@@ -47,6 +47,11 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   restantes estaban rotos de antes, en las cuatro guías de Git: apuntaban a una estructura de una
   carpeta por guía —`../Estandares-Modelo-Ramas-Guide/`, `../GitFlow-Practice-Guide/`— que es la
   del repositorio del que se copiaron y que acá nunca existió.
+- **Anclas de los índices de cinco documentos** — veintidós enlaces internos escribían el ancla sin
+  acentos (`#2-que-promete-esta-superficie`) mientras GitHub los conserva en el identificador que
+  genera, así que no saltaban a ninguna parte. Estaban rotos desde antes de la mudanza, en
+  `Caso-HolaMundo-Page.md`, `Caso-Login-Page.md`, `Caso-Encuesta-Page.md`,
+  `Marco-La-Superficie-Verificable.md` y `Quick-Guide-Primer-Proyecto.md`.
 - **`README.md`** — la sección «Guías» dejaba de estar al día: remitía a `Lab-E2E.WebBlazor` y
   listaba dos documentos de los nueve. Ahora describe las dos carpetas propias con una fila por
   documento y para quién es cada uno.

@@ -12,14 +12,14 @@ señaladas más abajo.
 
 ## Índice
 
-- **[1. Qué encuadra este documento](#1-que-encuadra-este-documento)**
+- **[1. Qué encuadra este documento](#1-qué-encuadra-este-documento)**
 - **[2. Las tres tradiciones](#2-las-tres-tradiciones)** — y por qué casi nunca se cruzan
-- **[3. Tradición I — Especificación y verificación formal](#3-tradicion-i--especificacion-y-verificacion-formal)** — de dónde sale «promesa», y el hallazgo de las hiperpropiedades
-- **[4. Tradición II — Diseño de interacción centrado en el uso](#4-tradicion-ii--diseno-de-interaccion-centrado-en-el-uso)** — de dónde salen «superficie» y «estado»
-- **[5. Tradición III — Especificación ejecutable y prueba](#5-tradicion-iii--especificacion-ejecutable-y-prueba)** — de dónde sale la forma del caso
+- **[3. Tradición I — Especificación y verificación formal](#3-tradición-i--especificación-y-verificación-formal)** — de dónde sale «promesa», y el hallazgo de las hiperpropiedades
+- **[4. Tradición II — Diseño de interacción centrado en el uso](#4-tradición-ii--diseño-de-interacción-centrado-en-el-uso)** — de dónde salen «superficie» y «estado»
+- **[5. Tradición III — Especificación ejecutable y prueba](#5-tradición-iii--especificación-ejecutable-y-prueba)** — de dónde sale la forma del caso
 - **[6. Lo que este laboratorio agrega](#6-lo-que-este-laboratorio-agrega)**
 - **[7. Tabla de procedencia](#7-tabla-de-procedencia)**
-- **[8. Bibliografía, con su grado de verificación](#8-bibliografia-con-su-grado-de-verificacion)**
+- **[8. Bibliografía, con su grado de verificación](#8-bibliografía-con-su-grado-de-verificación)**
 - **[9. Lo que este documento no cubre](#9-lo-que-este-documento-no-cubre)**
 
 ---

@@ -8,15 +8,15 @@
 ## Índice
 
 - **[1. Definiciones](#1-definiciones)** — guard, credencial de sesión, rechazo indiferenciado
-- **[2. Qué promete esta superficie](#2-que-promete-esta-superficie)** — una promesa **negativa**:
+- **[2. Qué promete esta superficie](#2-qué-promete-esta-superficie)** — una promesa **negativa**:
   por qué tiene dos sujetos y por qué no se puede verificar mirando
 - **[3. La diferencia que ordena todo el resto](#3-la-diferencia-que-ordena-todo-el-resto)** —
   SSR frente a interactiva
-- **[4. Los criterios de diseño de estos casos](#4-los-criterios-de-diseno-de-estos-casos)**
+- **[4. Los criterios de diseño de estos casos](#4-los-criterios-de-diseño-de-estos-casos)**
 - **[5. El mapa de los casos](#5-el-mapa-de-los-casos)**
-- **[6. Un hallazgo que apareció al escribir estos casos](#6-un-hallazgo-que-aparecio-al-escribir-estos-casos)**
+- **[6. Un hallazgo que apareció al escribir estos casos](#6-un-hallazgo-que-apareció-al-escribir-estos-casos)**
 - **[7. Lo que estos casos deliberadamente no prueban](#7-lo-que-estos-casos-deliberadamente-no-prueban)**
-- **[8. Cómo se corren](#8-como-se-corren)**
+- **[8. Cómo se corren](#8-cómo-se-corren)**
 - **[9. Los criterios, en una lista](#9-los-criterios-en-una-lista)**
 
 > **De dónde viene todo esto:** el vocabulario de este documento —promesa, superficie,
@@ -71,7 +71,7 @@ La segunda mitad de esa frase es lo interesante. Esta superficie no promete solo
 comportamiento: promete **un silencio**. Y un silencio también se prueba.
 
 > Cómo se llega a una frase así —y cómo se sabe si la que escribiste sirve— está en
-> [§2 del caso Hola Mundo](Caso-HolaMundo-Page.md#2-que-promete-esta-superficie): las cinco preguntas y
+> [§2 del caso Hola Mundo](Caso-HolaMundo-Page.md#2-qué-promete-esta-superficie): las cinco preguntas y
 > los ejemplos de superficies que no la pasan. Es criterio compartido y no se repite
 > acá; lo que sigue es ese criterio **aplicado a esta promesa**, que tiene otra forma.
 
