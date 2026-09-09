@@ -25,7 +25,8 @@ divergieran en silencio.
 
 | Documento | Para quién | Qué deja |
 | --- | --- | --- |
-| [E2E-Resumen.md](Guides/E2E-Guide/E2E-Resumen.md) | Quien llega por primera vez | Del requerimiento al caso: cómo se deducen superficies, promesas y estados antes de que exista una pantalla, más el mapa del resto de los documentos |
+| [E2E-Resumen.md](Guides/E2E-Guide/E2E-Resumen.md) | Quien llega por primera vez | El mapa: qué documento responde qué pregunta, cómo se cruzan los dos vocabularios del conjunto y quién es dueño de cada tema |
+| [Del-Requerimiento-Al-Caso.md](Guides/E2E-Guide/Del-Requerimiento-Al-Caso.md) | Quien recibe un problema y no tiene nada escrito | El tramo de análisis: las alturas con las que llega un pedido, las cinco preguntas que deducen los actos, la elección del recurso de interfaz y qué promesas y estados trae cada uno. **Método propuesto**: declara en su §10 qué tiene respaldo en los laboratorios y qué no |
 | [Quick-Guide-Primer-Proyecto.md](Guides/E2E-Guide/Quick-Guide-Primer-Proyecto.md) | Quien nunca creó un proyecto de pruebas | Cómo se crea el proyecto NUnit con Playwright y se escribe la primera prueba, con el Explorador de pruebas de Visual Studio |
 | [Beginner-Guide.md](Guides/E2E-Guide/Beginner-Guide.md) | Quien nunca escribió una prueba E2E | Anatomía del proyecto E2E en .NET, criterios sobre qué testear, cómo se escribe y estabiliza un caso, y cómo se atan las pruebas al merge de un pull request con GitHub Actions |
 | [Quick-Guide-ABM.md](Guides/E2E-Guide/Quick-Guide-ABM.md) | Quien ya escribió pruebas E2E y necesita el camino corto | Los siete pasos para montar las pruebas de un ABM, las trampas propias de Blazor *interactive server* y una lista de verificación |

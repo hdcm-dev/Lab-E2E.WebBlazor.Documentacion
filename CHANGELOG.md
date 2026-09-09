@@ -28,6 +28,22 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   dos vocabularios —superficie/promesa/estado por un lado, escenario/contexto/actor por el otro,
   que hasta ahora no se mencionaban entre sí— y declara **quién es dueño de cada tema**, para que
   una corrección se haga en un solo lugar y las repeticiones no diverjan.
+- **`Guides/E2E-Guide/Del-Requerimiento-Al-Caso.md`, nuevo** — el tramo de análisis se separa a un
+  documento propio. Había nacido como §1 de `E2E-Resumen.md` y creció hasta ocupar dos tercios del
+  archivo, que dejó de ser una puerta de entrada para ser un tratado. El criterio con el que se
+  separa es el mismo con el que se argumentó no unificar todo el conjunto: **un documento por
+  pregunta**, y una pregunta se reconoce porque tiene audiencia propia y ritmo de cambio propio.
+  El documento declara además **qué clase de cosa es**: `doc_type: metodo-propuesto`, porque ninguno
+  de los tres casos de diseño recorre el camino de ida que describe. Su §10 audita afirmación por
+  afirmación qué tiene respaldo y qué no, y el resultado es el que ordena su lectura: de los siete
+  recursos de interfaz que clasifica, **cuatro existen en los laboratorios** —formulario simple,
+  asistente, listado con ficha y modal, cada uno con su archivo— y **tres no existen en ninguno**
+  —pestañas, maestro-detalle y página de llegada—, verificado el 2026-09-09 recorriendo las trece
+  superficies y las cinco clases de prueba de los dos laboratorios. Las filas de esos tres son
+  razonamiento por analogía y quedan marcadas como hipótesis. Las tres eras del diseño de
+  formularios quedan declaradas como encuadre y no como afirmación histórica documentada: no se
+  citan fuentes de historia de interfaces porque no se investigaron.
+
 - **`Guides/E2E-Guide/E2E-Resumen.md` §1.6, nueva** — qué promesas y qué estados trae cada recurso,
   que es lo que faltaba para poder usar la elección de §1.5. Arranca separando las promesas en dos
   familias: **la del acto sobrevive al cambio de recurso** —es la que sigue siendo cierta si el
@@ -112,6 +128,11 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   genera, así que no saltaban a ninguna parte. Estaban rotos desde antes de la mudanza, en
   `Caso-HolaMundo-Page.md`, `Caso-Login-Page.md`, `Caso-Encuesta-Page.md`,
   `Marco-La-Superficie-Verificable.md` y `Quick-Guide-Primer-Proyecto.md`.
+- **`Guides/E2E-Guide/E2E-Resumen.md` vuelve a ser lo que su nombre dice**: el mapa del conjunto. Su
+  §1 pasa a ser la cadena en una pantalla, con el diagrama de qué documento cubre cada tramo; el
+  vocabulario y la tabla de dueños quedan; y sus criterios propios pasan a ser tres, los que
+  sostienen la organización del corpus en vez de los del método. `confidence` sube a **alta**, porque
+  lo que afirma es verificable abriendo los documentos que lista.
 - **`README.md`** — la sección «Guías» dejaba de estar al día: remitía a `Lab-E2E.WebBlazor` y
   listaba dos documentos de los nueve. Ahora describe las dos carpetas propias con una fila por
   documento y para quién es cada uno.
