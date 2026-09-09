@@ -13,6 +13,10 @@ traces: [GF-08, GF-09-00]
 
 # Anexo — workflows
 
+> **De qué va** — Los tres workflows de ejemplo del anexo, listos para copiar a un repositorio.
+> **Para quién** — Quien va a montar la integración continua del equipo.
+> **Qué deja** — `ci.yml`, `release.yml` y `auditoria-convergencia.yml`, con qué hace cada uno y qué hay que cambiarle.
+
 Los tres archivos de esta carpeta completan el pipeline para operar el modelo de tronco con ramas de
 release. Se copian a `.github/workflows/` del repositorio de práctica en el
 [escenario 00](../../Guia-Practica-GitFlow.md#2-escenario-00--preparación).
@@ -25,6 +29,13 @@ release. Se copian a `.github/workflows/` del repositorio de práctica en el
 
 **`ci.yml` reemplaza** al que trae la aplicación sembrada. Aquel solo se dispara sobre `main`; este
 protege además las ramas `release/**`, que es precisamente donde el equipo tenía el hueco.
+
+
+## Índice
+
+- [Lo que estos archivos dan por sentado](#lo-que-estos-archivos-dan-por-sentado)
+- [Decisiones que conviene entender antes de copiar](#decisiones-que-conviene-entender-antes-de-copiar)
+- [Estado de verificación](#estado-de-verificación)
 
 ## Lo que estos archivos dan por sentado
 

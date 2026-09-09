@@ -1,5 +1,9 @@
 # Aplicación del template SDD por defecto a los proyectos base
 
+> **De qué va** — Qué se aplicó del template SDD por defecto a las dos aplicaciones base, qué se decidió al aplicarlo y cómo se verificó.
+> **Para quién** — Quien construye la superficie del lado de la vista.
+> **Qué deja** — Los tokens, los componentes propios uno por patrón, el vocabulario de estados y las desviaciones declaradas.
+
 **Fecha:** 2026-09-01
 **Alcance:** `src/WebBlazor.E2E.Base.HolaMundo` y `src/WebBlazor.E2E.Base.Login`
 **Bases de conocimiento aplicadas:**
@@ -15,6 +19,20 @@ bases: el mismo marcado, las mismas clases `mq-`, la misma fuente única de valo
 visuales y el mismo reparto entre superficie, componente y servicio.
 
 ---
+
+
+## Índice
+
+- [1. Qué se aplicó](#1-qué-se-aplicó)
+  - [1.1 Tokens y estilos](#11-tokens-y-estilos)
+  - [1.2 Tema](#12-tema)
+  - [1.3 Componentes propios, uno por patrón](#13-componentes-propios-uno-por-patrón)
+  - [1.4 Shells](#14-shells)
+  - [1.5 Identidad, en el proyecto Login](#15-identidad-en-el-proyecto-login)
+  - [1.6 Identidad de versión](#16-identidad-de-versión)
+- [2. Decisiones tomadas al aplicar, declaradas como tales](#2-decisiones-tomadas-al-aplicar-declaradas-como-tales)
+- [3. Criterios de aceptación, verificados](#3-criterios-de-aceptación-verificados)
+- [4. Cómo se reprodujo](#4-cómo-se-reprodujo)
 
 ## 1. Qué se aplicó
 

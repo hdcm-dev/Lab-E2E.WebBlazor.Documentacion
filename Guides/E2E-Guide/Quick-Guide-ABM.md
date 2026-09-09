@@ -13,6 +13,10 @@ traces: [E2E-00]
 
 # Montar un E2E de un ABM
 
+> **De qué va** — La receta corta para montar las pruebas de extremo a extremo de un ABM.
+> **Para quién** — Quien ya escribió pruebas E2E y necesita el camino corto.
+> **Qué deja** — Siete pasos, la matriz de nueve casos, las trampas propias de Blazor *interactive server* y una lista de verificación.
+
 Receta para quien ya escribió pruebas de extremo a extremo y necesita el camino corto: qué se copia
 tal cual, qué se decide en cada ABM y dónde están las trampas propias de Blazor con render
 *interactive server*. Toma como base el ABM de localidades de
@@ -21,6 +25,22 @@ tal cual, qué se decide en cada ABM y dónde están las trampas propias de Blaz
 Si en algún paso falta el fundamento —por qué se elige un localizador y no otro, qué es el circuito
 de Blazor, cómo se decide qué testear— está desarrollado en
 [Beginner-Guide.md](Beginner-Guide.md); acá se enlaza y no se repite.
+
+
+## Índice
+
+- [1. El ciclo de una corrida](#1-el-ciclo-de-una-corrida)
+- [2. Los siete pasos](#2-los-siete-pasos)
+  - [2.1. Poner el contrato en la pantalla](#21-poner-el-contrato-en-la-pantalla)
+  - [2.2. Crear el proyecto](#22-crear-el-proyecto)
+  - [2.3. Copiar la infraestructura](#23-copiar-la-infraestructura)
+  - [2.4. Aislar los datos de cada prueba](#24-aislar-los-datos-de-cada-prueba)
+  - [2.5. Escribir la matriz de casos](#25-escribir-la-matriz-de-casos)
+  - [2.6. Configurar la corrida](#26-configurar-la-corrida)
+  - [2.7. Atarlo a la integración continua](#27-atarlo-a-la-integración-continua)
+- [3. Las trampas que cuestan una tarde](#3-las-trampas-que-cuestan-una-tarde)
+- [4. Lista de verificación](#4-lista-de-verificación)
+- [5. Evidencia](#5-evidencia)
 
 ## Marcas de evidencia
 

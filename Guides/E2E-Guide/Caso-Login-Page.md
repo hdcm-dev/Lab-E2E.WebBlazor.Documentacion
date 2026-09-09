@@ -1,5 +1,9 @@
 # Caso de prueba: la superficie de acceso
 
+> **De qué va** — Cómo se decide qué probar cuando además del usuario hay un adversario.
+> **Para quién** — Ídem, con postura de seguridad.
+> **Qué deja** — La promesa negativa y por qué se verifica comparando dos observaciones en vez de mirar una, y por qué una superficie SSR no necesita testigo de hidratación.
+
 **Superficie:** `Components/Paginas/Identidad/Ingreso.razor`
 **Pruebas:** `tests/WebBlazor.E2E.Base.Login.E2ETests/LoginE2ETests.cs`
 **Base común:** `tests/WebBlazor.E2E.Base.Login.E2ETests/PruebaDeSuperficie.cs`

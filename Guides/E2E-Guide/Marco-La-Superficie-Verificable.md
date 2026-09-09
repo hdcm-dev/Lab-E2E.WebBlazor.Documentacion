@@ -1,5 +1,9 @@
 # La superficie verificable — marco conceptual y procedencia
 
+> **De qué va** — De dónde sale el vocabulario que usa todo el conjunto: *superficie*, *promesa*, *estado*, *testigo*.
+> **Para quién** — Quien quiere ir más lejos por su cuenta.
+> **Qué deja** — Las tres tradiciones que se cruzan, la procedencia de cada concepto con lo que se le cambió, la bibliografía con su grado de verificación, y dónde se reinventó algo que ya tenía nombre.
+
 **Qué es:** el encuadre de los dos documentos de caso de esta carpeta. De dónde viene
 cada concepto que usan, qué se le cambió al traerlo, y qué es propio de este laboratorio.
 

@@ -13,6 +13,10 @@ traces: [GF-06, GF-07, GF-08]
 
 # Guía práctica de GitFlow
 
+> **De qué va** — Los ocho escenarios ejecutables del modelo de ramas adoptado, sobre un repositorio real.
+> **Para quién** — Un equipo de tres personas que rotan por los roles.
+> **Qué deja** — Precondiciones, comandos, verificaciones y errores frecuentes de cada escenario. Se ejecuta sin depender de ningún otro documento.
+
 Este documento contiene la práctica completa: los ocho escenarios ejecutables del modelo adoptado,
 con sus precondiciones, comandos, verificaciones y errores frecuentes. Se lee y se ejecuta sin
 depender de ningún otro documento de esta carpeta.
@@ -22,6 +26,7 @@ con la aplicación de `Lab-E2E.WebBlazor` como sistema bajo prueba, y está pens
 **tres personas** que rotan por los roles.
 
 ---
+
 
 ## Tabla de contenido
 

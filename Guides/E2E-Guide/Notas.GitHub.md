@@ -1,5 +1,10 @@
- 
-## Notas sobre la configuración del runner
+# Notas de configuración del repositorio en GitHub
+
+> **De qué va** — Cómo se configura el repositorio para que un pull request desde un fork no ejecute código sin revisar en el runner propio.
+> **Para quién** — Quien administra el repositorio.
+> **Qué deja** — La opción exacta de *Settings* y las casillas que corresponden.
+
+## La opción que hay que tocar
 
 > Para que usuarios que hagan fork no corran el runner
 

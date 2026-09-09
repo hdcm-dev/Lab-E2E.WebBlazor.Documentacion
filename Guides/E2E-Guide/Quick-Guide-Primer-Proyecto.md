@@ -1,6 +1,10 @@
 
 # Pruebas de extremo a extremo (E2E) E2E 
 
+> **De qué va** — Cómo se crea el proyecto NUnit con Playwright y se escribe la primera prueba.
+> **Para quién** — Quien arranca de cero, con Visual Studio a mano.
+> **Qué deja** — Los comandos, la estructura de carpetas, el ejemplo Hola Mundo completo y el testigo de hidratación.
+
 > **Pruebas de extremo a extremo (E2E)**: son un tipo de prueba de software que valida la funcionalidad completa de una aplicación desde el punto de vista del usuario final. Estas pruebas simulan escenarios del mundo real para garantizar que todos los componentes del sistema funcionen correctamente juntos. **La prueba se realiza directamente sobre la interfaz que una persona usa.**
 
 > **PlayWright**: es una biblioteca de automatización de navegadores desarrollada por Microsoft, con soporte oficial para Chromium, Firefox y WebKit. Tiene la ventaja que espera que el elemento exista, tiene aserciones con reintento, cada prueba recibe un contexto de navegador propio, cookies y almacenamientos nuevos.

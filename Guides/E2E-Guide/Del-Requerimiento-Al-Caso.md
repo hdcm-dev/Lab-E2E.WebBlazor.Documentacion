@@ -13,13 +13,55 @@ traces: [E2E-00, E2E-02, E2E-03]
 
 # Del requerimiento al caso
 
+> **De qué va** — Cómo se llega de un problema contado en desorden hasta superficies, promesas y estados, antes de que exista una pantalla que mirar.
+> **Para quién** — Quien recibe un pedido y todavía no tiene nada escrito.
+> **Qué deja** — Las alturas con las que llega un pedido, cinco preguntas que deducen los actos, la elección del recurso de interfaz y qué promesas y estados trae cada uno. Es un **método propuesto**: su §10 declara qué tiene respaldo en los laboratorios y qué no.
+
 **El escenario:** alguien te tira su problema encima, entero y desordenado, mezclando lo que le pasa
 con lo que ya decidió y con lo que se imagina que habría que hacer. Ordenar eso hasta llegar a
 superficies, promesas y estados —antes de que exista una pantalla que mirar— es lo que este
 documento trata.
 
 Los demás documentos del conjunto enseñan a probar **una pantalla que ya existe**. Este empieza
-antes. El mapa de todo el conjunto está en [E2E-Resumen.md](E2E-Resumen.md).
+antes. El mapa de todo el conjunto está en [Mapa-Del-Conjunto.md](Mapa-Del-Conjunto.md).
+
+
+## Índice
+
+  - [Qué clase de documento es esto](#qué-clase-de-documento-es-esto)
+  - [1. Por qué este eslabón se volvió necesario](#1-por-qué-este-eslabón-se-volvió-necesario)
+  - [2. Quién interviene, y qué se pregunta cada uno](#2-quién-interviene-y-qué-se-pregunta-cada-uno)
+  - [3. El punto cero: con qué llega realmente quien pide](#3-el-punto-cero-con-qué-llega-realmente-quien-pide)
+    - [3.1. El caso incómodo: cuando ya decidió](#31-el-caso-incómodo-cuando-ya-decidió)
+    - [3.2. Cuando no se sabe: la exploración](#32-cuando-no-se-sabe-la-exploración)
+    - [3.3. Lo que hay que conseguir: el criterio de relevancia](#33-lo-que-hay-que-conseguir-el-criterio-de-relevancia)
+    - [3.4. Cuando el pedido ya trae las necesidades de datos](#34-cuando-el-pedido-ya-trae-las-necesidades-de-datos)
+  - [4. Las cinco preguntas de ida](#4-las-cinco-preguntas-de-ida)
+    - [P1 — ¿Qué actos necesita completar alguien?](#p1--qué-actos-necesita-completar-alguien)
+    - [P2 — ¿Quién hace cada uno?](#p2--quién-hace-cada-uno)
+    - [P3 — Si abandono en el medio, ¿queda algo hecho?](#p3--si-abandono-en-el-medio-queda-algo-hecho)
+    - [P4 — ¿Qué necesita tener listo antes de empezar?](#p4--qué-necesita-tener-listo-antes-de-empezar)
+    - [P5 — ¿Qué puede faltar, fallar o tardar?](#p5--qué-puede-faltar-fallar-o-tardar)
+  - [5. Qué recurso representa el acto](#5-qué-recurso-representa-el-acto)
+    - [5.1. El segundo eje: qué pasa con la mirada](#51-el-segundo-eje-qué-pasa-con-la-mirada)
+    - [5.2. Lo que no distingue: conservar lo cargado](#52-lo-que-no-distingue-conservar-lo-cargado)
+  - [6. Qué promesas y qué estados trae cada recurso](#6-qué-promesas-y-qué-estados-trae-cada-recurso)
+    - [6.1. Las promesas son de dos familias](#61-las-promesas-son-de-dos-familias)
+    - [6.2. Lo que trae cada recurso](#62-lo-que-trae-cada-recurso)
+    - [6.3. Cómo se distingue una promesa de un estado](#63-cómo-se-distingue-una-promesa-de-un-estado)
+    - [6.4. Un rol distinto cambia los actos, y se nota](#64-un-rol-distinto-cambia-los-actos-y-se-nota)
+    - [6.5. Cuando el acto anidado reutiliza otra superficie](#65-cuando-el-acto-anidado-reutiliza-otra-superficie)
+  - [7. La cadena no es una tubería](#7-la-cadena-no-es-una-tubería)
+  - [8. Dos ejemplos trabajados](#8-dos-ejemplos-trabajados)
+    - [A. Desde un síntoma](#a-desde-un-síntoma)
+    - [B. Desde la exploración](#b-desde-la-exploración)
+  - [9. Qué no se decide en este tramo](#9-qué-no-se-decide-en-este-tramo)
+- [10. Qué de esto tiene evidencia y qué no](#10-qué-de-esto-tiene-evidencia-y-qué-no)
+  - [10.1. Lo que tiene respaldo](#101-lo-que-tiene-respaldo)
+  - [10.2. Los cuatro recursos que los laboratorios ejercitan](#102-los-cuatro-recursos-que-los-laboratorios-ejercitan)
+  - [10.3. Los tres recursos que ningún laboratorio tiene](#103-los-tres-recursos-que-ningún-laboratorio-tiene)
+  - [10.4. Lo que es encuadre y no hallazgo](#104-lo-que-es-encuadre-y-no-hallazgo)
+- [11. Los criterios de este documento, en una lista](#11-los-criterios-de-este-documento-en-una-lista)
 
 ## Qué clase de documento es esto
 

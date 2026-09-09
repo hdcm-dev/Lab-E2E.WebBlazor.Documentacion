@@ -13,6 +13,10 @@ traces: [ESC-01, ESC-02, ESC-03, ESC-04, ESC-05, CTX-01, CTX-02, CTX-03, CTX-04,
 
 # Pruebas E2E en .NET con Playwright
 
+> **De qué va** — Qué es una prueba de extremo a extremo, cómo se arma el proyecto en .NET con Playwright, cómo se escribe y se estabiliza un caso, y cómo se ata al merge de un pull request.
+> **Para quién** — Quien nunca escribió una.
+> **Qué deja** — Nueve capítulos y seis anexos con plantillas, listas de verificación y glosario, apoyados en un laboratorio que compila y corre.
+
 Una prueba de extremo a extremo abre un navegador de verdad contra la aplicación de verdad y hace
 lo que haría una persona: escribe en los campos, aprieta el botón, mira lo que aparece en pantalla.
 Es la única familia de pruebas que responde la pregunta que importa antes de liberar —«¿esto que

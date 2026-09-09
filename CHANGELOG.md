@@ -28,6 +28,23 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   dos vocabularios —superficie/promesa/estado por un lado, escenario/contexto/actor por el otro,
   que hasta ahora no se mencionaban entre sí— y declara **quién es dueño de cada tema**, para que
   una corrección se haga en un solo lugar y las repeticiones no diverjan.
+- **`E2E-Resumen.md` pasa a llamarse `Mapa-Del-Conjunto.md`** — el nombre decía «resumen», que es lo
+  único que el documento no es: no resume a los demás, dice cuál abrir y por qué. El nombre nuevo
+  coincide con el título que ya tenía y con lo que hace.
+- **Abstract en los dieciséis documentos** — cada uno abre, debajo del título, con un bloque de tres
+  líneas: *de qué va*, *para quién* y *qué deja*. Sirve para decidir si es el documento que hace
+  falta sin leer la introducción entera, y para que la tabla del README no sea la única forma de
+  saberlo.
+- **Índice en los documentos que no lo tenían** — `Mapa-Del-Conjunto`, `Del-Requerimiento-Al-Caso`,
+  `Quick-Guide-ABM` y `Template-SDD-Aplicado`. Los demás ya tenían el suyo, con nombres distintos
+  —«Contenido», «Índice detallado», «Tabla de contenido»— y se respetaron: agregar un segundo habría
+  sido la duplicación que el conjunto evita. `Notas.GitHub.md` queda sin índice a propósito: son
+  catorce líneas con una sola sección.
+- **`README.md`** — la sección «Guías» pasa a ser el índice del conjunto: una tabla por carpeta con
+  una fila por documento, para quién es y de qué va, en una línea. Se agregan las filas que
+  faltaban: los tres casos de diseño, el marco, el template aplicado, las notas de GitHub y los
+  workflows del anexo.
+
 - **`Guides/E2E-Guide/Del-Requerimiento-Al-Caso.md` §6.5, nueva** — el caso que aparece apenas el
   catálogo crece: el tramo pide un identificador y se abre un buscador, que es el mismo listado que
   en otro lado es un ABM. La respuesta es que **pertenece a la superficie que lo abre y no a la del

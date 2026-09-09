@@ -1,5 +1,9 @@
 # Caso de prueba: la superficie Hola Mundo
 
+> **De qué va** — Cómo se decide **qué** probar, en la superficie más simple que existe.
+> **Para quién** — Quien tiene que decidir qué probar y no cómo escribirlo.
+> **Qué deja** — Las definiciones de superficie y de estado, las cinco preguntas que validan la frase de una promesa, y por qué una superficie interactiva necesita un testigo de hidratación.
+
 **Superficie:** `Components/Paginas/HolaMundo.razor`
 **Prueba:** `tests/WebBlazor.E2E.Base.HolaMundo.E2ETests/HolaMundoE2ETests.cs`
 **Qué tipo de superficie es:** interactiva (`@rendermode InteractiveServer`)

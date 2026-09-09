@@ -13,6 +13,10 @@ traces: [GF-07, GF-08, GF-AX-WF]
 
 # GitHub Actions — guía de estudio
 
+> **De qué va** — Qué es un workflow, cómo se lee su sintaxis y cómo se arman los escenarios completos —compilar, probar, publicar, desplegar—.
+> **Para quién** — Quien nunca escribió uno y no quiere aprender copiando.
+> **Qué deja** — El vocabulario primero, la sintaxis sección por sección después, y escenarios sacados de workflows que existen y corren en este workspace.
+
 Quien nunca escribió un workflow suele empezar copiando uno que funciona y cambiándole nombres hasta
 que deja de fallar. Funciona una vez y no enseña nada: el siguiente problema vuelve a ser opaco.
 Esta guía recorre el camino inverso. Primero fija el vocabulario —qué es un pipeline, qué es una

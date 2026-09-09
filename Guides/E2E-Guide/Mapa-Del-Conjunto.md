@@ -13,6 +13,10 @@ traces: [E2E-00, E2E-01, E2E-02, E2E-04]
 
 # Mapa del conjunto
 
+> **De qué va** — Qué documento del conjunto responde a qué pregunta, cómo se cruzan sus dos vocabularios y quién es dueño de cada tema.
+> **Para quién** — Quien llega al conjunto y no sabe por dónde entrar.
+> **Qué deja** — Una ruta de lectura según el perfil, y la regla de dónde corregir para que las repeticiones no diverjan.
+
 Este documento es la puerta de entrada al conjunto. Hace dos cosas que ningún otro hace:
 
 1. **Ubica cada documento en la cadena** que va de la situación de alguien hasta el caso de prueba
@@ -22,6 +26,20 @@ Este documento es la puerta de entrada al conjunto. Hace dos cosas que ningún o
    corrección se haga en un solo lugar (§2 y §3).
 
 No enseña a probar ni a diseñar: **manda a leer al que corresponde.**
+
+
+## Índice
+
+- [1. La cadena, en una pantalla](#1-la-cadena-en-una-pantalla)
+- [2. El vocabulario, en una cadena](#2-el-vocabulario-en-una-cadena)
+  - [2.1 La traducción](#21-la-traducción)
+  - [2.2 Los criterios de la clase y del método](#22-los-criterios-de-la-clase-y-del-método)
+  - [2.3 Los dos ejes del conjunto, y cómo se cruzan](#23-los-dos-ejes-del-conjunto-y-cómo-se-cruzan)
+- [3. El mapa del conjunto](#3-el-mapa-del-conjunto)
+  - [3.1 Qué responde cada documento](#31-qué-responde-cada-documento)
+  - [3.2 Quién es dueño de cada tema](#32-quién-es-dueño-de-cada-tema)
+  - [3.3 Por dónde entrar](#33-por-dónde-entrar)
+- [4. Los criterios de este documento](#4-los-criterios-de-este-documento)
 
 ## Marcas de evidencia
 
@@ -107,7 +125,7 @@ una suite que ya existe.
 
 | Documento | La pregunta que contesta |
 | --- | --- |
-| **E2E-Resumen** *(este)* | ¿Qué leo para qué, y quién es dueño de cada tema? |
+| **Mapa-Del-Conjunto** *(este)* | ¿Qué leo para qué, y quién es dueño de cada tema? |
 | [Del-Requerimiento-Al-Caso](Del-Requerimiento-Al-Caso.md) | Alguien me tiró un problema encima: ¿cómo llego de ahí a superficies, promesas y estados? |
 | [Quick-Guide-Primer-Proyecto](Quick-Guide-Primer-Proyecto.md) | ¿Cómo creo el proyecto y escribo la primera prueba? |
 | [Beginner-Guide](Beginner-Guide.md) | ¿Cómo se escribe, se estabiliza y se ata a la CI una suite E2E? |

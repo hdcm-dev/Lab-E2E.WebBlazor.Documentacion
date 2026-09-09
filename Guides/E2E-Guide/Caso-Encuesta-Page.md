@@ -13,6 +13,10 @@ traces: [E2E-00, E2E-01]
 
 # Caso de prueba: la superficie Encuesta
 
+> **De qué va** — Cómo se decide qué probar en una superficie que se recorre en tramos.
+> **Para quién** — Ídem, con un acto divisible.
+> **Qué deja** — Por qué los tres pasos de un asistente son **una** superficie y no tres, cómo se prueba una promesa sobre la memoria, a quién le pertenece cada identificador, y dos promesas del código que hoy no tienen caso.
+
 **Superficie:** [`Components/Pages/Encuesta.razor`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Pages/Encuesta.razor)
 · [`Encuesta.razor.cs`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Pages/Encuesta.razor.cs)
 **Componente que la estructura:** [`Componentes/Asistente.razor`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Componentes/Asistente.razor)

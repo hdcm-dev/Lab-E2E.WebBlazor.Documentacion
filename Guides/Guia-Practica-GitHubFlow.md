@@ -13,6 +13,10 @@ traces: [GF-05, GF-06, GF-07, GF-08]
 
 # Guía práctica de GitHub Flow
 
+> **De qué va** — Los mismos ocho escenarios, pero sobre el modelo que el equipo **no** adoptó.
+> **Para quién** — Ídem, y quien quiera medir qué agrega cada pieza del modelo adoptado.
+> **Qué deja** — La línea de base contra la que se mide cualquier otro modelo: una sola rama de vida larga, corrección hacia adelante, feature flag y reversión en lugar de releases.
+
 La guía de estudio del equipo compara cuatro modelos de ramas y adopta uno —tronco con ramas de
 release— para su contexto. Esta guía práctica ejercita **otro**: GitHub Flow, el más simple de los
 cuatro, con una sola rama de vida larga y nada más.
@@ -25,6 +29,7 @@ tenerlo. Quien recorrió los ocho escenarios de acá sabe exactamente qué se ga
 Este documento reúne los ocho escenarios completos. Se lee de punta a punta o se entra por la tabla
 de contenido; no hace falta abrir ningún otro documento para ejecutarlo, salvo los enlaces
 explícitos a la guía de estudio, que son ampliaciones y no requisitos.
+
 
 ## Convención de marcas
 

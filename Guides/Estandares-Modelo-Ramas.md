@@ -13,6 +13,10 @@ consolida: [GF-01, GF-02, GF-03, GF-04, GF-05, GF-06, GF-07, GF-08, GF-AX-GL, GF
 
 # Estándares de modelo de ramas
 
+> **De qué va** — Qué modelos de ramas hay, cómo se elige uno con criterio, y cómo se opera el ciclo de vida de las versiones con pull requests verificados.
+> **Para quién** — El equipo entero: desarrollo, QA, DevOps, PO y autoridad de cambio.
+> **Qué deja** — Vocabulario, los modelos comparados, el modelo adoptado con sus guardarraíles, integración y versionado, y los anexos de glosario, plantillas, listas y fuentes.
+
 Cuerpo documental para que un equipo de desarrollo entienda los modelos de ramas, adopte uno con
 criterio, y opere el ciclo de vida de sus versiones con pull requests verificados automáticamente.
 Todo el contenido de estudio está acá: el vocabulario, los modelos comparados, el modelo adoptado,
@@ -21,6 +25,7 @@ verificación, preguntas y fuentes. Fuera de este documento quedan solo dos cosa
 de workflow listos para copiar, en [`Anexos/workflows/`](Anexos/workflows/README.md), y las dos guías
 prácticas ejecutables sobre un repositorio real —la del modelo adoptado y la de GitHub Flow, que
 sirve de línea de base para medirlo—.
+
 
 ## Convención de marcas
 
