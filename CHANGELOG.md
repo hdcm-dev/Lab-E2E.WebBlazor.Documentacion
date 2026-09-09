@@ -28,6 +28,24 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   dos vocabularios —superficie/promesa/estado por un lado, escenario/contexto/actor por el otro,
   que hasta ahora no se mencionaban entre sí— y declara **quién es dueño de cada tema**, para que
   una corrección se haga en un solo lugar y las repeticiones no diverjan.
+- **`Guides/E2E-Guide/E2E-Resumen.md` §1.5.1 y §1.5.2** — la tabla de recursos usaba un solo eje y no
+  alcanzaba: un mismo acto divisible se puede montar saltando de página, cambiando de panel o
+  superponiendo, y el eje estructural no elige entre esas tres. Se agrega el **eje atencional** —qué
+  pasa con el contexto de la persona: el modal se superpone y lo conserva a la vista, el asistente lo
+  reemplaza a propósito para concentrar, el maestro-detalle los hace coexistir—, con la regla de que
+  los dos ejes se leen en orden: el estructural dice cuántas superficies hay y descarta lo
+  incompatible, el atencional elige entre lo que queda. Poner un asistente donde el acto no es
+  divisible es un error del primer eje; ponerlo donde la persona necesitaba seguir viendo el resto es
+  del segundo, y se paga en abandono y no en datos mal cargados.
+  Y se corrige algo que la entrada anterior había dejado mal atado: **conservar lo cargado no es la
+  propiedad que define al modal, porque es transversal** —el asistente conserva al volver, las
+  pestañas al cambiar, el maestro-detalle al pasar de un detalle a otro—, así que no sirve para
+  elegir ningún recurso. Importa por otro motivo, y queda escrito como regla: *cada vez que un
+  recurso fragmenta un acto, nace una promesa de conservación, y es la que más se da por sentada*.
+  Se da por sentada porque parece trivial, y lo trivial es exactamente lo que nadie escribe. Va con
+  la tabla del gesto que la pone a prueba en cada recurso, incluida la fila que más se olvida: al
+  volver de una ficha al listado, el filtro que había puesto también es estado que se conserva o se
+  pierde.
 - **`Guides/E2E-Guide/E2E-Resumen.md` §1.3.4 y §1.5** — dos ajustes que salieron de discutir la
   sección. El **modal** estaba caracterizado por «un punto sin retorno dentro de otro acto», que es
   el caso de la confirmación y no la propiedad general: se redefine como un **acto anidado que

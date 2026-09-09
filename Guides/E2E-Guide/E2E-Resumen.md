@@ -260,7 +260,7 @@ deriva de dos propiedades del acto** — si es divisible, y si sus partes promet
 | **Pestañas** | **Varios** actos sobre el mismo sujeto, independientes entre sí | Puedo usar una y ninguna otra, y sigue teniendo sentido | Hay orden obligatorio → era un asistente |
 | **Maestro-detalle** | Dos actos anidados: el detalle no existe sin el maestro y se repite N veces para el mismo | Necesito ver el maestro **mientras** trabajo el detalle | El detalle es uno solo → era un campo más |
 | **Listado + ficha (ABM)** | Acto de administración recurrente sobre un catálogo | Antes de actuar hay que **encontrar** | No hay búsqueda posible → era un formulario |
-| **Modal** | Un acto **anidado** que interrumpe otro sin abandonarlo: el punto de retorno se conserva | Al cerrarlo vuelvo exactamente a donde estaba, con lo que tenía | Al volver perdí el contexto → era una navegación disfrazada |
+| **Modal** | Un acto **anidado** que interrumpe otro sin abandonarlo | Al cerrarlo sigo en el mismo acto, no en otro | Al volver aterricé en otro lado → era una navegación disfrazada |
 | **Página de llegada** | No hay acto: hay una condición que llega de afuera | El verbo es *llego*, no *hago* | Hay algo que completar → es una superficie de acto |
 
 **El par que más se confunde es asistente contra pestañas**, y es instructivo porque se ven casi
@@ -275,16 +275,67 @@ igual —contenido partido en secciones— y son estructuralmente opuestos:
 
 Se distinguen con P3, hecha antes de dibujar: **si abandono en el medio, ¿queda algo hecho?**
 
-**Y una precisión sobre el modal, porque se lo suele reducir a la confirmación.** Confirmar un
-borrado es *un caso* de acto anidado; la propiedad general es más amplia y cubre, por ejemplo,
-«agregar una localidad que no está en la lista» sin perder los seis campos ya cargados. Lo que
-define al recurso no es la gravedad de lo que se pregunta sino que **el punto de retorno se
-conserve**.
+**Una precisión sobre el modal, porque se lo suele reducir a la confirmación.** Confirmar un borrado
+es *un caso* de acto anidado; la propiedad general cubre también «agregar una localidad que no está
+en la lista» en el medio de la encuesta. Lo que lo define no es la gravedad de lo que pregunta, sino
+que **al cerrarlo se sigue en el mismo acto**.
 
-Eso tiene una consecuencia para las pruebas: **conservar el punto de retorno es en sí una promesa**,
-y se verifica como toda promesa sobre la memoria —yendo y volviendo, nunca leyendo el modelo
-([Caso-Encuesta §4.2](Caso-Encuesta-Page.md))—. Un modal no lleva un caso: lleva dos, lo que hace y
-que devuelve a la persona donde estaba. **[C]**
+### 1.5.1 El segundo eje: qué pasa con la mirada
+
+La tabla de arriba usa un solo eje, el **estructural** —si el acto es divisible y si sus partes
+prometen solas—, y ese eje decide **cuántas superficies** hay. Pero no alcanza para elegir el
+recurso, porque varios son estructuralmente compatibles con el mismo acto. Un flujo de tres tramos
+se puede montar saltando de página, cambiando de panel en la misma página o superponiendo. Lo que
+decide entre esos es otro eje, **atencional**: qué se hace con el contexto de la persona. **[C]**
+
+| Recurso | Qué pasa con el contexto | Para qué |
+| --- | --- | --- |
+| **Modal** | **Se conserva a la vista**: se superpone, no reemplaza | Interrumpir sin desorientar |
+| **Asistente** | **Se reemplaza, a propósito** | Concentrar en un subconjunto de la información |
+| **Pestañas** | Se reemplaza, pero el mapa completo queda visible en los rótulos | Ofrecer sin imponer orden |
+| **Maestro-detalle** | **Coexisten los dos** en la misma vista | Trabajar el detalle sin perder de vista el todo |
+| **Listado + ficha** | Se reemplaza, con vuelta al listado | Encontrar primero, actuar después |
+| **Formulario simple** | No hay contexto que perder | — |
+
+**Los dos ejes se leen en orden**: el estructural dice cuántas superficies hay y descarta los
+recursos incompatibles; el atencional elige entre los que quedan. Poner un asistente donde el acto
+no es divisible es un error del primer eje; poner un asistente donde la persona necesitaba seguir
+viendo el resto es un error del segundo, y se paga en abandono, no en datos mal cargados.
+
+### 1.5.2 Lo que **no** distingue: conservar lo cargado
+
+Es tentador usar la conservación para definir el modal —«te devuelve donde estabas»—, y es un error:
+**conservar es transversal.** Un asistente que salta de página también conserva al volver, las
+pestañas conservan al cambiar, el maestro-detalle conserva al pasar de un detalle a otro. No sirve
+para elegir nada.
+
+**Pero justamente por eso importa**, y de otra manera:
+
+> **Cada vez que un recurso fragmenta un acto, nace una promesa de conservación — y es la que más se
+> da por sentada.**
+
+Se da por sentada porque parece lógica y trivial: *claro que si vuelvo, lo que cargué sigue ahí*. Y
+lo trivial es exactamente lo que nadie escribe, y por eso lo que se rompe sin que nadie se entere.
+Que la encuesta del laboratorio tenga el caso `PermiteVolverAtrasConservandoLoCargado` no es obvio:
+alguien se tomó el trabajo de escribir lo evidente
+**[E: ../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/EncuestaTests.cs]**.
+
+El gesto que hay que probar cambia con el recurso, pero siempre existe:
+
+| Recurso | El gesto que lo pone a prueba |
+| --- | --- |
+| **Asistente** | Volver al tramo anterior |
+| **Modal** | Cerrarlo o cancelarlo |
+| **Pestañas** | Cambiar de pestaña y volver |
+| **Maestro-detalle** | Cambiar de detalle y volver |
+| **Listado + ficha** | Volver al listado — **¿y el filtro que había puesto?** |
+
+Esa última fila es la que más se olvida, porque la conservación no es solo de lo que la persona
+escribió: también es de **cómo dejó la vista**.
+
+Y se verifica como toda promesa sobre la memoria: **yendo y volviendo, nunca leyendo el modelo**
+([Caso-Encuesta §4.2](Caso-Encuesta-Page.md)). Un recurso que fragmenta no lleva un caso: lleva el
+del acto, y el de que fragmentar no costó nada. **[C]**
 
 ## 1.6 La cadena no es una tubería
 
@@ -463,6 +514,8 @@ una contradicción esperando fecha»*, [Beginner §9.3](Beginner-Guide.md#93-dos
 | El propósito mínimo | **E2E-Resumen §1.3.4** | — |
 | Las cinco preguntas de ida | **E2E-Resumen §1.4** | — |
 | Qué recurso representa el acto | **E2E-Resumen §1.5** | — |
+| Los dos ejes: estructural y atencional | **E2E-Resumen §1.5.1** | — |
+| La promesa de conservación | **E2E-Resumen §1.5.2** | Caso-Encuesta §4.2 |
 | Definición de superficie y estado | Caso-HolaMundo §1 | Caso-Encuesta §1, este §2 |
 | Las cinco preguntas de la frase | Caso-HolaMundo §2.2 | este §1.4 |
 | Acto divisible y prueba de corte | Caso-Encuesta §1.2 y §3 | este §1.4 y §1.5 |
@@ -513,17 +566,20 @@ De §1, que es lo propio de este documento:
 10. **Si al abandonar en el medio no queda nada, era una sola superficie**, por más tramos que tenga.
 11. **La precondición descubre actos que nadie nombró.** Es la pregunta que más rinde.
 12. **Dos estados son distintos cuando la salida que se le ofrece a la persona es distinta.**
-13. **El recurso no se elige, se deriva** de si el acto es divisible y de si sus partes prometen algo
-    por separado. Asistente y pestañas se ven igual y son opuestos; un modal se define porque
-    **conserva el punto de retorno**, no por la gravedad de lo que pregunta.
-14. **La cadena tiene retornos, pero la dependencia no**: no se elige recurso sin acto, ni se escribe
+13. **El recurso se decide con dos ejes.** El estructural —si el acto es divisible y si sus partes
+    prometen solas— dice cuántas superficies hay y descarta lo incompatible; el atencional —si el
+    contexto se conserva a la vista o se reemplaza— elige entre lo que queda.
+14. **Conservar lo cargado no distingue ningún recurso: es transversal.** Y por eso es la promesa que
+    más se da por sentada — cada vez que un recurso fragmenta un acto, nace una, y lo trivial es
+    justamente lo que nadie escribe.
+15. **La cadena tiene retornos, pero la dependencia no**: no se elige recurso sin acto, ni se escribe
     el caso sin promesa.
 
 Y de §2, para no perder el hilo con el resto del conjunto:
 
-15. **Una clase por superficie; un método por promesa; un motivo de falla por método.**
-16. **Un estado se observa, una promesa se ejercita.**
-17. **Una corrección se hace en el documento dueño del tema**, y los demás enlazan.
+16. **Una clase por superficie; un método por promesa; un motivo de falla por método.**
+17. **Un estado se observa, una promesa se ejercita.**
+18. **Una corrección se hace en el documento dueño del tema**, y los demás enlazan.
 
 ---
 
