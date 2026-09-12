@@ -5,7 +5,7 @@
 > fixture—, para que un agente no las confunda con Movilidad Urbana ni las «uniforme» con ella.
 > **Fuente primaria**: `src/WebBlazor.HolaMundo/`, `src/WebBlazor.Login/`,
 > `tests/WebBlazor.{HolaMundo,Login}/`, `evidencia/`.
-> **Vigencia**: 2026-09-12, commit `06528d3`.
+> **Vigencia**: 2026-09-12, commit `88e5caa`.
 
 ## De dónde vienen y para qué están
 
@@ -146,7 +146,7 @@ solo en http, ninguna de las dos redirige (`CHANGELOG.md`).
 Del repositorio de origen no hacía falta traer su `README.md`, `CHANGELOG.md`, el `.slnx`, el
 `.devcontainer/` —imagen de Playwright + SDK + `libnss3-tools`, para confiar el certificado de
 desarrollo— ni su `scripts/pruebas.sh`: nada de eso es necesario con http. Se rescataron a
-`evidencia/` las corridas del template (`2026-09-01-aplicacion-template/`, en el commit `06528d3`) y
+`evidencia/` las corridas del template (`2026-09-01-aplicacion-template/`, en el commit `88e5caa`) y
 del testigo (`2026-09-03-testigo-de-hidratacion/`).
 
 ## Cómo verificar todo esto

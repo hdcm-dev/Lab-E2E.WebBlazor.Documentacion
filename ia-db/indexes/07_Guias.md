@@ -3,7 +3,7 @@
 > **Propósito**: saber dónde están las guías y cuál responde qué pregunta, sin abrirlas todas.
 > **Fuente primaria**: `CHANGELOG.md` de `Lab-E2E.WebBlazor` (2026-09-09) y el árbol `Guides/` de
 > `Lab-E2E.WebBlazor.Documentacion`, con la tabla de su `README.md`.
-> **Vigencia**: 2026-09-12, commit `06528d3` del laboratorio. Inventario tomado ese día sobre
+> **Vigencia**: 2026-09-12, commit `88e5caa` del laboratorio. Inventario tomado ese día sobre
 > `Lab-E2E.WebBlazor.Documentacion`.
 
 ## Ya no viven en el repositorio de código

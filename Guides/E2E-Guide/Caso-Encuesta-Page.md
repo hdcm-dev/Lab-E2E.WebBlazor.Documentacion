@@ -95,7 +95,7 @@ el paso 2 no pasó nada que ella pueda usar, no era una operación: era un tramo
 
 **Uno de los tramos del acto divisible, y a la vez un estado de la superficie.** Acá son tres, y su
 cantidad es una constante del dominio:
-[`ReglasDeEncuesta.TotalDePasos`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Dominio/Reglas/ReglasDeEncuesta.cs#L6).
+[`ReglasDeEncuesta.TotalDePasos`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Dominio/Reglas/ReglasDeEncuesta.cs#L6).
 
 ### 1.4 Estado direccionable
 
@@ -287,7 +287,7 @@ superficie es navegable con lector de pantalla.
 | `NoFinalizaConElPaso3Incompleto` | 3 | Distancia fuera de rango + minutos faltantes |
 
 **No es repetición.** Son tres promesas distintas de
-[`ServicioDeEncuestas.ValidarPaso`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Aplicacion/Encuestas/ServicioDeEncuestas.cs#L16),
+[`ServicioDeEncuestas.ValidarPaso`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Aplicacion/Encuestas/ServicioDeEncuestas.cs#L16),
 y cada una falla por su cuenta. Un solo caso que recorriera los tres con datos malos fallaría por
 tres motivos y el reporte no diría cuál.
 

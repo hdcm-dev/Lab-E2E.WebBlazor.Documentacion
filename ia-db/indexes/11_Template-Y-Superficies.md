@@ -6,7 +6,7 @@
 > `Components/Componentes/`, `Theme/`, la sección «Diseño» de `README.md`,
 > `evidencia/2026-09-01-aplicacion-template/` y `Guides/E2E-Guide/Template-SDD-Aplicado.md` (en
 > `Lab-E2E.WebBlazor.Documentacion`).
-> **Vigencia**: 2026-09-12, commit `06528d3`.
+> **Vigencia**: 2026-09-12, commit `88e5caa`.
 
 ## Las tres aplicaciones, la misma forma
 

@@ -4,7 +4,7 @@
 > con los que las pruebas las ubican, para poder escribir o corregir un caso E2E sin abrir cada
 > `.razor`.
 > **Fuente primaria**: `src/MovilidadUrbana.Web/Components/`, incluidos `App.razor` y `Routes.razor`.
-> **Vigencia**: 2026-09-12, commit `06528d3`. Las superficies de Hola Mundo y Login están en
+> **Vigencia**: 2026-09-12, commit `88e5caa`. Las superficies de Hola Mundo y Login están en
 > [10](10_Hola-Mundo-Y-Login.md); la forma constructiva común a las tres, en
 > [11](11_Template-Y-Superficies.md).
 

@@ -5,7 +5,7 @@
 > **Fuente primaria**: `README.md` (secciones «Por qué las pruebas E2E son un proyecto de la
 > solución», «Lo que cambia respecto del ejemplo estático», «Los workflows» y «Evidencia»),
 > `CHANGELOG.md` y los comentarios del código citado.
-> **Vigencia**: 2026-09-12, commit `06528d3`.
+> **Vigencia**: 2026-09-12, commit `88e5caa`.
 
 ## Decisiones de fondo
 

@@ -4,13 +4,14 @@
 > las E2E y qué variables de entorno la gobiernan.
 > **Fuente primaria**: `tests/`, `pruebas.runsettings`, `scripts/pruebas.sh` y
 > `evidencia/2026-09-12-unificacion/`.
-> **Vigencia**: 2026-09-12, commit `06528d3`.
+> **Vigencia**: 2026-09-12, commit `88e5caa`.
 
-## Las cuatro suites
+## Las cinco suites
 
 | Suite | Proyecto | Casos | Qué verifica | Quién levanta la aplicación |
 | --- | --- | --- | --- | --- |
 | Unitarias | `tests/MovilidadUrbana.UnitTests` | 49 | Las reglas de dominio de Movilidad Urbana, sin navegador ni servidor | Nadie: no hace falta |
+| API | `tests/MovilidadUrbana.ApiWeb.Tests` | 11 | Los dos controllers de `MovilidadUrbana.ApiWeb`, en proceso | **`WebApplicationFactory`**, sobre una base SQLite propia de la corrida — ver [12](12_Api-REST.md) |
 | E2E | `tests/MovilidadUrbana.E2ETests` | 22 | El circuito completo de Movilidad Urbana | **Su fixture**, que publica y arranca la aplicación |
 | E2E | `tests/WebBlazor.Login.E2ETests` | 10 | El acceso, el guard y la superficie protegida | **Quien corre la prueba**: URL fija `http://localhost:5181` |
 | E2E | `tests/WebBlazor.HolaMundo.E2ETests` | 1 | La superficie Hola Mundo | **Quien corre la prueba**: URL fija `http://localhost:5027` |

@@ -3,7 +3,7 @@
 > **Propósito**: dar la visión general del laboratorio —qué es, con qué está hecho y qué decisiones
 > lo definen— para que un agente pueda situarse sin abrir el código.
 > **Fuente primaria**: `README.md`, `CHANGELOG.md` y `Lab-E2E.WebBlazor.sln` del repositorio.
-> **Vigencia**: 2026-09-12, commit `06528d3`.
+> **Vigencia**: 2026-09-12, commit `88e5caa`.
 
 ## Qué es
 
@@ -17,7 +17,7 @@ se pueda estudiar de a un escalón:
 | --- | --- | --- |
 | 1 | `WebBlazor.HolaMundo` | Una superficie interactiva con sus estados; sin capas ni datos |
 | 2 | `WebBlazor.Login` | La misma superficie detrás de un acceso por cookies |
-| 3 | `MovilidadUrbana.Web` | Servidor, SQLite, aislamiento por sesión, un ABM y un asistente; Clean Architecture en carpetas |
+| 3 | `MovilidadUrbana.Web` + `MovilidadUrbana.ApiWeb` | Servidor, SQLite, aislamiento por sesión, un ABM y un asistente; Clean Architecture en **proyectos por capa**, con dos cabezas —la web y una API REST— sobre las mismas capas |
 
 Las dos primeras llegaron desde `Lab-E2E.WebBlazor.Base`, que se retiró; su detalle está en
 [10_Hola-Mundo-Y-Login.md](10_Hola-Mundo-Y-Login.md).
@@ -40,15 +40,20 @@ Blazor — ver [08_Decisiones-Y-Trampas.md](08_Decisiones-Y-Trampas.md).
 
 **Ya no hay Bootstrap**: se retiró el 2026-09-04 al aplicar el template.
 
-## Los siete proyectos de la solución
+## Los doce proyectos de la solución
 
 | Proyecto | Ruta | Rol |
 | --- | --- | --- |
-| `MovilidadUrbana.Web` | `src/MovilidadUrbana.Web/` | La aplicación completa. Un solo proyecto, capas en carpetas |
+| `MovilidadUrbana.Dominio` | `src/MovilidadUrbana.Dominio/` | Entidades, reglas y catálogos. No depende de nada |
+| `MovilidadUrbana.Aplicacion` | `src/MovilidadUrbana.Aplicacion/` | Casos de uso y abstracciones. Depende de Dominio |
+| `MovilidadUrbana.Infraestructura` | `src/MovilidadUrbana.Infraestructura/` | EF Core sobre SQLite y la sesión por cookie. Depende de Aplicacion |
+| `MovilidadUrbana.Web` | `src/MovilidadUrbana.Web/` | Presentación Blazor y composición |
+| `MovilidadUrbana.ApiWeb` | `src/MovilidadUrbana.ApiWeb/` | Presentación REST y composición — ver [12](12_Api-REST.md) |
 | `WebBlazor.HolaMundo` | `src/WebBlazor.HolaMundo/` | La superficie Hola Mundo |
 | `WebBlazor.Login` | `src/WebBlazor.Login/` | Hola Mundo detrás de un acceso |
 | `MovilidadUrbana.E2ETests` | `tests/MovilidadUrbana.E2ETests/` | 22 casos, con fixture que levanta la aplicación |
-| `MovilidadUrbana.UnitTests` | `tests/MovilidadUrbana.UnitTests/` | 49 casos sobre las reglas de dominio |
+| `MovilidadUrbana.UnitTests` | `tests/MovilidadUrbana.UnitTests/` | 49 casos sobre las reglas de dominio; referencia solo `Dominio` |
+| `MovilidadUrbana.ApiWeb.Tests` | `tests/MovilidadUrbana.ApiWeb.Tests/` | 11 casos en proceso sobre la API, con `WebApplicationFactory` |
 | `WebBlazor.HolaMundo.E2ETests` | `tests/WebBlazor.HolaMundo.E2ETests/` | 1 caso, sin fixture |
 | `WebBlazor.Login.E2ETests` | `tests/WebBlazor.Login.E2ETests/` | 10 casos, sin fixture |
 
@@ -64,6 +69,8 @@ Cada una está desarrollada en [08_Decisiones-Y-Trampas.md](08_Decisiones-Y-Tram
 | Decisión | En una línea |
 | --- | --- |
 | **Tres aplicaciones de complejidad creciente** | La escalera es didáctica: fixture, URL y workflow difieren a propósito entre ellas |
+| **Capas en proyectos, no en carpetas** (desde el 2026-09-12) | Para que la web y la API compartan reglas sin duplicarlas ni referenciar un proyecto web desde otro |
+| **La API identifica la sesión por encabezado**, no por cookie | `X-Sesion-Id` es lo idiomático en REST; el aislamiento de datos es el mismo |
 | Playwright con las **vinculaciones de .NET**, no el runner de JavaScript | Se gana descubrimiento y depuración desde Visual Studio; se pierden `--shard`, `merge-reports` y el reporte HTML |
 | Las E2E son **proyectos de la solución** | La alternativa —carpeta `e2e/` con TypeScript, como `dotnet/eShop`— es igual de defendible; esta prioriza el IDE |
 | **Un workflow E2E por aplicación**, independientes | Cada uno con la complejidad que su proyecto necesita — ver [06](06_CI-Y-Workflows.md) |
@@ -92,6 +99,8 @@ Cada una está desarrollada en [08_Decisiones-Y-Trampas.md](08_Decisiones-Y-Tram
 | 2026-09-12 | Login como lo corre su workflow —binario publicado, Production— | 10/10 en chromium y firefox | `…/login-falsificacion-y-binario-publicado.log` |
 | 2026-09-12 | Hola Mundo y Login sin la aplicación levantada | Fallan: no pasan en vacío | `…/*-falsificacion-*.log` |
 | 2026-09-12 | GitHub Actions: `ci.yml`, `e2e-holamundo.yml` y `e2e-login.yml` sobre `f9f3ca2`; `ci.yml` sobre `06528d3` | En verde | API pública de Actions — ver [06](06_CI-Y-Workflows.md) |
+| 2026-09-12 | Solución de doce proyectos en Release con `-warnaserror`; unitarias y E2E de la web tras extraer las capas | 0 avisos; 49/49 y 22/22 sin cambios | `evidencia/2026-09-12-capas-y-api/` |
+| 2026-09-12 | API: pruebas en proceso; falsificación (200 en vez de 201); corrida real sobre Kestrel con OpenAPI y `curl` | 11/11; un caso en rojo; ocho rutas expuestas | ídem |
 
 **No verificado**: la ejecución desde el Explorador de pruebas de Visual Studio —no hay Windows en esa
 máquina—, incluido el paso previo que necesitan Hola Mundo y Login.
@@ -99,7 +108,8 @@ máquina—, incluido el paso previo que necesitan Hola Mundo y Login.
 ## Historia reciente
 
 | Fecha | Cambio |
-| --- | --- |
+| --- | | 2026-09-12 | Capas de Movilidad Urbana en proyectos propios; `MovilidadUrbana.ApiWeb` con sus pruebas; los proyectos mudados pierden el prefijo `E2E.Base` |
+--- |
 | 2026-09-12 | Unificación con `Lab-E2E.WebBlazor.Base`: Hola Mundo y Login, un workflow E2E por aplicación, `scripts/pruebas.sh` con `PROYECTO` y `REPETIR`, `evidencia/` (incluida la del template, rescatada en `06528d3`) |
 | 2026-09-09 | Las guías se mudan a `Lab-E2E.WebBlazor.Documentacion` |
 | 2026-09-04 | Template del Framework SDD en la interfaz; se retira Bootstrap; `Caso-Encuesta-Page.md` |

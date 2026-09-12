@@ -22,6 +22,7 @@
 | Qué significa un término del proyecto | [09_Glosario.md](indexes/09_Glosario.md) |
 | Qué hacen Hola Mundo y Login, cómo es el acceso por cookies y cómo se prueban sin fixture | [10_Hola-Mundo-Y-Login.md](indexes/10_Hola-Mundo-Y-Login.md) |
 | Con qué forma constructiva se escriben las superficies de las tres aplicaciones | [11_Template-Y-Superficies.md](indexes/11_Template-Y-Superficies.md) |
+| Qué expone la API REST de Movilidad Urbana, cómo identifica la sesión y cómo se prueba | [12_Api-REST.md](indexes/12_Api-REST.md) |
 
 ## Resumen ejecutivo
 
@@ -29,7 +30,7 @@
 | --- | --- |
 | Proyecto | `Lab-E2E.WebBlazor` (`LAB/Lab-E2E.WebBlazor`) |
 | Tipo | Laboratorio didáctico: tres aplicaciones web de complejidad creciente, sus pruebas E2E y su pipeline |
-| Stack | .NET 10 · Blazor Web App *interactive server* · EF Core 10 sobre SQLite (Movilidad Urbana) · Playwright 1.62 + NUnit 4 · template del Framework SDD, sin librería de componentes |
+| Stack | .NET 10 · Blazor Web App *interactive server* y ASP.NET Core Web API con controllers · EF Core 10 sobre SQLite (Movilidad Urbana) · Playwright 1.62 + NUnit 4 · `WebApplicationFactory` para la API · template del Framework SDD, sin librería de componentes |
 | Repositorio | `https://github.com/hdcm-dev/Lab-E2E.WebBlazor` · rama `main` |
 | Versión | Sin versionar: el `CHANGELOG.md` agrupa por fecha, no por número (última entrada: 2026-09-12) |
 | Documentación asociada | `Lab-E2E.WebBlazor.Documentacion` (este repositorio), donde viven también las guías |
@@ -40,21 +41,27 @@ aplicaciones escalonan la dificultad: una superficie sola, la misma detrás de u
 negocio de juguete —*movilidad urbana*: un ABM y una encuesta en tres pasos— con servidor y base.
 
 **Arquitectura en una línea** — tres aplicaciones web —Hola Mundo y Login sin capas, Movilidad
-Urbana con Clean Architecture en carpetas—, cada una con su proyecto E2E y su workflow, más las
-pruebas unitarias de Movilidad Urbana.
+Urbana con Clean Architecture en **proyectos por capa** y dos cabezas, la web Blazor y una API
+REST—, cada web con su proyecto E2E y su workflow, más las pruebas unitarias y las de la API de
+Movilidad Urbana.
 
 ## Estructura
 
 ```
 Lab-E2E.WebBlazor/
-├── Lab-E2E.WebBlazor.sln         Siete proyectos + carpetas de solución (src, tests, github-workflow, scripts, Solution Items)
+├── Lab-E2E.WebBlazor.sln         Doce proyectos + carpetas de solución (src, tests, github-workflow, scripts, Solution Items)
 ├── src/
-│   ├── MovilidadUrbana.Web/          Dominio, Aplicacion, Infraestructura, Components
+│   ├── MovilidadUrbana.Dominio/      Entidades, reglas y catálogos
+│   ├── MovilidadUrbana.Aplicacion/   Casos de uso y abstracciones
+│   ├── MovilidadUrbana.Infraestructura/  EF Core sobre SQLite y la sesión por cookie
+│   ├── MovilidadUrbana.Web/          Presentación Blazor
+│   ├── MovilidadUrbana.ApiWeb/       Presentación REST: dos controllers sobre las mismas capas
 │   ├── WebBlazor.HolaMundo/ La superficie más simple
 │   └── WebBlazor.Login/     La misma superficie detrás de un acceso
 ├── tests/
 │   ├── MovilidadUrbana.E2ETests/                22 casos + fixture que levanta la aplicación
 │   ├── MovilidadUrbana.UnitTests/               49 casos sobre las reglas de dominio
+│   ├── MovilidadUrbana.ApiWeb.Tests/            11 casos sobre la API, en proceso
 │   ├── WebBlazor.HolaMundo.E2ETests/   1 caso, sin fixture
 │   └── WebBlazor.Login.E2ETests/       10 casos, sin fixture
 ├── scripts/                      dotnet.sh, publicar.sh, pruebas.sh (todo por contenedor)
@@ -90,20 +97,24 @@ Lab-E2E.WebBlazor/
 
 - Generado por : `/IA/PROMPTs/IA.Prompts/Tool-Prompts/Indexado-Documentado/Iniciar-Indexado.md`
   (invocado desde `/LAB/Lab-E2E.WebBlazor.Documentacion/PROMPTs/Indexado/Crear-Indexado.md`)
-- Alcance      : `/LAB/Lab-E2E.WebBlazor` — modo proyecto, un solo repositorio (siete proyectos:
-  tres aplicaciones web, tres suites E2E y una unitaria)
+- Alcance      : `/LAB/Lab-E2E.WebBlazor` — modo proyecto, un solo repositorio (doce proyectos:
+  tres capas y dos cabezas de Movilidad Urbana, dos webs simples, tres suites E2E, una unitaria y
+  una de la API)
 - Destino      : `/LAB/Lab-E2E.WebBlazor.Documentacion/ia-db` (estructura canónica plana). Sucede al
   workspace `ia-db/Root/` (versión 1.2, del 2026-09-12, commit `7262395`), retirado junto con
   `ia-db/Base/` al quedar un solo repositorio de código
 - Fuentes      : `README.md`, `CHANGELOG.md`, `Lab-E2E.WebBlazor.sln`, `pruebas.runsettings`,
-  `.gitignore`, `src/` (tres proyectos), `tests/` (cuatro), `scripts/`, `.github/workflows/`,
+  `.gitignore`, `src/` (siete proyectos), `tests/` (cinco), `scripts/`, `.github/workflows/`,
   `evidencia/` (`.log` y `.mjs`; las capturas solo se referencian). Para el índice 07, el árbol
   `Guides/` de `Lab-E2E.WebBlazor.Documentacion`. Para las corridas observadas del índice 06, la API
   pública de GitHub Actions consultada el 2026-09-12
 - Exclusiones  : `.git`, `.nuget/`, `.dotnet/`, `.navegadores/`, `publicacion/`, `datos-e2e/`,
   `resultados/`, `bin/`, `obj/`, las capturas `.png` de `evidencia/` y lo ignorado por `.gitignore`
-- Estado del repositorio : rama `main`, último commit `06528d3` (2026-09-12, «Rescatar la evidencia
-  de la aplicacion del template»)
+- Estado del repositorio : rama `main`, último commit `88e5caa` (2026-09-12, «Extraer las capas de
+  Movilidad Urbana a proyectos y sumar una API REST»)
 - Generado     : 2026-09-12 · Versión: 1.0
+- Actualizado  : 2026-09-12 · Versión: 1.1 — capas de Movilidad Urbana en proyectos propios y
+  `MovilidadUrbana.ApiWeb` con sus pruebas: índice nuevo `12_Api-REST.md`; `00`, `01`, `05` y `06`
+  corregidos; `02` y `03` solo en las rutas de sus fuentes; el resto sin cambios
 - Actualizar   : `/IA/PROMPTs/IA.Prompts/Tool-Prompts/Indexado-Documentado/Actualizar-Indexado.md`
   (invocado desde `/LAB/Lab-E2E.WebBlazor.Documentacion/PROMPTs/Indexado/Actualizar-Indexado.md`)

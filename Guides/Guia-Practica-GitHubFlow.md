@@ -590,7 +590,7 @@ pasa a ser `"Resistencia (Chaco)"` y esa prueba —y solo esa— falla. **[E]**
 git checkout main
 git pull --ff-only
 git checkout -b feature/151-listado-mas-recientes-primero
-# src/MovilidadUrbana.Web/Infraestructura/Persistencia/RepositorioDeLocalidades.cs
+# src/MovilidadUrbana.Infraestructura/Persistencia/RepositorioDeLocalidades.cs
 #   .OrderBy(l => l.Id)  →  .OrderByDescending(l => l.Id)
 git push -u origin feature/151-listado-mas-recientes-primero
 ```

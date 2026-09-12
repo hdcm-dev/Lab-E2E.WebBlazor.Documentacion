@@ -2,9 +2,9 @@
 
 > **Propósito**: explicar el mecanismo que hace posible probar en paralelo contra un único servidor
 > y una única base, y cómo se guardan los datos.
-> **Fuente primaria**: `src/MovilidadUrbana.Web/Infraestructura/`, `Components/App.razor` y
+> **Fuente primaria**: `src/MovilidadUrbana.Infraestructura/`, `Components/App.razor` y
 > `Components/Routes.razor`.
-> **Vigencia**: 2026-09-12, commit `06528d3`.
+> **Vigencia**: 2026-09-12, commit `88e5caa`.
 
 ## El problema que resuelve
 

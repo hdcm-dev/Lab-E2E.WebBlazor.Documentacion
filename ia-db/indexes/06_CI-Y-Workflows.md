@@ -4,7 +4,7 @@
 > GitHub Actions aplica el laboratorio, que es una parte central de lo que enseña.
 > **Fuente primaria**: `.github/workflows/` y la sección «Los workflows» de `README.md`. Las
 > corridas observadas salen de la API pública de GitHub Actions.
-> **Vigencia**: 2026-09-12, commit `06528d3`.
+> **Vigencia**: 2026-09-12, commit `88e5caa`.
 
 ## El mapa
 
@@ -133,7 +133,7 @@ jobs:
 
 | Job | Qué hace |
 | --- | --- |
-| `compilacion` («Compilación y unitarias», 15 min) | `restore` → `build Lab-E2E.WebBlazor.sln -warnaserror` —los siete proyectos— → **pruebas unitarias** con TRX (`resultados-unitarias`, 7 días) → `dotnet test --list-tests` sobre las E2E **de Movilidad Urbana** |
+| `compilacion` («Compilación y unitarias», 15 min) | `restore` → `build Lab-E2E.WebBlazor.sln -warnaserror` —los doce proyectos— → **pruebas unitarias** con TRX (`resultados-unitarias`, 7 días) → **pruebas de la API** en proceso (`api.trx`) → `dotnet test --list-tests` sobre las E2E **de Movilidad Urbana** |
 | `e2e` | Invoca `./.github/workflows/e2e.yml` con `navegadores` según el evento y `referencia` = SHA de la cabeza del PR |
 | `comentario-en-pr` | Deja **o actualiza** un comentario con el resultado y el enlace a la corrida; solo para ramas del propio repositorio (un fork no tiene permisos de escritura) |
 | `ci-ok` («CI aprobada») | Resume todos los jobs en un único check |

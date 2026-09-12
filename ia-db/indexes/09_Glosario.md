@@ -3,7 +3,7 @@
 > **Propósito**: fijar el vocabulario del laboratorio, incluidos los términos propios del binding de
 > .NET de Playwright que no coinciden con los del runner de JavaScript.
 > **Fuente primaria**: código y `README.md` del repositorio.
-> **Vigencia**: 2026-09-12, commit `06528d3`.
+> **Vigencia**: 2026-09-12, commit `88e5caa`.
 
 | Término | Qué significa acá |
 | --- | --- |

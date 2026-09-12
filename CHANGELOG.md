@@ -6,7 +6,21 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Sin publicar] - 2026-09-12
 
+### Añadido
+
+- **`ia-db/indexes/12_Api-REST.md`** — qué expone `MovilidadUrbana.ApiWeb`, la sesión por encabezado
+  `X-Sesion-Id`, los errores como `ValidationProblemDetails` con las mismas claves que la web, sus
+  11 pruebas en proceso y lo que la API todavía no tiene.
+
 ### Cambiado
+
+- **La ia-db pasa a versión 1.1** por `Actualizar-Indexado.md`: las capas de Movilidad Urbana ya no
+  son carpetas de `MovilidadUrbana.Web` sino proyectos propios —`Dominio`, `Aplicacion`,
+  `Infraestructura`— y hay una segunda cabeza, la API. Se corrigen `00`, `01`, `05` y `06`; `02` y `03`
+  solo en las rutas de sus fuentes. Las guías que citaban `src/MovilidadUrbana.Web/{Dominio,
+  Aplicacion,Infraestructura}/` pasan a las rutas nuevas; la única línea que corrió es el
+  `PRAGMA journal_mode=WAL` de `PreparadorDeBaseDeDatos.cs`, que por un `using` nuevo pasa de la 28 a
+  la 29. Los 196 enlaces de `Guides/` y los 62 de `ia-db/` resuelven.
 
 - **Los proyectos de Hola Mundo y Login pierden el prefijo `E2E.Base`** en las guías y en la ia-db,
   siguiendo el renombre en `Lab-E2E.WebBlazor`: `WebBlazor.HolaMundo`, `WebBlazor.Login` y sus

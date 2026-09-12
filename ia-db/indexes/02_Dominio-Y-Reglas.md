@@ -2,8 +2,8 @@
 
 > **Propósito**: registrar qué se modela, qué valida cada regla y con qué límites, para poder
 > razonar sobre el comportamiento esperado sin abrir el código.
-> **Fuente primaria**: `src/MovilidadUrbana.Web/Dominio/` y `src/MovilidadUrbana.Web/Aplicacion/`.
-> **Vigencia**: 2026-09-12, commit `06528d3`.
+> **Fuente primaria**: `src/MovilidadUrbana.Dominio/` y `src/MovilidadUrbana.Aplicacion/`.
+> **Vigencia**: 2026-09-12, commit `88e5caa`.
 
 ## Entidades
 
