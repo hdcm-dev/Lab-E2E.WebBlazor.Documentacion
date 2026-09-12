@@ -10,49 +10,56 @@
 
 | Necesitás saber… | Leé |
 | --- | --- |
-| De qué trata el laboratorio, con qué stack y qué decisiones lo definen | [00_MASTER-INDEX.md](indexes/00_MASTER-INDEX.md) |
-| Cómo se reparten las capas, qué depende de qué y dónde se compone todo | [01_Arquitectura.md](indexes/01_Arquitectura.md) |
+| De qué trata el laboratorio, cuáles son sus tres aplicaciones y qué decisiones lo definen | [00_MASTER-INDEX.md](indexes/00_MASTER-INDEX.md) |
+| Cómo se reparten las capas de Movilidad Urbana, qué depende de qué y dónde se compone todo | [01_Arquitectura.md](indexes/01_Arquitectura.md) |
 | Qué entidades y reglas de negocio existen, y qué valida cada una | [02_Dominio-Y-Reglas.md](indexes/02_Dominio-Y-Reglas.md) |
 | Cómo se aísla el estado por sesión y cómo se persiste en SQLite | [03_Sesiones-Y-Persistencia.md](indexes/03_Sesiones-Y-Persistencia.md) |
-| Qué pantallas hay, qué hace cada una y con qué `data-testid` se la ubica | [04_Interfaz-Y-Pantallas.md](indexes/04_Interfaz-Y-Pantallas.md) |
-| Cómo se corren las pruebas, qué cubre cada suite y qué variables las gobiernan | [05_Pruebas.md](indexes/05_Pruebas.md) |
-| Qué hace cada workflow, cuándo se dispara y qué exige la protección de rama | [06_CI-Y-Workflows.md](indexes/06_CI-Y-Workflows.md) |
-| Qué guía de estudio responde qué pregunta | [07_Guias.md](indexes/07_Guias.md) |
+| Qué pantallas tiene Movilidad Urbana, qué hace cada una y con qué `data-testid` se la ubica | [04_Interfaz-Y-Pantallas.md](indexes/04_Interfaz-Y-Pantallas.md) |
+| Cómo se corren las pruebas de las tres aplicaciones, qué cubre cada suite y qué variables las gobiernan | [05_Pruebas.md](indexes/05_Pruebas.md) |
+| Qué hace cada workflow —uno por aplicación—, cuándo se dispara y qué se observó corriendo | [06_CI-Y-Workflows.md](indexes/06_CI-Y-Workflows.md) |
+| Dónde están las guías de estudio y cuál responde qué pregunta | [07_Guias.md](indexes/07_Guias.md) |
 | Por qué el proyecto está hecho así y qué trampas ya se pagaron | [08_Decisiones-Y-Trampas.md](indexes/08_Decisiones-Y-Trampas.md) |
 | Qué significa un término del proyecto | [09_Glosario.md](indexes/09_Glosario.md) |
+| Qué hacen Hola Mundo y Login, cómo es el acceso por cookies y cómo se prueban sin fixture | [10_Hola-Mundo-Y-Login.md](indexes/10_Hola-Mundo-Y-Login.md) |
+| Con qué forma constructiva se escriben las superficies de las tres aplicaciones | [11_Template-Y-Superficies.md](indexes/11_Template-Y-Superficies.md) |
 
 ## Resumen ejecutivo
 
 | Dato | Valor |
 | --- | --- |
 | Proyecto | `Lab-E2E.WebBlazor` (`LAB/Lab-E2E.WebBlazor`) |
-| Tipo | Laboratorio didáctico: aplicación web + pruebas E2E + pipeline |
-| Stack | .NET 10 · Blazor Web App *interactive server* · EF Core 10 sobre SQLite · Playwright 1.62 + NUnit 4 · Bootstrap 5.3.8 vendorizado |
+| Tipo | Laboratorio didáctico: tres aplicaciones web de complejidad creciente, sus pruebas E2E y su pipeline |
+| Stack | .NET 10 · Blazor Web App *interactive server* · EF Core 10 sobre SQLite (Movilidad Urbana) · Playwright 1.62 + NUnit 4 · template del Framework SDD, sin librería de componentes |
 | Repositorio | `https://github.com/hdcm-dev/Lab-E2E.WebBlazor` · rama `main` |
-| Versión | Sin versionar: el `CHANGELOG.md` agrupa por fecha, no por número (última entrada: 2026-08-31) |
-| Documentación asociada | `Lab-E2E.WebBlazor.Documentacion` (este repositorio) |
+| Versión | Sin versionar: el `CHANGELOG.md` agrupa por fecha, no por número (última entrada: 2026-09-12) |
+| Documentación asociada | `Lab-E2E.WebBlazor.Documentacion` (este repositorio), donde viven también las guías |
 
 **Función principal** — enseñar a escribir, estabilizar y automatizar pruebas de extremo a extremo
-con Playwright sobre una aplicación Blazor real, y a atarlas a las puertas de un pipeline de GitHub
-Actions. El caso de negocio es de juguete —*movilidad urbana*: un ABM de localidades y una encuesta
-de transporte en tres pasos—; lo que se estudia es todo lo que rodea a esas dos pantallas.
+con Playwright sobre Blazor, y a atarlas a las puertas de un pipeline de GitHub Actions. Las tres
+aplicaciones escalonan la dificultad: una superficie sola, la misma detrás de un acceso, y un caso de
+negocio de juguete —*movilidad urbana*: un ABM y una encuesta en tres pasos— con servidor y base.
 
-**Arquitectura en una línea** — un único proyecto web con las capas de Clean Architecture separadas
-en carpetas (`Dominio` → `Aplicacion` → `Infraestructura` / `Components`, compuestas en
-`Program.cs`), más dos proyectos de prueba hermanos —E2E y unitarias— en `tests/`.
+**Arquitectura en una línea** — tres aplicaciones web —Hola Mundo y Login sin capas, Movilidad
+Urbana con Clean Architecture en carpetas—, cada una con su proyecto E2E y su workflow, más las
+pruebas unitarias de Movilidad Urbana.
 
 ## Estructura
 
 ```
 Lab-E2E.WebBlazor/
-├── Lab-E2E.WebBlazor.sln         Tres proyectos + carpetas de solución (Guides, scripts, workflows)
-├── src/MovilidadUrbana.Web/      La aplicación: Dominio, Aplicacion, Infraestructura, Components
+├── Lab-E2E.WebBlazor.sln         Siete proyectos + carpetas de solución (github-workflow, scripts, Solution Items)
+├── src/
+│   ├── MovilidadUrbana.Web/          Dominio, Aplicacion, Infraestructura, Components
+│   ├── WebBlazor.E2E.Base.HolaMundo/ La superficie más simple
+│   └── WebBlazor.E2E.Base.Login/     La misma superficie detrás de un acceso
 ├── tests/
-│   ├── MovilidadUrbana.E2ETests/     22 casos Playwright + su infraestructura de fixture
-│   └── MovilidadUrbana.UnitTests/    49 casos sobre las reglas de dominio, sin navegador
+│   ├── MovilidadUrbana.E2ETests/                22 casos + fixture que levanta la aplicación
+│   ├── MovilidadUrbana.UnitTests/               49 casos sobre las reglas de dominio
+│   ├── WebBlazor.E2E.Base.HolaMundo.E2ETests/   1 caso, sin fixture
+│   └── WebBlazor.E2E.Base.Login.E2ETests/       10 casos, sin fixture
 ├── scripts/                      dotnet.sh, publicar.sh, pruebas.sh (todo por contenedor)
-├── Guides/                       Guías de estudio: cinco carpetas, un documento por guía
-├── .github/workflows/            ci.yml, e2e.yml (reutilizable), verificacion-entorno.yml
+├── .github/workflows/            ci.yml, e2e.yml, e2e-holamundo.yml, e2e-login.yml, verificacion-entorno.yml
+├── evidencia/                    Registros de corridas que respaldan lo que afirman las guías
 ├── pruebas.runsettings           Navegador, timeouts y workers de las E2E
 ├── README.md                     Documento de referencia del repositorio (extenso)
 └── CHANGELOG.md                  Registro por fecha
@@ -62,14 +69,18 @@ Lab-E2E.WebBlazor/
 
 - **No inventar**: toda afirmación de estos índices apunta a un archivo del repositorio. Si algo no
   figura acá, verificalo en la fuente antes de afirmarlo.
-- **No confundir los dos laboratorios**: `Lab-E2E.WebBlazor.Base` es un repositorio distinto, con su
-  propia ia-db en [`../Base/`](../Base/README.md). Comparten técnica y difieren en madurez.
+- **No uniformar las tres aplicaciones**: que Hola Mundo y Login no tengan fixture, que prueben contra
+  una URL fija y que cada una tenga un workflow distinto es **deliberado** — ver
+  [10](indexes/10_Hola-Mundo-Y-Login.md) y [06](indexes/06_CI-Y-Workflows.md).
 - **No proponer cambios de estructura** por «prolijidad»: las decisiones no obvias —publicar en el
   fixture, `ParallelScope.Fixtures`, la cookie de sesión, `EnsureCreated`— están justificadas en
   [08_Decisiones-Y-Trampas.md](indexes/08_Decisiones-Y-Trampas.md).
-- **No dar por verificado lo que el propio repositorio marca como no verificado**: la ejecución
-  desde el Explorador de pruebas de Visual Studio y el comportamiento real de los workflows nunca
-  se probaron desde esta máquina (solo se validó la sintaxis YAML).
+- **No dar por verificado lo que no lo está**: la ejecución desde el Explorador de pruebas de Visual
+  Studio nunca se probó desde esta máquina. Los workflows, en cambio, sí se observaron corriendo — ver
+  [06](indexes/06_CI-Y-Workflows.md).
+- **`Lab-E2E.WebBlazor.Base` ya no existe como repositorio aparte**: se unificó en este. Su
+  conocimiento vigente está en [10](indexes/10_Hola-Mundo-Y-Login.md) y
+  [11](indexes/11_Template-Y-Superficies.md); no hay `ia-db/Base` que consultar.
 - Si una tarea cambia el código o la documentación, **actualizar esta base de forma incremental** con
   `Actualizar-Indexado.md`, no reconstruirla.
 
@@ -77,16 +88,20 @@ Lab-E2E.WebBlazor/
 
 - Generado por : `/IA/PROMPTs/IA.Prompts/Tool-Prompts/Indexado-Documentado/Iniciar-Indexado.md`
   (invocado desde `/LAB/Lab-E2E.WebBlazor.Documentacion/PROMPTs/Indexado/Crear-Indexado.md`)
-- Alcance      : `/LAB/Lab-E2E.WebBlazor` — modo proyecto
-- Fuentes      : `README.md`, `CHANGELOG.md`, `Lab-E2E.WebBlazor.sln`, `pruebas.runsettings`,
-  `src/MovilidadUrbana.Web/`, `tests/`, `scripts/`, `.github/workflows/`, `Guides/`
+- Alcance      : `/LAB/Lab-E2E.WebBlazor` — modo proyecto. Desde la versión 1.2 absorbe el
+  conocimiento vigente del workspace `ia-db/Base/` (`Lab-E2E.WebBlazor.Base`), retirado al unificarse
+  los dos repositorios
+- Fuentes      : `README.md`, `CHANGELOG.md`, `Lab-E2E.WebBlazor.sln`, `pruebas.runsettings`, `src/`
+  (tres proyectos), `tests/` (cuatro), `scripts/`, `.github/workflows/`, `evidencia/`
 - Exclusiones  : `.git`, `.nuget/`, `.dotnet/`, `.navegadores/`, `publicacion/`, `datos-e2e/`,
-  `bin/`, `obj/`, `wwwroot/vendor/` y `wwwroot/lib/` (Bootstrap vendorizado), y lo ignorado por
+  `resultados/`, `bin/`, `obj/`, las capturas de `evidencia/` (solo se referencian) y lo ignorado por
   `.gitignore`
-- Estado del repositorio : rama `main`, último commit `c870628` (2026-08-31). El árbol de trabajo
-  tiene sin commitear la consolidación de las guías (27 borrados, 3 documentos nuevos) — ver
-  [07_Guias.md](indexes/07_Guias.md)
+- Estado del repositorio : rama `main`, último commit `7262395` (2026-09-12)
 - Generado     : 2026-09-01 · Versión: 1.0
 - Actualizado  : 2026-09-02 · Versión: 1.1 — sincronizado `07_Guias.md` con la consolidación de
-  `Guides/` y corregida una referencia en `09_Glosario.md`; el resto de los índices no registró cambios
+  `Guides/` y corregida una referencia en `09_Glosario.md`
+- Actualizado  : 2026-09-12 · Versión: 1.2 — unificación con `Lab-E2E.WebBlazor.Base`: índices nuevos
+  `10` y `11` con lo vigente de `ia-db/Base/`, que se retira; `00`, `04`, `05`, `06` y `07` rehechos
+  por el template (2026-09-04), la mudanza de las guías (2026-09-09) y la unificación; `01`, `02`,
+  `08` y `09` corregidos en puntos; `03` sin cambios
 - Actualizar   : `/IA/PROMPTs/IA.Prompts/Tool-Prompts/Indexado-Documentado/Actualizar-Indexado.md`

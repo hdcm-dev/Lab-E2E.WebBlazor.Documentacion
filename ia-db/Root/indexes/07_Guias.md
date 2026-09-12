@@ -1,141 +1,90 @@
 # 07 — Guías de estudio
 
-> **Propósito**: mapear las guías de `Guides/` para poder ir directo a la que responde una pregunta,
-> sin abrirlas todas.
-> **Fuente primaria**: `Guides/` y la sección «Guías» de `README.md`.
-> **Vigencia**: revisado el 2026-09-02 sobre el árbol de trabajo, no sobre `HEAD` — ver
-> [«Consolidación en curso»](#consolidacion-en-curso) al final.
+> **Propósito**: saber dónde están las guías y cuál responde qué pregunta, sin abrirlas todas.
+> **Fuente primaria**: `CHANGELOG.md` de este repositorio (2026-09-09) y `Guides/` de
+> `Lab-E2E.WebBlazor.Documentacion`.
+> **Vigencia**: 2026-09-12. Inventario tomado ese día sobre `Lab-E2E.WebBlazor.Documentacion`.
 
-Son **dos familias en cinco carpetas**: una sobre pruebas de extremo a extremo, otra sobre el modelo
-de ramas —guía de estudio y dos guías prácticas—, y la guía de GitHub Actions, que explica la
-maquinaria que ejecuta las puertas que las otras describen.
+## Ya no viven en este repositorio
 
-Desde el 2026-09-01 cada guía es **un solo documento**: las carpetas que antes tenían un archivo por
-capítulo quedaron con un único `.md` que los consolida. Solo `E2E-Guide/` conserva dos documentos,
-porque son dos guías distintas y no dos capítulos.
+Desde el 2026-09-09 **toda la documentación de estudio vive en
+[`Lab-E2E.WebBlazor.Documentacion`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion)**:
+las de pruebas en `Guides/E2E-Guide/` y las de ramas e integración continua en `Guides/`. El motivo
+que registra el `CHANGELOG.md`: las mismas guías estaban repartidas entre este repositorio y
+`Lab-E2E.WebBlazor.Base`, con dos copias que podían divergir sin que nada avisara.
 
-## Mapa de la carpeta
+Ese día `Lab-E2E.WebBlazor.sln` retiró las carpetas de solución `Guides` y `E2E-Guide`, y la sección
+«Guías» del `README.md` pasó a remitir al repositorio de documentación.
 
-| Carpeta | Documento | Líneas | `doc_id` |
-| --- | --- | --- | --- |
-| `E2E-Guide/` | `Beginner-Guide.md` | 1812 | — |
-| `E2E-Guide/` | `Quick-Guide-ABM.md` | 325 | — |
-| `Estandares-Modelo-Ramas-Guide/` | `Estandares-Modelo-Ramas.md` | 2029 | `GF-GUIA` |
-| `GitFlow-Practice-Guide/` | `Guia-Practica-GitFlow.md` | 1178 | `GF-09-ESCENARIOS` |
-| `GitHubFlow-Practice-Guide/` | `Guia-Practica-GitHubFlow.md` | 1067 | `GHF-GUIA` |
-| `GitHub-Action-Guide/` | `GitHub-Action-Guide.md` | 2974 | — |
+**Consecuencia práctica.** Las guías citan el código de este repositorio por ruta relativa
+(`../../../Lab-E2E.WebBlazor/…`), así que se leen mejor con los dos repositorios clonados como
+carpetas hermanas. En github.com esos enlaces no resuelven: una ruta relativa no puede salir de su
+repositorio.
 
-Las guías del modelo de ramas llevan **frontmatter YAML** (`doc_id`, `doc_type`, `status`, `origin`,
-`confidence`, `owner`, `last_review`, `audience`, `traces`): vienen de `Lab-GitFlow.Documentacion` y
-conservan su convención de trazabilidad.
+## Inventario
 
-## E2E-Guide — pruebas de extremo a extremo
+| Documento | Líneas |
+| --- | --- |
+| `Guides/E2E-Guide/Mapa-Del-Conjunto.md` | 228 |
+| `Guides/E2E-Guide/Del-Requerimiento-Al-Caso.md` | 714 |
+| `Guides/E2E-Guide/Quick-Guide-Primer-Proyecto.md` | 536 |
+| `Guides/E2E-Guide/Beginner-Guide.md` | 1816 |
+| `Guides/E2E-Guide/Quick-Guide-ABM.md` | 345 |
+| `Guides/E2E-Guide/Caso-HolaMundo-Page.md` | 861 |
+| `Guides/E2E-Guide/Caso-Login-Page.md` | 465 |
+| `Guides/E2E-Guide/Caso-Encuesta-Page.md` | 437 |
+| `Guides/E2E-Guide/Marco-La-Superficie-Verificable.md` | 446 |
+| `Guides/E2E-Guide/Template-SDD-Aplicado.md` | 169 |
+| `Guides/E2E-Guide/Notas.GitHub.md` | 19 |
+| `Guides/Estandares-Modelo-Ramas.md` | 2034 |
+| `Guides/Guia-Practica-GitFlow.md` | 1183 |
+| `Guides/Guia-Practica-GitHubFlow.md` | 1072 |
+| `Guides/GitHub-Action-Guide.md` | 2978 |
+| `Guides/Anexos/workflows/README.md` | 114 |
 
-| Documento | Para quién | Qué deja |
+## Qué responde cada una
+
+Tomado de la tabla del `README.md` de `Lab-E2E.WebBlazor.Documentacion`, que es la que mantiene esa
+correspondencia.
+
+### Pruebas de extremo a extremo
+
+| Documento | Para quién | De qué va |
 | --- | --- | --- |
-| `Guides/E2E-Guide/Beginner-Guide.md` | Quien nunca escribió una prueba E2E | Nueve capítulos y seis anexos: qué es una E2E, marco de escenarios y actores, anatomía del proyecto en .NET, qué testear, cómo se escribe y estabiliza un caso, lo propio de una aplicación con servidor, y la integración con GitHub Actions |
-| `Guides/E2E-Guide/Quick-Guide-ABM.md` | Quien ya escribió pruebas E2E | La receta corta para montar las de un ABM: siete pasos, las trampas de Blazor *interactive server* y una lista de verificación |
+| `Mapa-Del-Conjunto.md` | Quien llega y no sabe por dónde entrar | Qué documento responde a qué pregunta y quién es dueño de cada tema |
+| `Del-Requerimiento-Al-Caso.md` | Quien recibe un pedido y no tiene nada escrito | Cómo se llega de un problema hasta superficies, promesas y estados. Método propuesto: su §10 declara qué tiene respaldo |
+| `Quick-Guide-Primer-Proyecto.md` | Quien nunca creó un proyecto de pruebas | Crear el proyecto NUnit con Playwright y la primera prueba, sobre Hola Mundo |
+| `Beginner-Guide.md` | Quien nunca escribió una prueba E2E | Qué es una E2E, cómo se arma el proyecto en .NET, cómo se estabiliza un caso y cómo se ata al merge |
+| `Quick-Guide-ABM.md` | Quien ya escribió pruebas E2E | La receta corta para las de un ABM, con las trampas de Blazor *interactive server* |
+| `Caso-HolaMundo-Page.md` | Quien tiene que decidir **qué** probar | Superficie, estados y el testigo de hidratación |
+| `Caso-Login-Page.md` | Ídem, con postura de seguridad | La promesa negativa, que se verifica comparando dos observaciones |
+| `Caso-Encuesta-Page.md` | Ídem, con un acto divisible | Por qué tres pasos de un asistente son **una** superficie |
+| `Marco-La-Superficie-Verificable.md` | Quien quiere ir más lejos | De qué tradición viene cada concepto, con bibliografía |
+| `Template-SDD-Aplicado.md` | Quien construye la superficie | Qué se aplicó del template SDD y cómo se verificó — ver [11](11_Template-Y-Superficies.md) |
+| `Notas.GitHub.md` | Quien administra el repositorio | Cómo evitar que un PR desde un fork corra en el runner propio |
 
-> Los dos documentos existen **también** en `Lab-E2E.WebBlazor.Documentacion/Guides/E2E-Guide/`
-> (verificado el 2026-09-01). Ante una diferencia, comprobar cuál está vigente antes de citarlos.
+Los tres casos de diseño se corresponden con las tres aplicaciones: Hola Mundo y Login están en
+[10](10_Hola-Mundo-Y-Login.md) y la Encuesta de Movilidad Urbana en
+[04](04_Interfaz-Y-Pantallas.md).
 
-## GitHub-Action-Guide
+### Ramas, integración y releases
 
-`Guides/GitHub-Action-Guide/GitHub-Action-Guide.md` (agregada el 2026-08-31, 2974 líneas). Va del
-marco conceptual —qué es un pipeline, una puerta, qué significa «continuo»— a la anatomía de un
-workflow sección por sección, y de ahí a escenarios completos: compilar y probar, E2E, publicar un
-paquete, subir un sitio, imagen de contenedor, app móvil.
+| Documento | Para quién | De qué va |
+| --- | --- | --- |
+| `Estandares-Modelo-Ramas.md` | El equipo entero | Qué modelos de ramas hay, cómo se elige uno y cómo se opera el ciclo de versiones |
+| `Guia-Practica-GitFlow.md` | Un equipo de tres que rota roles | Los ocho escenarios ejecutables del modelo adoptado |
+| `Guia-Practica-GitHubFlow.md` | Ídem | Los mismos ocho sobre el modelo que **no** se adoptó |
+| `GitHub-Action-Guide.md` | Quien nunca escribió un workflow | Vocabulario, sintaxis y escenarios completos |
+| `Anexos/workflows/` | Quien monta la CI | Tres workflows listos para copiar |
 
-Los ejemplos salen de workflows que existen y corren en el workspace —los de este laboratorio entre
-ellos—; lo ilustrativo se marca como tal con su fuente. Queda al lado de las guías del modelo de
-ramas porque explica **la maquinaria que ejecuta las puertas** que aquéllas describen.
-
-## Estandares-Modelo-Ramas-Guide — ramas, integración y releases
-
-`Guides/Estandares-Modelo-Ramas-Guide/Estandares-Modelo-Ramas.md` (`doc_id: GF-GUIA`,
-`last_review: 2026-08-23`). Documento único que **consolida los trece anteriores**: su frontmatter
-los declara en `consolida: [GF-01 … GF-08, GF-AX-GL, GF-AX-PL, GF-AX-LV, GF-AX-PF, GF-AX-FU]`.
-
-La carpeta se llama *Estandares-Modelo-Ramas* y no *GitFlow* a propósito: lo que documenta es la
-**elección** entre modelos. GitFlow es uno de los comparados, pero el modelo adoptado es otro
-—tronco con ramas de release—.
-
-| Bloque | De qué trata |
-| --- | --- |
-| Marco de referencia | Escenarios, contextos y actores: el vocabulario que usa todo lo demás |
-| Mapa conceptual | Entradas por escenario, por rol y por artefacto |
-| Fundamentos de Git | Merge, squash, rebase, cherry-pick y tags |
-| GitFlow | El modelo original, sus reglas y la nota de 2020 de su autor |
-| Cómo elegir el modelo | GitHub Flow, GitFlow, GitLab Flow y tronco: comparación y criterio |
-| Modelo adoptado | Las siete reglas, guardarraíles y antipatrones |
-| Integración y versionado | Ambientes, promoción, versionado semántico y releases |
-| Pull requests y pruebas | Ciclo del pull request, protección de rama y qué verifica el pipeline |
-| Anexos | Glosario, plantillas, listas de verificación, preguntas frecuentes y fuentes |
-
-El documento declara que fuera de él quedan **solo dos cosas**: los tres workflows de ejemplo listos
-para copiar en `Anexos/workflows/` (`ci.yml`, `release.yml`, `auditoria-convergencia.yml`, con su
-`README.md`) y las dos guías prácticas.
-
-> **Duplicación en pie.** Los cinco anexos siguen existiendo como archivos sueltos en
-> `Anexos/` —`Glosario.md`, `Plantillas.md`, `Listas-De-Verificacion.md`, `Preguntas-Frecuentes.md`,
-> `Fuentes.md`, entre 84 y 102 líneas cada uno— aunque su contenido ya está adentro del documento
-> consolidado. Ante una diferencia, el consolidado es el que el frontmatter declara vigente.
-
-## Las dos guías prácticas
-
-Cada una es un recorrido de **ocho escenarios ejecutables** sobre un repositorio real, para un
-equipo de tres personas que rotan por los roles. Se practican sobre
-[`Lab-GitFlow`](https://github.com/hdcm-dev/Lab-GitFlow), con la aplicación de este laboratorio como
-sistema bajo prueba.
-
-| Guía | Qué ejercita |
-| --- | --- |
-| `GitFlow-Practice-Guide/Guia-Practica-GitFlow.md` | El **modelo adoptado**: preparación, funcionalidad nueva, defecto con release abierta, corte de release, PR que rompe la regresión, emergencia en producción, versión de demostración, cierre y auditoría |
-| `GitHubFlow-Practice-Guide/Guia-Practica-GitHubFlow.md` | El modelo que **no** se adoptó, como línea de base: preparación, funcionalidad nueva, corrección hacia adelante, PR que rompe la regresión, cambio grande con feature flag, reversión, vista previa para demostración, cierre y auditoría |
-
-Las dos declaran leerse «sin depender de ningún otro documento de esta carpeta».
-
-El punto de contacto entre las dos familias es concreto: el escenario del **PR que rompe la
-regresión** es donde las E2E de este laboratorio entran en la historia, y el bloque de **pull
-requests y pruebas** del documento de estándares explica cuándo esa verificación bloquea un merge y
-quién decide.
-
-Las guías del modelo de ramas se tomaron de
-[`Lab-GitFlow.Documentacion`](https://github.com/hdcm-dev/Lab-GitFlow.Documentacion) el 2026-08-30,
-para poder leerlas junto al código que las pruebas verifican.
-
-<a id="consolidacion-en-curso"></a>
-
-## Consolidación en curso — qué está desalineado
-
-**Hecho**, verificado el 2026-09-02 con `git status` sobre `Lab-E2E.WebBlazor`:
-
-| Estado | Archivos |
-| --- | --- |
-| Borrados sin commitear (` D`) | Los 8 numerados + `README.md` de `Estandares-Modelo-Ramas-Guide/`; los 8 + `README.md` de `GitFlow-Practice-Guide/`; los 8 + `README.md` de `GitHubFlow-Practice-Guide/` — 27 en total |
-| Sin versionar (`??`) | Los tres documentos consolidados |
-
-El último commit del repositorio sigue siendo `c870628` (2026-08-31): **la consolidación está solo
-en el árbol de trabajo**.
-
-**Consecuencia comprobable.** Dos artefactos siguen apuntando a los archivos que ya no existen:
-
-| Artefacto | Qué referencia |
-| --- | --- |
-| `Lab-E2E.WebBlazor.sln` | Las carpetas de solución `Guides` listan los 27 archivos borrados (líneas 33-41, 46-54 y 81-89) y ninguno de los tres consolidados |
-| `README.md` | La sección «Guías» enlaza `01-Marco-De-Referencia.md` … `08-Pull-Requests-Y-Pruebas.md` y los `README.md` de las dos guías prácticas (líneas 104-131) |
-
-**Interpretación.** Abrir la solución en Visual Studio muestra las guías con el ícono de archivo
-faltante, y los enlaces del README dan 404 en GitHub. Es trabajo a medio terminar, no un error de
-este índice: al commitear la consolidación corresponde actualizar el `.sln`, el `README.md` y el
-`CHANGELOG.md`, que todavía no la registra.
+El punto de contacto entre las dos familias es el escenario del **PR que rompe la regresión**: ahí
+entran las E2E de este laboratorio, y el bloque de pull requests y pruebas del documento de
+estándares explica cuándo esa verificación bloquea un merge.
 
 ## Cómo verificar todo esto
 
 | Afirmación | Comprobación |
 | --- | --- |
-| Qué documentos hay | `find Guides -type f -name '*.md' \| sort` |
-| Consolidación sin commitear | `git status --porcelain Guides/` |
-| Referencias muertas en la solución | `grep -n 'Guides.\+[0-9][0-9]-' Lab-E2E.WebBlazor.sln` |
-| Referencias muertas en el README | `grep -n 'Estandares-Modelo-Ramas-Guide/0' README.md` |
-| Anexos duplicados | `wc -l Guides/Estandares-Modelo-Ramas-Guide/Anexos/*.md` frente al bloque de anexos del consolidado |
+| Las guías no están en este repositorio | `ls Guides` (no existe) y `grep -n Guides Lab-E2E.WebBlazor.sln` (sin resultados) |
+| Qué documentos hay | `find Guides -name '*.md' \| sort`, en `Lab-E2E.WebBlazor.Documentacion` |
+| Los enlaces relativos al código resuelven | Con los dos repositorios como carpetas hermanas |

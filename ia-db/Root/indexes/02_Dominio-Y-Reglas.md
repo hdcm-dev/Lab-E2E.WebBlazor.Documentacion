@@ -3,6 +3,7 @@
 > **Propósito**: registrar qué se modela, qué valida cada regla y con qué límites, para poder
 > razonar sobre el comportamiento esperado sin abrir el código.
 > **Fuente primaria**: `src/MovilidadUrbana.Web/Dominio/` y `src/MovilidadUrbana.Web/Aplicacion/`.
+> **Vigencia**: 2026-09-12, commit `7262395`.
 
 ## Entidades
 
@@ -44,7 +45,8 @@ verifica en pantalla es la etiqueta.
 | `MismaLocalidad` | Mismo nombre **sin distinguir mayúsculas** y misma provincia **de forma ordinal** |
 
 Constantes públicas: `LargoMinimoDelNombre = 3`, `LargoMaximoDelNombre = 60`,
-`HabitantesMinimos = 1`. El largo máximo lo aplica el mapeo de EF y el `maxlength` del campo.
+`HabitantesMinimos = 1` y `DigitosDelCodigoPostal = 4` —el patrón `^\d{4}$` la espeja—. El largo
+máximo lo aplica el mapeo de EF y el `maxlength` del campo.
 
 La asimetría de `MismaLocalidad` es deliberada y está cubierta por una prueba unitaria propia
 («La provincia se compara de forma ordinal»): el nombre lo escribe la persona, la provincia sale de
@@ -57,11 +59,12 @@ un catálogo cerrado.
 | Constante | Valor |
 | --- | --- |
 | `TotalDePasos` | 3 |
+| `LargoMinimoDelNombre` / `LargoMaximoDelNombre` | 3 / 80 |
 | `EdadMinima` / `EdadMaxima` | 16 / 110 |
 | `DistanciaMinima` / `DistanciaMaxima` | 0 / 500 (km) |
 | `MinutosMinimos` / `MinutosMaximos` | 1 / 600 |
 
-`NombreValido` pide 3 caracteres recortados, igual que en localidades.
+`NombreValido` pide `LargoMinimoDelNombre` (3) caracteres recortados, igual que en localidades.
 
 ## Casos de uso
 
@@ -99,6 +102,19 @@ verificable: los medios se guardan **en el orden del catálogo y no en el de tip
 resumen sea estable y la prueba pueda compararlo con un texto fijo.
 
 `ModeloDeEncuesta` acumula los tres pasos; `Medios` es un `HashSet<string>` con `AlternarMedio`.
+
+## Políticas: el requisito antes del intento
+
+Desde el 2026-09-04, `Aplicacion/Localidades/PoliticaDeLocalidades.cs` y
+`Aplicacion/Encuestas/PoliticaDeEncuestas.cs` derivan de las constantes de `Dominio/Reglas/` el texto
+de requisito que cada campo muestra **antes** del intento. Los límites que estaban escritos a mano en
+la vista y en los mensajes —60 caracteres, 4 dígitos, 3 caracteres— pasaron a constantes de las
+reglas. Los errores los sigue decidiendo el servicio de aplicación.
+
+`Aplicacion/Encuestas/ResumenDeEncuesta.cs` arma las filas clave/valor que la superficie recorre al
+registrar una respuesta, en vez de escribirlas a mano en la vista.
+
+Fuente: `CHANGELOG.md` (2026-09-04) y la sección «Diseño» de `README.md`.
 
 ## Cobertura de estas reglas
 

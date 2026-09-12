@@ -12,13 +12,15 @@ tabla de navegación indica qué índice cargar.
 
 | Workspace | Indexa | Punto de entrada |
 | --- | --- | --- |
-| [ia-db/Root/](ia-db/Root/) | [Lab-E2E.WebBlazor](../Lab-E2E.WebBlazor) — la aplicación, sus pruebas y su pipeline | [ia-db/Root/README.md](ia-db/Root/README.md) |
-| [ia-db/Base/](ia-db/Base/) | [Lab-E2E.WebBlazor.Base](../Lab-E2E.WebBlazor.Base) — el andamiaje mínimo previo, en construcción | [ia-db/Base/README.md](ia-db/Base/README.md) |
+| [ia-db/Root/](ia-db/Root/) | [Lab-E2E.WebBlazor](../Lab-E2E.WebBlazor) — las tres aplicaciones, sus pruebas y sus workflows | [ia-db/Root/README.md](ia-db/Root/README.md) |
+
+Hasta el 2026-09-12 hubo un segundo workspace, `ia-db/Base/`, para `Lab-E2E.WebBlazor.Base`. Ese
+repositorio se unificó en `Lab-E2E.WebBlazor` y su conocimiento vigente pasó a `ia-db/Root/`.
 
 ## Guías
 
-Toda la documentación de los dos laboratorios vive acá, en [Guides/](Guides/). Antes estaba
-repartida entre los dos repositorios de código, con el riesgo de que dos copias del mismo texto
+Toda la documentación del laboratorio vive acá, en [Guides/](Guides/). Antes estaba repartida entre
+los dos repositorios de código que existían, con el riesgo de que dos copias del mismo texto
 divergieran en silencio.
 
 **Cada documento abre con un abstract** —*de qué va, para quién, qué deja*— y con su índice, así que
@@ -52,8 +54,8 @@ Se leen en este orden si es la primera vez; si no, por la columna del medio.
 | [GitHub-Action-Guide.md](Guides/GitHub-Action-Guide.md) | Quien nunca escribió un workflow | Vocabulario, sintaxis y escenarios completos, con ejemplos que corren en este workspace |
 | [Anexos/workflows/](Guides/Anexos/workflows/README.md) | Quien monta la CI | Los tres workflows listos para copiar |
 
-Los documentos de `E2E-Guide/` citan el código de los dos laboratorios por ruta relativa, así que
-se leen mejor con los tres repositorios clonados como carpetas hermanas.
+Los documentos de `E2E-Guide/` citan el código del laboratorio por ruta relativa, así que se leen
+mejor con los dos repositorios —código y documentación— clonados como carpetas hermanas.
 
 ## PROMPTs
 
@@ -62,8 +64,9 @@ laboratorios y esta documentación, ordenadas por el workspace al que apuntan:
 
 | Carpeta | Encarga sobre |
 | --- | --- |
-| [PROMPTs/Root/](PROMPTs/Root/) | [Lab-E2E.WebBlazor](../Lab-E2E.WebBlazor) — `Inicio/` la creación de la solución, `Features/` los cambios posteriores |
-| [PROMPTs/Base/](PROMPTs/Base/) | [Lab-E2E.WebBlazor.Base](../Lab-E2E.WebBlazor.Base) — el andamiaje mínimo previo |
+| [PROMPTs/Inicio/](PROMPTs/Inicio/) | La creación de la solución de [Lab-E2E.WebBlazor](../Lab-E2E.WebBlazor) |
+| [PROMPTs/Features/](PROMPTs/Features/) | Los cambios de funcionalidad posteriores |
+| [PROMPTs/Fixs/](PROMPTs/Fixs/) | Arreglos y reorganizaciones, como la unificación de los dos repositorios de código |
 | [PROMPTs/Analisis/](PROMPTs/Analisis/) | Estudios que no modifican código, con su resultado en `OUTPUTs/` |
 | [PROMPTs/Indexado/](PROMPTs/Indexado/) | La generación y el refresco de `ia-db/` |
 

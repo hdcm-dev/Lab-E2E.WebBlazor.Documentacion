@@ -2,44 +2,41 @@
 
 > **Propósito**: registrar qué cubre cada suite, cómo se ejecutan, qué hace la infraestructura de
 > las E2E y qué variables de entorno la gobiernan.
-> **Fuente primaria**: `tests/`, `pruebas.runsettings`, `scripts/pruebas.sh`.
+> **Fuente primaria**: `tests/`, `pruebas.runsettings`, `scripts/pruebas.sh` y
+> `evidencia/2026-09-12-unificacion/`.
+> **Vigencia**: 2026-09-12, commit `7262395`.
 
-## Las dos suites
+## Las cuatro suites
 
-| Suite | Proyecto | Casos | Qué verifica | Duración |
+| Suite | Proyecto | Casos | Qué verifica | Quién levanta la aplicación |
 | --- | --- | --- | --- | --- |
-| Unitarias | `tests/MovilidadUrbana.UnitTests` | 49 | Las reglas de dominio por sí solas, sin navegador ni servidor | ~27 ms |
-| E2E | `tests/MovilidadUrbana.E2ETests` | 22 | El circuito completo con navegador real | 6–15 s según navegador |
+| Unitarias | `tests/MovilidadUrbana.UnitTests` | 49 | Las reglas de dominio de Movilidad Urbana, sin navegador ni servidor | Nadie: no hace falta |
+| E2E | `tests/MovilidadUrbana.E2ETests` | 22 | El circuito completo de Movilidad Urbana | **Su fixture**, que publica y arranca la aplicación |
+| E2E | `tests/WebBlazor.E2E.Base.Login.E2ETests` | 10 | El acceso, el guard y la superficie protegida | **Quien corre la prueba**: URL fija `http://localhost:5181` |
+| E2E | `tests/WebBlazor.E2E.Base.HolaMundo.E2ETests` | 1 | La superficie Hola Mundo | **Quien corre la prueba**: URL fija `http://localhost:5027` |
 
-Las E2E corren en **4 configuraciones** —chromium, firefox, webkit y `mobile-chrome` (chromium con
-el descriptor de un Pixel 7)—: 88 ejecuciones en total.
+Conteo verificado con `dotnet test --list-tests` el 2026-09-12. Los tres proyectos E2E usan
+`Microsoft.Playwright.NUnit` **1.62.0**, así que comparten la build de navegadores.
+
+La diferencia en quién levanta la aplicación **es a propósito**: las tres aplicaciones escalonan la
+complejidad del laboratorio — ver [00](00_MASTER-INDEX.md).
 
 ## Pruebas unitarias
 
 `ReglasDeLocalidadTests.cs` (25 casos) y `ReglasDeEncuestaTests.cs` (24 casos), casi todos
-`[TestCase]` sobre los bordes de cada validación. Dos casos con nombre propio en localidades
-—`MismaLocalidadCompara` y `LaProvinciaSeComparaDeFormaOrdinal`— y uno en encuesta —`TotalDePasos`—.
+`[TestCase]` sobre los bordes de cada validación. El proyecto referencia `MovilidadUrbana.Web.csproj`:
+prueba las reglas directamente, sin dobles.
 
-El proyecto referencia `MovilidadUrbana.Web.csproj`: prueba las reglas directamente, sin dobles.
-
-```bash
-dotnet test tests/MovilidadUrbana.UnitTests
-```
-
-## Pruebas E2E — el catálogo
+## Movilidad Urbana — el catálogo
 
 Tres clases, cada una con su `[SetUp]` de navegación.
 
-### NavegacionTests (4 casos)
+### NavegacionTests (4)
 
-| Caso |
-| --- |
-| La portada ofrece acceso a las dos pantallas |
-| El menú marca la página activa |
-| Desde la portada se llega al ABM y a la encuesta |
-| Una dirección inexistente muestra la pantalla de no encontrado |
+La portada ofrece acceso a las dos pantallas · el menú marca la página activa · desde la portada se
+llega al ABM y a la encuesta · una dirección inexistente muestra la pantalla de no encontrado.
 
-### LocalidadesTests (9 casos) — `[SetUp]` navega a `/localidades`
+### LocalidadesTests (9) — `[SetUp]` navega a `/localidades`
 
 | Caso |
 | --- |
@@ -53,11 +50,11 @@ Tres clases, cada una con su `[SetUp]` de navegación.
 | Al borrar todas las localidades avisa que no hay datos |
 | **Cada prueba trabaja sobre su propio conjunto de datos** |
 
-El último es el que verifica el aislamiento por sesión descrito en
-[03_Sesiones-Y-Persistencia.md](03_Sesiones-Y-Persistencia.md); es la garantía de que el paralelismo
-es correcto y no una casualidad.
+El último verifica el aislamiento por sesión de
+[03_Sesiones-Y-Persistencia.md](03_Sesiones-Y-Persistencia.md): es la garantía de que el paralelismo es
+correcto y no una casualidad.
 
-### EncuestaTests (9 casos) — `[SetUp]` navega a `/encuesta`
+### EncuestaTests (9) — `[SetUp]` navega a `/encuesta`
 
 | Caso |
 | --- |
@@ -66,68 +63,91 @@ es correcto y no una casualidad.
 | No avanza del paso 1 con datos inválidos |
 | No avanza del paso 2 sin medios ni frecuencia |
 | Permite volver atrás conservando lo cargado |
-| La barra de progreso acompaña el avance |
+| El indicador de pasos acompaña el avance |
 | No finaliza con el paso 3 incompleto |
 | Recorre los tres pasos, muestra el resumen y registra la respuesta |
 | «Nueva encuesta» devuelve el asistente al paso 1 |
 
-## La infraestructura de las E2E
+Con el template (2026-09-04) cuatro puntos se adaptaron sin aflojar ninguna verificación:
+`IrPorMenuAsync` ya no despliega un menú, el diálogo se verifica por sus identificadores propios, el
+avance del asistente se verifica sobre el indicador de pasos, y las acciones de fila se buscan en la
+presentación visible — detalle en [04](04_Interfaz-Y-Pantallas.md#identificadores-que-cambiaron).
 
-`tests/MovilidadUrbana.E2ETests/Infraestructura/` — tres archivos que resuelven lo que el binding de
-.NET no trae de fábrica.
+## Movilidad Urbana — la infraestructura
+
+`tests/MovilidadUrbana.E2ETests/Infraestructura/`.
 
 ### ServidorDeLaAplicacion.cs — `[SetUpFixture]`
 
-Reemplaza la sección `webServer` que ofrece el runner de JavaScript. Ciclo:
+Reemplaza la sección `webServer` del runner de JavaScript:
 
-1. **Asegura el navegador** llamando a `Microsoft.Playwright.Program.Main(["install", <navegador>])`
-   —la vía documentada, `pwsh playwright.ps1 install`, exige PowerShell 7—. Instala solo el
-   navegador de la corrida. Se apaga con `INSTALAR_NAVEGADORES=false`.
+1. **Asegura el navegador** con `Microsoft.Playwright.Program.Main(["install", <navegador>])`. Se
+   apaga con `INSTALAR_NAVEGADORES=false`.
 2. Si hay `URL_BASE`, la toma y **no levanta nada**.
 3. Si no, fija `UrlBase = http://127.0.0.1:<PUERTO>` (por defecto **4173**).
-4. **Publica** la aplicación con `dotnet publish -c Release -o publicacion` (salvo
-   `PUBLICAR_ANTES_DE_PROBAR=false`). Lee las dos salidas del proceso en paralelo, porque esperar a
-   una con el búfer de la otra lleno traba el proceso.
-5. **Resuelve el arranque**: usa el apphost nativo si existe —`MovilidadUrbana.Web.exe` en Windows,
-   sin extensión en Linux y macOS— y si no `dotnet MovilidadUrbana.Web.dll`.
-6. Lanza el proceso con `WorkingDirectory` en la carpeta de publicación, `ASPNETCORE_URLS`,
-   `ASPNETCORE_ENVIRONMENT=Production`, la cadena de conexión a `datos-e2e/movilidad.db` y
-   `Logging__LogLevel__Default=Warning`.
-7. **Espera a que Kestrel escuche** por TCP, hasta 90 segundos, abortando si el proceso murió solo.
+4. **Publica** con `dotnet publish -c Release -o publicacion`, salvo `PUBLICAR_ANTES_DE_PROBAR=false`;
+   lee las dos salidas del proceso en paralelo.
+5. Usa el apphost nativo si existe, o `dotnet MovilidadUrbana.Web.dll`.
+6. Lanza el proceso desde la carpeta publicada con `ASPNETCORE_URLS`,
+   `ASPNETCORE_ENVIRONMENT=Production`, la base `datos-e2e/movilidad.db` y logging en `Warning`.
+7. **Espera a que Kestrel escuche** por TCP, hasta 90 segundos.
 8. `[OneTimeTearDown]` mata el árbol de procesos.
 
-`RaizDelRepositorio` se ubica subiendo directorios hasta encontrar un `*.sln`; la usan la
-publicación, la base de datos y las trazas.
-
-El fixture vive en el namespace `MovilidadUrbana.E2ETests` **y no en uno anidado**: un
-`[SetUpFixture]` cubre su propio namespace y los que cuelgan de él, nunca el de arriba.
+Vive en el namespace `MovilidadUrbana.E2ETests` y no en uno anidado: un `[SetUpFixture]` cubre su
+propio namespace y los que cuelgan de él, nunca el de arriba.
 
 ### PruebaE2E.cs — clase base
 
-Hereda de `PageTest`, que da a cada prueba una página nueva en su propio `BrowserContext`. Aporta:
-
 | Miembro | Qué hace |
 | --- | --- |
-| `ContextOptions()` | Fija `BaseURL`, `Locale = es-AR` y `TimezoneId = America/Argentina/Buenos_Aires`. Con `EMULAR_MOVIL=true` parte del descriptor `Pixel 7`, y **falla explícitamente** si Playwright no lo conoce —para que la emulación no caiga en silencio a escritorio— |
-| `[SetUp] EstrenarSesionAsync` | Agrega la cookie `sesion-movilidad` con un `Guid` propio y arranca la traza |
-| `[TearDown] GuardarLaTrazaSiFalloAsync` | Guarda `resultados/trazas/<caso>.zip` solo si el caso falló; si pasó, la descarta |
+| `ContextOptions()` | `BaseURL`, `Locale = es-AR`, `TimezoneId = America/Argentina/Buenos_Aires`. Con `EMULAR_MOVIL=true` parte del descriptor `Pixel 7` y **falla** si Playwright no lo conoce |
+| `[SetUp] EstrenarSesionAsync` | Cookie `sesion-movilidad` con un `Guid` propio, y arranca la traza |
+| `[TearDown] GuardarLaTrazaSiFalloAsync` | Guarda `resultados/trazas/<caso>.zip` solo si el caso falló |
 | `IrAAsync(ruta)` | `GotoAsync` + espera de interactividad |
 | `EsperarInteractivoAsync()` | Espera que `estado-app` tenga `data-interactivo="true"` |
-| `IrPorMenuAsync(testid)` | Despliega el menú si el alternador es visible y después hace clic |
+| `IrPorMenuAsync(testid)` | Hace clic en el enlace de la barra: desde el template no hay menú que desplegar |
 
-La traza se graba **siempre** y se conserva solo en los fallos: sin reintentos no existe el
-`trace: 'on-first-retry'` del runner de JavaScript, y una traza que empieza cuando el caso ya falló
-llega tarde. Cuesta unos 2 segundos sobre los 22 casos de chromium y se apaga con `TRAZAR=false`.
-El `.zip` trae DOM paso a paso, red y consola; se abre con `playwright show-trace <archivo>` o en
-[trace.playwright.dev](https://trace.playwright.dev).
+La traza se graba **siempre** y se conserva solo en los fallos. Cuesta unos 2 segundos sobre los 22
+casos de chromium y se apaga con `TRAZAR=false`.
 
 ### ParalelismoDelEnsamblado.cs
 
-Una sola línea: `[assembly: Parallelizable(ParallelScope.Fixtures)]`. Las clases corren en paralelo
-entre sí; los casos de cada clase, en secuencia. El motivo de no subir a `Children` está en
-[08_Decisiones-Y-Trampas.md](08_Decisiones-Y-Trampas.md).
+`[assembly: Parallelizable(ParallelScope.Fixtures)]`: las clases corren en paralelo entre sí; los
+casos de cada clase, en secuencia. Ver [08](08_Decisiones-Y-Trampas.md).
+
+## Hola Mundo y Login — pruebas sin fixture
+
+Ninguno de los dos proyectos levanta la aplicación ni instala el navegador: prueban por HTTP contra
+una URL escrita en el código. El detalle de las superficies está en [10](10_Hola-Mundo-Y-Login.md).
+
+| Proyecto | Pieza | Qué hace |
+| --- | --- | --- |
+| HolaMundo | `HolaMundoE2ETests` : `PageTest` | `[SetUp]` navega a `http://localhost:5027/HolaMundo` y espera `estado-app`; `[Test] MostrarMensaje` llena la frase, la muestra y afirma `campo-mensaje` |
+| Login | `PruebaDeSuperficie` : `PageTest` (base) | `BaseURL = http://localhost:5181`; credencial `admin`/`admin`; `IngresarAsync()` por la superficie; `EsperarCircuitoAbiertoAsync()` |
+| Login | `LoginE2ETests` (9) | El acceso y el guard — lista abajo |
+| Login | `HolaMundoE2ETest` (1) | Ingresa, abre `/HolaMundo`, espera el circuito y ejercita la superficie protegida |
+
+`LoginE2ETests`:
+
+| Caso |
+| --- |
+| Una credencial admitida abre la superficie de trabajo |
+| Aceptado el ingreso, se vuelve al destino que se había pedido |
+| Un destino externo no se honra: el ingreso no es una redirección abierta |
+| Una credencial rechazada devuelve al acceso con el mensaje del catálogo |
+| El rechazo no dice cuál de los dos campos falló |
+| Lo que falta no se intenta: el navegador retiene el envío incompleto |
+| Sin sesión, la superficie protegida devuelve al acceso conservando el destino |
+| El destino sobrevive al rebote: se entra donde se quería entrar |
+| Cerrar la sesión devuelve al acceso y revoca el paso |
+
+**Quien corre estas pruebas tiene que levantar la aplicación** en la URL que tienen escrita:
+`scripts/pruebas.sh` con `PROYECTO`, los workflows `e2e-holamundo.yml` y `e2e-login.yml`, o a mano
+con el perfil `http` de la aplicación. Cambiar la URL de un lado obliga a cambiarla del otro.
 
 ## pruebas.runsettings
+
+Lo usan los tres proyectos E2E.
 
 | Sección | Valor |
 | --- | --- |
@@ -137,14 +157,13 @@ entre sí; los casos de cada clase, en secuencia. El motivo de no subir a `Child
 | `NUnit/NumberOfTestWorkers` | 4 |
 | `RunConfiguration/ResultsDirectory` | `resultados` |
 
-Es el reemplazo del bloque `projects` de un `playwright.config.js`: en el binding de .NET el
-navegador es una **opción de la corrida**, no un proyecto del archivo de configuración. Se pisa
-desde la línea de comandos con `-- Playwright.BrowserName=firefox`.
-
-`NumberOfTestWorkers` es la **única** declaración del número de workers: el alcance vive en el
-código y el número acá, para que no puedan divergir.
+El navegador es una **opción de la corrida**: se pisa con `-- Playwright.BrowserName=firefox`.
+`NumberOfTestWorkers` es la única declaración del número de workers.
 
 ## Variables de entorno
+
+Las lee **solo la infraestructura de Movilidad Urbana**; las pruebas de Hola Mundo y Login no leen
+ninguna.
 
 | Variable | Efecto | Por defecto |
 | --- | --- | --- |
@@ -162,11 +181,10 @@ código y el número acá, para que no puedan divergir.
 
 ### Desde Visual Studio
 
-Se abre `Lab-E2E.WebBlazor.sln` y el Explorador de pruebas descubre los 22 casos; se ejecutan o
-depuran de a uno, con puntos de interrupción en el C# de la prueba. **No hay ningún paso previo**:
-publicar la aplicación e instalar el navegador son responsabilidad del fixture. La primera corrida
-tarda minutos porque baja el navegador. El navegador se elige en *Test > Configurar archivo de
-configuración de ejecución* apuntando a `pruebas.runsettings`.
+`Lab-E2E.WebBlazor.sln` descubre las pruebas de los cuatro proyectos: 33 casos E2E y 49 unitarios.
+Movilidad Urbana **no tiene paso previo**: publicar e instalar el navegador son responsabilidad del
+fixture. **Hola Mundo y Login sí**: hay que arrancar antes la aplicación con su perfil `http`, y usan
+el navegador que instala la primera corrida de Movilidad Urbana. **No verificado en Windows.**
 
 ### Desde la línea de comandos
 
@@ -174,27 +192,39 @@ configuración de ejecución* apuntando a `pruebas.runsettings`.
 dotnet test tests/MovilidadUrbana.UnitTests
 dotnet test tests/MovilidadUrbana.E2ETests --settings pruebas.runsettings
 dotnet test tests/MovilidadUrbana.E2ETests --settings pruebas.runsettings -- Playwright.BrowserName=firefox
+# Hola Mundo y Login, con la aplicación ya levantada en su URL:
+dotnet test tests/WebBlazor.E2E.Base.Login.E2ETests --settings pruebas.runsettings
 ```
 
 ### Sin nada instalado, con Docker
 
-`scripts/pruebas.sh` corre todo dentro de `mcr.microsoft.com/playwright:v1.62.1-noble` —que ya trae
-las librerías de sistema— y le agrega el SDK de .NET en `.dotnet/` la primera vez. Los navegadores
-quedan en `.navegadores/` y los paquetes en `.nuget/`; las tres carpetas están ignoradas por git.
+`scripts/pruebas.sh` corre dentro de `mcr.microsoft.com/playwright:v1.62.1-noble` y agrega el SDK de
+.NET en `.dotnet/` la primera vez. Los navegadores quedan en `.navegadores/`.
 
 ```bash
-scripts/pruebas.sh                     # chromium
+scripts/pruebas.sh                              # Movilidad Urbana, chromium
 scripts/pruebas.sh firefox
-scripts/pruebas.sh webkit
-EMULAR_MOVIL=true scripts/pruebas.sh   # chromium emulando un Pixel 7
+EMULAR_MOVIL=true scripts/pruebas.sh            # chromium emulando un Pixel 7
 URL_BASE=https://ejemplo.test scripts/pruebas.sh chromium
+PROYECTO=holamundo scripts/pruebas.sh           # levanta Hola Mundo en su URL y prueba
+PROYECTO=login scripts/pruebas.sh firefox
+REPETIR=8 PROYECTO=login scripts/pruebas.sh     # ocho corridas seguidas
 ```
 
 | Script | Para qué |
 | --- | --- |
 | `scripts/dotnet.sh` | Ejecuta el SDK dentro de `mcr.microsoft.com/dotnet/sdk:10.0` |
-| `scripts/publicar.sh` | Publica **autocontenido** para `linux-x64` en `publicacion/`; es el artefacto que usa CI |
-| `scripts/pruebas.sh` | Corre las E2E en la imagen de Playwright |
+| `scripts/publicar.sh` | Publica **autocontenido** para `linux-x64` en `publicacion/` |
+| `scripts/pruebas.sh` | Corre las E2E; con `PROYECTO=holamundo` o `login` levanta la aplicación en la URL que la prueba tiene escrita y la apaga al terminar |
 
-Los tres montan la raíz del repositorio en `/trabajo` y corren con el UID de quien invoca, para no
-dejar archivos de root.
+## Evidencia
+
+`evidencia/2026-09-12-unificacion/`, corrida en la máquina del autor:
+
+| Comprobación | Resultado |
+| --- | --- |
+| `PROYECTO=holamundo`, 3 corridas | 3 de 3 en verde |
+| `PROYECTO=login`, 3 corridas | 3 de 3 en verde |
+| Movilidad Urbana por el camino por defecto del script | 22/22 |
+| Login como lo corre su workflow: binario publicado, Production | 10/10 en chromium y en firefox |
+| Hola Mundo y Login **sin** la aplicación levantada | Fallan: la prueba no pasa en vacío |

@@ -3,7 +3,8 @@
 > **Propósito**: reunir el porqué de las decisiones no obvias y los errores que ya se encontraron y
 > se resolvieron, para no revertirlos por «prolijidad» ni volver a pisarlos.
 > **Fuente primaria**: `README.md` (secciones «Lo que cambia respecto del ejemplo estático», «Los
-> workflows» y «Evidencia») y los comentarios del código citado.
+> workflows» y «Evidencia»), `CHANGELOG.md` y los comentarios del código citado.
+> **Vigencia**: 2026-09-12, commit `7262395`.
 
 ## Decisiones de fondo
 
@@ -118,16 +119,21 @@ queja de la cookie—.
 | Dos peticiones de la misma sesión sembraban a la vez | `try/catch (DbUpdateException)` en `SembradorDeSesion` |
 | Con `EMULAR_MOVIL=true` la emulación podía caer en silencio a escritorio | `ContextOptions()` lanza si Playwright no conoce el descriptor `Pixel 7` |
 | El número de workers estaba declarado en dos lados y podía divergir | Se quitó `[assembly: LevelOfParallelism(3)]`; vive solo en `NumberOfTestWorkers` |
-| Las carpetas de solución de `Guides` apuntaban a rutas inexistentes | Ahora reproducen el árbol del disco |
+| Las carpetas de solución de `Guides` apuntaban a rutas inexistentes | Se reordenaron el 2026-08-30 y se retiraron el 2026-09-09, cuando las guías se mudaron a `Lab-E2E.WebBlazor.Documentacion` |
 | Los artefactos de Actions pierden el bit de ejecución | `chmod +x` antes de arrancar |
 | El resumen de la encuesta variaba con el orden de tipeo | Los medios se guardan en el orden del catálogo |
 | Leer una salida del proceso con el búfer de la otra llena trababa el `dotnet publish` | Se leen ambas en paralelo |
 | `/dev/shm` a 64 MB mata Chromium a media corrida | **Medido**: a esta escala no ocurre. Si apareciera: `--disable-dev-shm-usage` o más `--shm-size` |
+| Hola Mundo y Login probaban por https con un puerto fijo y ningún paso levantaba la aplicación: en su repositorio de origen su workflow tuvo 0 corridas verdes de 4 | URL `http` en los puertos de sus `launchSettings` y un workflow por proyecto que levanta la aplicación antes de probar (2026-09-12) |
+| Dos workflows se llamaban `E2E` y compartían nombre de artefacto | Se retiró el copiado (`e2e_2.yml`); los nuevos tienen nombre y artefacto propios |
 
 ## Límites conocidos
 
 - La ejecución desde el Explorador de pruebas de Visual Studio **no se verificó** (no hay Windows en
-  la máquina del autor).
-- De los workflows **solo se validó la sintaxis YAML**; su comportamiento real no se comprobó.
+  la máquina del autor), incluido el paso previo que necesitan Hola Mundo y Login: arrancar la
+  aplicación con su perfil `http`.
+- Los workflows **sí se observaron corriendo** en GitHub Actions: `e2e.yml` registra corridas
+  programadas y manuales en verde, y el 2026-09-12 `ci.yml`, `e2e-holamundo.yml` y `e2e-login.yml`
+  terminaron en verde sobre `f9f3ca2` — ver [06_CI-Y-Workflows.md](06_CI-Y-Workflows.md).
 - El runner autoalojado no admite jobs con `container:`: es él mismo un contenedor y no tiene montado
   el socket de Docker.

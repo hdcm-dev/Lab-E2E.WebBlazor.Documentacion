@@ -3,12 +3,16 @@
 > **Propósito**: explicar cómo se reparte la aplicación en capas, qué depende de qué y dónde se
 > compone todo, para poder ubicar cualquier archivo sin recorrer el árbol.
 > **Fuente primaria**: `src/MovilidadUrbana.Web/` y `src/MovilidadUrbana.Web/Program.cs`.
+> **Vigencia**: 2026-09-12, commit `7262395`.
 
 ## Un proyecto, cuatro capas
 
 `MovilidadUrbana.Web` es **un único proyecto** con las capas de Clean Architecture separadas en
 carpetas. Las dependencias apuntan siempre hacia adentro: ninguna capa interior conoce a las que la
 rodean.
+
+Este índice es solo de Movilidad Urbana. Las otras dos aplicaciones de la solución —Hola Mundo y
+Login— no tienen capas: están en [10_Hola-Mundo-Y-Login.md](10_Hola-Mundo-Y-Login.md).
 
 ```mermaid
 graph LR
@@ -26,7 +30,7 @@ graph LR
 | Dominio | `Dominio/` | nada | `Entidades/`, `Reglas/`, `Catalogos.cs` |
 | Aplicación | `Aplicacion/` | Dominio | `Abstracciones/`, `Localidades/`, `Encuestas/`, `Resultado.cs` |
 | Infraestructura | `Infraestructura/` | Aplicación, Dominio | `Persistencia/`, `Sesiones/` |
-| Presentación | `Components/` | Aplicación | `App.razor`, `Routes.razor`, `Layout/`, `Pages/` |
+| Presentación | `Components/`, `Servicios/`, `Theme/` | Aplicación | `App.razor`, `Routes.razor`, `Layout/`, `Pages/` y `Componentes/` —un componente por patrón del template—; `Servicios/` de interfaz (diálogos, foco, identidad de versión); `Theme/` (íconos) |
 | Composición | `Program.cs` | todas | Es el **único** lugar que conoce todas las capas |
 
 La inversión de dependencia está en `Aplicacion/Abstracciones/`: las tres interfaces
@@ -45,6 +49,7 @@ Fuente: `src/MovilidadUrbana.Web/Program.cs`.
 | Sesión | `ContextoDeSesion` scoped, expuesto también como `IContextoDeSesion` | La misma instancia sirve a la implementación concreta y a la abstracción |
 | Repositorios | `RepositorioDeLocalidades`, `RepositorioDeEncuestas`, `SembradorDeSesion` — todos scoped | |
 | Casos de uso | `ServicioDeLocalidades`, `ServicioDeEncuestas` — scoped | |
+| Presentación | `IIdentidadDeVersion` singleton; `IServicioDeDialogos` y `IServicioDeFoco` scoped | Sumado con el template (2026-09-04): la versión se resuelve una sola vez en el host, y diálogos y foco son estado de interfaz del circuito |
 | Arranque | `PreparadorDeBaseDeDatos.Preparar(app.Services)` | Crea el archivo y el esquema antes de atender la primera petición |
 | Pipeline | `UseExceptionHandler("/Error")` fuera de Development · `UseStatusCodePagesWithReExecute("/no-encontrado")` · `UseMiddleware<MiddlewareDeSesion>()` · `UseAntiforgery()` · `MapStaticAssets()` · `MapRazorComponents<App>().AddInteractiveServerRenderMode()` | El middleware de sesión va **antes** de antiforgery y del mapeo de componentes |
 
@@ -68,7 +73,9 @@ para que `NavigateTo` durante el render estático no se manifieste como excepci�
 | El acceso a datos | `Infraestructura/Persistencia/` |
 | La cookie de sesión y su middleware | `Infraestructura/Sesiones/` |
 | Una pantalla | `Components/Pages/` |
-| El menú, el testigo de interactividad, el pie | `Components/Layout/MainLayout.razor` |
+| El shell: barra lateral, `#mq-main`, sello, host de diálogos, aviso de reconexión y testigo de interactividad | `Components/Layout/MainLayout.razor` |
+| Un patrón visual del catálogo (grilla, campo, asistente, diálogo, banda…) | `Components/Componentes/` — ver [11](11_Template-Y-Superficies.md) |
+| El requisito que un campo muestra antes del intento | `Aplicacion/*/Politica*.cs`, derivado de las constantes de `Dominio/Reglas/` |
 
 ## Resultado — el contrato entre caso de uso y pantalla
 

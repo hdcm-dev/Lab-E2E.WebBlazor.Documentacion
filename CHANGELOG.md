@@ -24,10 +24,23 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   `Del-Requerimiento-Al-Caso.md` §10.3 aclara que ese laboratorio reúne ahora las superficies de los
   dos. La verificación que cita, del 2026-09-09, no se rehízo.
 
-### Pendiente
+### Quitado
 
-- `README.md` —líneas 16 y 66—, `ia-db/Base/` e `ia-db/Root/` siguen describiendo dos laboratorios.
-  Quedan para `PROMPTs/Indexado/Actualizar-Indexado.md`.
+- **`ia-db/Base/`** — el workspace de `Lab-E2E.WebBlazor.Base`, que se retira. Su conocimiento
+  vigente pasa a `ia-db/Root/`, en dos índices nuevos: `10_Hola-Mundo-Y-Login.md` y
+  `11_Template-Y-Superficies.md`. Lo que describía un estado que ya no existe —el proyecto de
+  pruebas del login que no compilaba, el `estado-app` ausente, el workflow copiado— no se traslada.
+
+### Cambiado
+
+- **`ia-db/Root/` pasa a versión 1.2** (vigencia 2026-09-12, commit `7262395`), por
+  `Actualizar-Indexado.md`. Se rehacen `00`, `04`, `05`, `06` y `07` —desactualizados desde el
+  template del 2026-09-04, la mudanza de las guías del 2026-09-09 y la unificación— y se corrigen en
+  puntos `01`, `02`, `08` y `09`; `03` no tenía cambios. El manifiesto y la tabla de navegación
+  cubren ahora tres aplicaciones, siete proyectos y cinco workflows, con lo observado corriendo en
+  GitHub Actions.
+- **`README.md`** — un solo workspace de ia-db, `PROMPTs/` con su árbol actual (`Inicio/`,
+  `Features/`, `Fixs/`) y sin referencias a dos laboratorios.
 
 ## [Sin publicar] - 2026-09-09
 
