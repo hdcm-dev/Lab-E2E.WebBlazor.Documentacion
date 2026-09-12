@@ -61,7 +61,7 @@ Lab-E2E.WebBlazor/
 ├── tests/
 │   ├── MovilidadUrbana.E2ETests/                22 casos + fixture que levanta la aplicación
 │   ├── MovilidadUrbana.UnitTests/               49 casos sobre las reglas de dominio
-│   ├── MovilidadUrbana.ApiWeb.Tests/            11 casos sobre la API, en proceso
+│   ├── MovilidadUrbana.ApiWeb.Tests/            13 casos sobre la API, en proceso
 │   ├── WebBlazor.HolaMundo.E2ETests/   1 caso, sin fixture
 │   └── WebBlazor.Login.E2ETests/       10 casos, sin fixture
 ├── scripts/                      dotnet.sh, publicar.sh, pruebas.sh (todo por contenedor)
