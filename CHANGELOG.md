@@ -4,6 +4,31 @@ Todos los cambios relevantes de este repositorio de documentación se registran 
 
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [Sin publicar] - 2026-09-12
+
+### Cambiado
+
+- **Las guías apuntan a `Lab-E2E.WebBlazor`, que absorbió a `Lab-E2E.WebBlazor.Base`.** Los dos
+  proyectos web —Hola Mundo y Login— y sus pruebas se mudaron a `Lab-E2E.WebBlazor`, y
+  `Lab-E2E.WebBlazor.Base` va a retirarse. Se reescriben los 23 enlaces y la cita `[E: …]` que
+  apuntaban a su `src/`, más el enlace a la evidencia del testigo de hidratación, que se rescató en
+  `Lab-E2E.WebBlazor/evidencia/`. Las rutas internas no cambiaron y los archivos llegaron idénticos
+  byte a byte, así que los rangos de línea citados siguen valiendo.
+- **Las pruebas de Hola Mundo y Login pasan de https a http**, en `http://localhost:5027` y
+  `http://localhost:5181` —los perfiles `http` de sus `launchSettings`—. Con http no hace falta
+  confiar un certificado de desarrollo. El código que muestran `Caso-HolaMundo-Page.md` §5 y
+  `Quick-Guide-Primer-Proyecto.md` se actualiza igual que el archivo real.
+- **`scripts/pruebas.sh` elige el proyecto con `PROYECTO`**, y los dos casos de diseño muestran la
+  sintaxis nueva: `PROYECTO=holamundo scripts/pruebas.sh`.
+- `Quick-Guide-Primer-Proyecto.md` muestra el árbol de `Lab-E2E.WebBlazor`, y
+  `Del-Requerimiento-Al-Caso.md` §10.3 aclara que ese laboratorio reúne ahora las superficies de los
+  dos. La verificación que cita, del 2026-09-09, no se rehízo.
+
+### Pendiente
+
+- `README.md` —líneas 16 y 66—, `ia-db/Base/` e `ia-db/Root/` siguen describiendo dos laboratorios.
+  Quedan para `PROMPTs/Indexado/Actualizar-Indexado.md`.
+
 ## [Sin publicar] - 2026-09-09
 
 ### Añadido

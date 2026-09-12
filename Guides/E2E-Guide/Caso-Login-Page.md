@@ -4,7 +4,8 @@
 > **Para quién** — Ídem, con postura de seguridad.
 > **Qué deja** — La promesa negativa y por qué se verifica comparando dos observaciones en vez de mirar una, y por qué una superficie SSR no necesita testigo de hidratación.
 
-**Superficie:** `Components/Paginas/Identidad/Ingreso.razor`
+**Repositorio:** `Lab-E2E.WebBlazor`
+**Superficie:** `src/WebBlazor.E2E.Base.Login/Components/Paginas/Identidad/Ingreso.razor`
 **Pruebas:** `tests/WebBlazor.E2E.Base.Login.E2ETests/LoginE2ETests.cs`
 **Base común:** `tests/WebBlazor.E2E.Base.Login.E2ETests/PruebaDeSuperficie.cs`
 **Qué tipo de superficie es:** SSR estático (**sin** `@rendermode`)
@@ -136,9 +137,9 @@ Dónde aparece esa segunda promesa, hecha código:
 
 | Pieza | Cómo la sostiene |
 | --- | --- |
-| [`ServicioDeIdentidad.cs`](../../../Lab-E2E.WebBlazor.Base/src/WebBlazor.E2E.Base.Login/Servicios/ServicioDeIdentidad.cs) | Un solo desenlace de rechazo, para todas las formas de fallar |
-| [`CatalogoDeResultados.cs`](../../../Lab-E2E.WebBlazor.Base/src/WebBlazor.E2E.Base.Login/Servicios/CatalogoDeResultados.cs) | Un código sin entrada cae en el mensaje genérico, **nunca en el código crudo ni en la traza** |
-| [`IdentidadEndpoints.cs`](../../../Lab-E2E.WebBlazor.Base/src/WebBlazor.E2E.Base.Login/Endpoints/IdentidadEndpoints.cs) | Solo se admiten rutas locales: un destino externo sería una redirección abierta |
+| [`ServicioDeIdentidad.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.Login/Servicios/ServicioDeIdentidad.cs) | Un solo desenlace de rechazo, para todas las formas de fallar |
+| [`CatalogoDeResultados.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.Login/Servicios/CatalogoDeResultados.cs) | Un código sin entrada cae en el mensaje genérico, **nunca en el código crudo ni en la traza** |
+| [`IdentidadEndpoints.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.Login/Endpoints/IdentidadEndpoints.cs) | Solo se admiten rutas locales: un destino externo sería una redirección abierta |
 
 Las tres son la misma promesa, sostenida en tres lugares distintos.
 
@@ -441,8 +442,8 @@ herramientas, o no se verifica porque no existe.
 ## 8. Cómo se corren
 
 ```bash
-scripts/pruebas.sh login
-REPETIR=8 scripts/pruebas.sh login
+PROYECTO=login scripts/pruebas.sh
+REPETIR=8 PROYECTO=login scripts/pruebas.sh
 ```
 
 ---

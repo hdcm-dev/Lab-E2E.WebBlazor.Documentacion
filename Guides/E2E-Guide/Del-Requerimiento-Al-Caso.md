@@ -635,15 +635,15 @@ Las filas de [§5](#5-qué-recurso-representa-el-acto) y [§6](#6-qué-promesas-
 
 | Recurso | ¿Existe en un laboratorio? | Dónde |
 | --- | --- | --- |
-| **Formulario simple** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor.Base/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor]** y la superficie de ingreso |
+| **Formulario simple** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor]** y la superficie de ingreso |
 | **Asistente** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Pages/Encuesta.razor]** |
 | **Listado + ficha (ABM)** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Pages/Localidades.razor]** |
 | **Modal** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Servicios/ServicioDeDialogos.cs]**, con los dos casos de baja de `LocalidadesTests.cs` |
 
 ## 10.3. Los tres recursos que **ningún** laboratorio tiene
 
-**Pestañas**, **maestro-detalle** y **página de llegada** no existen en `Lab-E2E.WebBlazor` ni en
-`Lab-E2E.WebBlazor.Base`. Verificado el 2026-09-09 recorriendo las trece superficies de los dos
+**Pestañas**, **maestro-detalle** y **página de llegada** no existen en `Lab-E2E.WebBlazor`, que desde el
+2026-09-12 reúne también las superficies del antiguo `Lab-E2E.WebBlazor.Base`. Verificado el 2026-09-09 recorriendo las trece superficies de los dos
 laboratorios y las cinco clases de prueba. **[V]**
 
 Sus filas en §5 y §6 son **razonamiento por analogía a partir de los cuatro que sí existen**, no

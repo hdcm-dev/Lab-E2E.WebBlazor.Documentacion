@@ -42,15 +42,17 @@ O desde el asistente de creación de proyecto de Visual Studio, seleccionando el
 
 ### Estructura del proyecto
 
-En la carpeta test se alojan todos los proyectos de prueba, y en la carpeta src se alojan todos los proyectos de código fuente. La estructura del proyecto es la siguiente:
+En la carpeta test se alojan todos los proyectos de prueba, y en la carpeta src se alojan todos los proyectos de código fuente. La estructura del proyecto es la siguiente —solo se muestra lo que usa este ejemplo; el repositorio
+tiene además `MovilidadUrbana.Web` y `WebBlazor.E2E.Base.Login`, cada uno con su proyecto de pruebas—:
 
 ```
-Lab-E2E.WebBlazor.Base
+Lab-E2E.WebBlazor
 │   
-│   Ejemplos.WebBlazor.E2E.Base.slnx
+│   Lab-E2E.WebBlazor.sln
 │
 ├───.github
 │   └───workflows
+│           e2e-holamundo.yml
 │
 ├───src
 │   └───WebBlazor.E2E.Base.HolaMundo
@@ -145,7 +147,7 @@ public class HolaMundoE2ETests: PageTest
     [SetUp]
     public async Task Setup()
     {
-        await Page.GotoAsync("https://localhost:7071/HolaMundo");
+        await Page.GotoAsync("http://localhost:5027/HolaMundo");
     }
 
     [Test]

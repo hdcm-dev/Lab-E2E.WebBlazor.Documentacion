@@ -241,11 +241,11 @@ diseñador es contemplarlos todos y decidir cómo la pantalla se mueve entre ell
 
 **Qué se le cambió acá.** Tres cosas, y las tres apuntan a la verificabilidad:
 
-1. **Son un `enum` compartido, no una guía de estilo.** [`EstadoDeSuperficie.cs`](../../../Lab-E2E.WebBlazor.Base/src/WebBlazor.E2E.Base.HolaMundo/Theme/EstadoDeSuperficie.cs)
+1. **Son un `enum` compartido, no una guía de estilo.** [`EstadoDeSuperficie.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Theme/EstadoDeSuperficie.cs)
    tiene diez estados con nombre, y cada superficie **elige de esa lista** en vez de
    inventar los suyos.
 2. **Son excluyentes por construcción.** El `@if / else if / else` de
-   [`HolaMundo.razor` 87–110](../../../Lab-E2E.WebBlazor.Base/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L87-L110)
+   [`HolaMundo.razor` 87–110](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L87-L110)
    es el marco que los ordena.
 3. **La ausencia se declara.** Que `Indisponible` no aplique se escribe **en el marcado**,
    con su motivo.
