@@ -5,8 +5,8 @@
 > **Qué deja** — Las definiciones de superficie y de estado, las cinco preguntas que validan la frase de una promesa, y por qué una superficie interactiva necesita un testigo de hidratación.
 
 **Repositorio:** `Lab-E2E.WebBlazor`
-**Superficie:** `src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor`
-**Prueba:** `tests/WebBlazor.E2E.Base.HolaMundo.E2ETests/HolaMundoE2ETests.cs`
+**Superficie:** `src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor`
+**Prueba:** `tests/WebBlazor.HolaMundo.E2ETests/HolaMundoE2ETests.cs`
 **Qué tipo de superficie es:** interactiva (`@rendermode InteractiveServer`)
 
 Este documento no explica *cómo se escribe* una prueba con Playwright —eso está en
@@ -51,20 +51,20 @@ pieza de implementación, y una superficie es una promesa hecha a alguien.
 
 La definición es abstracta a propósito, pero **tiene una correspondencia física exacta**
 en el archivo. Estas son las tres partes en
-[`HolaMundo.razor`](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor):
+[`HolaMundo.razor`](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor):
 
 | La definición dice | En el archivo es | Líneas |
 | --- | --- | --- |
-| **lo que la persona ve** | El encabezado: el título y la bajada que enuncia de qué se trata | [19–24](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L19-L24) |
-| **lo que puede hacer** | El formulario: un campo, su requisito declarado antes del intento, y un botón | [38–81](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L38-L81) |
-| **en qué estados puede quedar** | El bloque de estados: *enviando*, *con datos*, *vacío* | [87–110](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L87-L110) |
-| | …y el cuarto, que va aparte porque interrumpe: *error de entrada* | [29–36](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L29-L36) |
+| **lo que la persona ve** | El encabezado: el título y la bajada que enuncia de qué se trata | [19–24](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L19-L24) |
+| **lo que puede hacer** | El formulario: un campo, su requisito declarado antes del intento, y un botón | [38–81](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L38-L81) |
+| **en qué estados puede quedar** | El bloque de estados: *enviando*, *con datos*, *vacío* | [87–110](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L87-L110) |
+| | …y el cuarto, que va aparte porque interrumpe: *error de entrada* | [29–36](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L29-L36) |
 
 Fijate en el tercer renglón: **los estados no están dispersos, están juntos y son
 excluyentes**. Ese `@if / else if / else` es la definición hecha código —«en qué estados
 puede quedar»— y por eso se puede leer los tres de un vistazo.
 
-Y fijate en el comentario de la línea [83–85](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L83-L85):
+Y fijate en el comentario de la línea [83–85](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L83-L85):
 
 > *«La superficie tiene tres estados de presentación, y cada uno es un bloque. El estado
 > `Indisponible` no aplica: la frase no viaja a ningún servicio externo, así que no hay
@@ -79,9 +79,9 @@ olvido — el mismo criterio de la §6, aplicado al marcado en vez de a la prueb
 
 | No es superficie | Qué es | Dónde se ve |
 | --- | --- | --- |
-| `Banda`, `EstadoVacio`, `Esqueleto`, `Icono` | **Componentes**: piezas reutilizables. Aparecen en muchas superficies y ninguno promete nada por sí solo | [33](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L33), [90](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L90), [107](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L107) |
+| `Banda`, `EstadoVacio`, `Esqueleto`, `Icono` | **Componentes**: piezas reutilizables. Aparecen en muchas superficies y ninguno promete nada por sí solo | [33](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L33), [90](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L90), [107](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L107) |
 | `MainLayout`, `BarraLateral` | **Chrome**: el marco de navegación. Está presente, pero no es lo que la pantalla promete | fuera del archivo |
-| `@page "/HolaMundo"` | **Una ruta**: dónde vive. Casi siempre hay una por superficie, pero es una coincidencia frecuente, no una regla | [1](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L1) |
+| `@page "/HolaMundo"` | **Una ruta**: dónde vive. Casi siempre hay una por superficie, pero es una coincidencia frecuente, no una regla | [1](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L1) |
 
 La última fila importa más de lo que parece, y es la que responde a «parto de una
 pantalla, ¿es una página?»:
@@ -139,7 +139,7 @@ una prueba»:
    desde el lado de la persona, que es justo lo que la Pregunta 1 pide.
 2. **De los flujos alternos del caso de uso** salen los casos que nadie escribe. «¿Qué
    pasa si el dato no cumple?» es un flujo alterno, y es exactamente el `ErrorDeEntrada`
-   de la línea [29](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L29).
+   de la línea [29](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L29).
 3. **De la maqueta** sale una advertencia, no un caso: **la maqueta suele dibujar un solo
    estado**, el feliz. Si la lista de estados de la superficie sale de la maqueta, van a
    faltar el vacío, el de carga y el de error — que son los tres que más se rompen.
@@ -183,19 +183,19 @@ Esa intuición —**la superficie como marco estructurado donde se ordenan las
 representaciones**— no es una metáfora: en este proyecto está hecha código, en dos
 piezas.
 
-**El vocabulario**, en [`EstadoDeSuperficie.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Theme/EstadoDeSuperficie.cs): diez estados con nombre, comunes
+**El vocabulario**, en [`EstadoDeSuperficie.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Theme/EstadoDeSuperficie.cs): diez estados con nombre, comunes
 a todas las superficies del proyecto. No los inventa cada pantalla; cada pantalla
 **elige de esa lista**.
 
-**El marco**, en [`HolaMundo.razor` 87–110](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L87-L110): un `@if / else if / else` con
+**El marco**, en [`HolaMundo.razor` 87–110](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L87-L110): un `@if / else if / else` con
 un bloque por estado. Excluyentes por construcción, y legibles los tres de un vistazo.
 
 | Estado | Qué se muestra | Línea |
 | --- | --- | --- |
-| `Enviando` | Un esqueleto | [90](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L90) |
-| `ConDatos` | La tarjeta con la frase | [94–103](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L94-L103) |
-| `Vacio` | El estado vacío, con qué hacer para salir de él | [107–108](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L107-L108) |
-| `ErrorDeEntrada` | Una banda, **fuera del marco** porque interrumpe | [29–36](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor#L29-L36) |
+| `Enviando` | Un esqueleto | [90](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L90) |
+| `ConDatos` | La tarjeta con la frase | [94–103](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L94-L103) |
+| `Vacio` | El estado vacío, con qué hacer para salir de él | [107–108](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L107-L108) |
+| `ErrorDeEntrada` | Una banda, **fuera del marco** porque interrumpe | [29–36](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L29-L36) |
 
 La última fila muestra el límite de la regla: un estado que **interrumpe** en vez de
 ocupar el lugar del contenido va en su propio bloque, arriba. El marco ordena los
@@ -203,7 +203,7 @@ estados del contenido, no todos los estados del mundo.
 
 #### Por qué los estados no son cosméticos
 
-El `<remarks>` de [`EstadoDeSuperficie.cs` 9–12](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Theme/EstadoDeSuperficie.cs#L9-L12) lo dice mejor que
+El `<remarks>` de [`EstadoDeSuperficie.cs` 9–12](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Theme/EstadoDeSuperficie.cs#L9-L12) lo dice mejor que
 cualquier explicación:
 
 > *«`FiltradoSinResultados` es un estado DISTINTO de `Vacio`: en el primero hay datos y

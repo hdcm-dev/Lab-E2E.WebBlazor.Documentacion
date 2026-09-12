@@ -5,9 +5,9 @@
 > **Qué deja** — La promesa negativa y por qué se verifica comparando dos observaciones en vez de mirar una, y por qué una superficie SSR no necesita testigo de hidratación.
 
 **Repositorio:** `Lab-E2E.WebBlazor`
-**Superficie:** `src/WebBlazor.E2E.Base.Login/Components/Paginas/Identidad/Ingreso.razor`
-**Pruebas:** `tests/WebBlazor.E2E.Base.Login.E2ETests/LoginE2ETests.cs`
-**Base común:** `tests/WebBlazor.E2E.Base.Login.E2ETests/PruebaDeSuperficie.cs`
+**Superficie:** `src/WebBlazor.Login/Components/Paginas/Identidad/Ingreso.razor`
+**Pruebas:** `tests/WebBlazor.Login.E2ETests/LoginE2ETests.cs`
+**Base común:** `tests/WebBlazor.Login.E2ETests/PruebaDeSuperficie.cs`
 **Qué tipo de superficie es:** SSR estático (**sin** `@rendermode`)
 
 ## Índice
@@ -137,9 +137,9 @@ Dónde aparece esa segunda promesa, hecha código:
 
 | Pieza | Cómo la sostiene |
 | --- | --- |
-| [`ServicioDeIdentidad.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.Login/Servicios/ServicioDeIdentidad.cs) | Un solo desenlace de rechazo, para todas las formas de fallar |
-| [`CatalogoDeResultados.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.Login/Servicios/CatalogoDeResultados.cs) | Un código sin entrada cae en el mensaje genérico, **nunca en el código crudo ni en la traza** |
-| [`IdentidadEndpoints.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.Login/Endpoints/IdentidadEndpoints.cs) | Solo se admiten rutas locales: un destino externo sería una redirección abierta |
+| [`ServicioDeIdentidad.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.Login/Servicios/ServicioDeIdentidad.cs) | Un solo desenlace de rechazo, para todas las formas de fallar |
+| [`CatalogoDeResultados.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.Login/Servicios/CatalogoDeResultados.cs) | Un código sin entrada cae en el mensaje genérico, **nunca en el código crudo ni en la traza** |
+| [`IdentidadEndpoints.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.Login/Endpoints/IdentidadEndpoints.cs) | Solo se admiten rutas locales: un destino externo sería una redirección abierta |
 
 Las tres son la misma promesa, sostenida en tres lugares distintos.
 

@@ -8,6 +8,12 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ### Cambiado
 
+- **Los proyectos de Hola Mundo y Login pierden el prefijo `E2E.Base`** en las guías y en la ia-db,
+  siguiendo el renombre en `Lab-E2E.WebBlazor`: `WebBlazor.HolaMundo`, `WebBlazor.Login` y sus
+  proyectos de prueba. Los 196 enlaces relativos de `Guides/` y los 57 de `ia-db/` siguen resolviendo.
+- **`ia-db/Root/` pasa a ser `ia-db/`**: con un solo repositorio indexado, la subcarpeta por
+  repositorio ya no tiene sentido.
+
 - **Las guías apuntan a `Lab-E2E.WebBlazor`, que absorbió a `Lab-E2E.WebBlazor.Base`.** Los dos
   proyectos web —Hola Mundo y Login— y sus pruebas se mudaron a `Lab-E2E.WebBlazor`, y
   `Lab-E2E.WebBlazor.Base` va a retirarse. Se reescriben los 23 enlaces y la cita `[E: …]` que

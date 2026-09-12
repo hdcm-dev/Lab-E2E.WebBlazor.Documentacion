@@ -5,7 +5,7 @@
 > **Qué deja** — Los tokens, los componentes propios uno por patrón, el vocabulario de estados y las desviaciones declaradas.
 
 **Fecha:** 2026-09-01
-**Alcance:** `src/WebBlazor.E2E.Base.HolaMundo` y `src/WebBlazor.E2E.Base.Login`
+**Alcance:** `src/WebBlazor.HolaMundo` y `src/WebBlazor.Login`
 **Bases de conocimiento aplicadas:**
 
 | Documento | Qué aporta |
@@ -140,7 +140,7 @@ leyendo los dos lados y mirando las capturas de `evidencia/2026-09-01-aplicacion
 | UI de reconexión estilizada y anunciada en región activa | cumple | `ReconnectModal.razor` |
 | El guard existe en las tres capas y ninguna expone el motivo | cumple | `Routes.razor`, `Inicio`/`HolaMundo`, endpoints |
 
-**Pendiente declarado.** `tests/WebBlazor.E2E.Base.Login.E2ETests` sigue sin casos: el
+**Pendiente declarado.** `tests/WebBlazor.Login.E2ETests` sigue sin casos: el
 recorrido de ingreso, rechazo y cierre de sesión hoy está cubierto por el guion de
 `evidencia/`, no por la batería. Escribirlo excede el alcance de esta aplicación.
 
@@ -155,10 +155,10 @@ del directorio de evidencia:
 docker network create labe2e
 docker run -d --name app-holamundo --network labe2e -v "$PWD":/w -w /w \
   -e ASPNETCORE_ENVIRONMENT=Development mcr.microsoft.com/dotnet/sdk:10.0 \
-  dotnet run --project src/WebBlazor.E2E.Base.HolaMundo/WebBlazor.E2E.Base.HolaMundo.csproj --urls http://0.0.0.0:8080
+  dotnet run --project src/WebBlazor.HolaMundo/WebBlazor.HolaMundo.csproj --urls http://0.0.0.0:8080
 docker run -d --name app-login --network labe2e -v "$PWD":/w -w /w \
   -e ASPNETCORE_ENVIRONMENT=Development mcr.microsoft.com/dotnet/sdk:10.0 \
-  dotnet run --project src/WebBlazor.E2E.Base.Login/WebBlazor.E2E.Base.Login.csproj --urls http://0.0.0.0:8080
+  dotnet run --project src/WebBlazor.Login/WebBlazor.Login.csproj --urls http://0.0.0.0:8080
 
 docker run --rm --network labe2e \
   -v "$PWD/evidencia/2026-09-01-aplicacion-template":/e2e -v "$PWD/salida":/salida -w /e2e \

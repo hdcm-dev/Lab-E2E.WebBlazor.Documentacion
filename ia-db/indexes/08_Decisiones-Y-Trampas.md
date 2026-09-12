@@ -2,9 +2,10 @@
 
 > **Propósito**: reunir el porqué de las decisiones no obvias y los errores que ya se encontraron y
 > se resolvieron, para no revertirlos por «prolijidad» ni volver a pisarlos.
-> **Fuente primaria**: `README.md` (secciones «Lo que cambia respecto del ejemplo estático», «Los
-> workflows» y «Evidencia»), `CHANGELOG.md` y los comentarios del código citado.
-> **Vigencia**: 2026-09-12, commit `7262395`.
+> **Fuente primaria**: `README.md` (secciones «Por qué las pruebas E2E son un proyecto de la
+> solución», «Lo que cambia respecto del ejemplo estático», «Los workflows» y «Evidencia»),
+> `CHANGELOG.md` y los comentarios del código citado.
+> **Vigencia**: 2026-09-12, commit `06528d3`.
 
 ## Decisiones de fondo
 
@@ -22,6 +23,13 @@ configuración es un TRX y el paralelismo lo maneja NUnit.
 
 La alternativa —dejar las E2E fuera de la solución, en una carpeta `e2e/` con specs de TypeScript—
 es la que eligió `dotnet/eShop`. **Las dos son defendibles**; esta prioriza el IDE.
+
+### Tres aplicaciones de complejidad creciente, cada una con su forma
+
+Hola Mundo y Login no tienen fixture, prueban contra una URL fija y tienen cada una su workflow, con
+menos piezas que el de Movilidad Urbana. **No es una deuda**: es la escalera didáctica que declara
+el `README.md` («para que la temática se pueda estudiar de a un escalón»). Uniformarlas destruiría
+el escalón.
 
 ### Publicar e instalar navegadores en el fixture, no en el build
 
@@ -42,6 +50,14 @@ mismo instalador como API, y se instala solo el navegador de la corrida.
 El laboratorio no versiona el esquema, y así el binario publicado arranca en cualquier máquina sin
 pasos previos. No es una omisión: es lo apropiado para el alcance.
 
+### La política de validación vive en el dominio, no en la vista
+
+`EditForm` sin `DataAnnotationsValidator` en Movilidad Urbana: anotar el modelo de pantalla sería
+«transcribir la política de validación en la vista». Lo que la regla del template protege —error por
+campo asociado por `aria-describedby` y requisito visible antes del intento— se conserva por otra
+vía (`Politica*.cs`). Hola Mundo, que no tiene dominio, sí usa anotaciones. Ver
+[11](11_Template-Y-Superficies.md).
+
 ## Las seis diferencias con el ejemplo estático
 
 Lo que sigue es lo que **aparece recién cuando la aplicación tiene servidor**. Las decisiones de
@@ -56,7 +72,8 @@ que llegue antes de la conexión se pierde sin dejar rastro, y el síntoma es un
 manera intermitente y solo en las máquinas cargadas.
 
 `MainLayout.razor` publica un testigo con `RendererInfo.IsInteractive`; `EsperarInteractivoAsync` de
-`PruebaE2E.cs` lo espera antes de tocar nada.
+`PruebaE2E.cs` lo espera antes de tocar nada. En Hola Mundo el mismo testigo cerró una intermitencia
+de 1 en 8 — evidencia en `evidencia/2026-09-03-testigo-de-hidratacion/`.
 
 ### 2. El estado es del servidor, así que hay que aislarlo
 
@@ -86,14 +103,16 @@ carpeta de la publicación.
 
 En la versión estática hubo que corregir dos defectos alrededor del modal de Bootstrap: el clic que
 llegaba durante la animación de apertura y el orden del manejador de `data-bs-dismiss`. Acá el
-diálogo es marcado propio gobernado por el estado del componente, así que esa clase de carrera no
-existe y **no hace falta desactivar las animaciones**.
+diálogo es el `<dialog>` nativo, abierto y cerrado por `ServicioDeDialogos` con la interoperabilidad
+mínima de `mq-dialogo.js`: el confinamiento de foco y el cierre por Escape los trae el navegador, no
+hay animación de apertura que esperar y esa clase de carrera no existe.
 
 ### 5. El enlace de datos tiene que escuchar el evento correcto
 
 `FillAsync` dispara `input`, no `change`. Con el `@bind` por defecto —que escucha `onchange`— el
 valor no llega al servidor hasta que el campo pierde el foco, y la validación rechaza un formulario
-que en pantalla se ve completo. Los campos usan `@bind:event="oninput"`.
+que en pantalla se ve completo. Los campos usan `@bind:event="oninput"` o `@oninput` directo — la
+tabla exacta está en [04](04_Interfaz-Y-Pantallas.md).
 
 ### 6. Con el binding de .NET, el paralelismo llega hasta la clase
 
@@ -119,21 +138,24 @@ queja de la cookie—.
 | Dos peticiones de la misma sesión sembraban a la vez | `try/catch (DbUpdateException)` en `SembradorDeSesion` |
 | Con `EMULAR_MOVIL=true` la emulación podía caer en silencio a escritorio | `ContextOptions()` lanza si Playwright no conoce el descriptor `Pixel 7` |
 | El número de workers estaba declarado en dos lados y podía divergir | Se quitó `[assembly: LevelOfParallelism(3)]`; vive solo en `NumberOfTestWorkers` |
-| Las carpetas de solución de `Guides` apuntaban a rutas inexistentes | Se reordenaron el 2026-08-30 y se retiraron el 2026-09-09, cuando las guías se mudaron a `Lab-E2E.WebBlazor.Documentacion` |
+| Las carpetas de solución de `Guides` apuntaban a rutas inexistentes | Se reordenaron el 2026-08-30, se pusieron al día el 2026-09-03 y se retiraron el 2026-09-09, cuando las guías se mudaron a `Lab-E2E.WebBlazor.Documentacion` |
 | Los artefactos de Actions pierden el bit de ejecución | `chmod +x` antes de arrancar |
 | El resumen de la encuesta variaba con el orden de tipeo | Los medios se guardan en el orden del catálogo |
 | Leer una salida del proceso con el búfer de la otra llena trababa el `dotnet publish` | Se leen ambas en paralelo |
 | `/dev/shm` a 64 MB mata Chromium a media corrida | **Medido**: a esta escala no ocurre. Si apareciera: `--disable-dev-shm-usage` o más `--shm-size` |
+| `fs.inotify.max_user_instances` agotado en la máquina del autor: la aplicación moría con código 134 al construir su configuración | No es del laboratorio: correr con `DOTNET_USE_POLLING_FILE_WATCHER=1` (`README.md` §Evidencia) |
 | Hola Mundo y Login probaban por https con un puerto fijo y ningún paso levantaba la aplicación: en su repositorio de origen su workflow tuvo 0 corridas verdes de 4 | URL `http` en los puertos de sus `launchSettings` y un workflow por proyecto que levanta la aplicación antes de probar (2026-09-12) |
 | Dos workflows se llamaban `E2E` y compartían nombre de artefacto | Se retiró el copiado (`e2e_2.yml`); los nuevos tienen nombre y artefacto propios |
+| La sección *Runner* del README decía que todo corría en `ubuntu-latest` | Corregido el texto (2026-09-12): `publicar` de `e2e.yml` usa el runner propio, y esa combinación es la que acumula las corridas en verde |
 
 ## Límites conocidos
 
 - La ejecución desde el Explorador de pruebas de Visual Studio **no se verificó** (no hay Windows en
   la máquina del autor), incluido el paso previo que necesitan Hola Mundo y Login: arrancar la
   aplicación con su perfil `http`.
-- Los workflows **sí se observaron corriendo** en GitHub Actions: `e2e.yml` registra corridas
-  programadas y manuales en verde, y el 2026-09-12 `ci.yml`, `e2e-holamundo.yml` y `e2e-login.yml`
-  terminaron en verde sobre `f9f3ca2` — ver [06_CI-Y-Workflows.md](06_CI-Y-Workflows.md).
+- Los workflows **sí se observaron corriendo** en GitHub Actions — ver
+  [06_CI-Y-Workflows.md](06_CI-Y-Workflows.md).
 - El runner autoalojado no admite jobs con `container:`: es él mismo un contenedor y no tiene montado
   el socket de Docker.
+- Dos promesas de la Encuesta no tienen caso de prueba (paso direccionable y fallo al registrar) —
+  ver [05](05_Pruebas.md).

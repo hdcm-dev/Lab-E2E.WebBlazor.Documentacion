@@ -635,7 +635,7 @@ Las filas de [§5](#5-qué-recurso-representa-el-acto) y [§6](#6-qué-promesas-
 
 | Recurso | ¿Existe en un laboratorio? | Dónde |
 | --- | --- | --- |
-| **Formulario simple** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/WebBlazor.E2E.Base.HolaMundo/Components/Paginas/HolaMundo.razor]** y la superficie de ingreso |
+| **Formulario simple** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor]** y la superficie de ingreso |
 | **Asistente** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Pages/Encuesta.razor]** |
 | **Listado + ficha (ABM)** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Pages/Localidades.razor]** |
 | **Modal** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Servicios/ServicioDeDialogos.cs]**, con los dos casos de baja de `LocalidadesTests.cs` |

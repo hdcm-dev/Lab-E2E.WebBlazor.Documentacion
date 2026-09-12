@@ -3,7 +3,7 @@
 > **Propósito**: registrar qué se modela, qué valida cada regla y con qué límites, para poder
 > razonar sobre el comportamiento esperado sin abrir el código.
 > **Fuente primaria**: `src/MovilidadUrbana.Web/Dominio/` y `src/MovilidadUrbana.Web/Aplicacion/`.
-> **Vigencia**: 2026-09-12, commit `7262395`.
+> **Vigencia**: 2026-09-12, commit `06528d3`.
 
 ## Entidades
 
@@ -23,8 +23,8 @@ parte del modelo, no un agregado de infraestructura.
 | Catálogo | Valores |
 | --- | --- |
 | `Provincias` | Buenos Aires, Chaco, Córdoba, Corrientes, Entre Ríos, Mendoza, Santa Fe |
-| `Medios` | `colectivo`, `auto`, `bicicleta`, `moto`, `caminata`, `tren` (clave → etiqueta) |
-| `Frecuencias` | `diaria`, `semanal`, `ocasional` |
+| `Medios` | `colectivo` (Colectivo), `auto` (Auto particular), `bicicleta`, `moto`, `caminata` (A pie), `tren` |
+| `Frecuencias` | `diaria` (Todos los días), `semanal` (Algunos días por semana), `ocasional` (Ocasionalmente) |
 | `Motivos` | `trabajo`, `estudio`, `salud`, `otros` |
 
 Los tres últimos son pares **(clave persistida, etiqueta mostrada)**, con `EtiquetaDeMedio`,
@@ -61,7 +61,7 @@ un catálogo cerrado.
 | `TotalDePasos` | 3 |
 | `LargoMinimoDelNombre` / `LargoMaximoDelNombre` | 3 / 80 |
 | `EdadMinima` / `EdadMaxima` | 16 / 110 |
-| `DistanciaMinima` / `DistanciaMaxima` | 0 / 500 (km) |
+| `DistanciaMinima` / `DistanciaMaxima` | 0 / 500 (km, `double`) |
 | `MinutosMinimos` / `MinutosMaximos` | 1 / 600 |
 
 `NombreValido` pide `LargoMinimoDelNombre` (3) caracteres recortados, igual que en localidades.
@@ -76,12 +76,17 @@ constructor primario.
 | Operación | Comportamiento |
 | --- | --- |
 | `ListarAsync` | Delega en el repositorio |
-| `GuardarAsync` | 1) valida campo por campo; 2) si hay errores, corta; 3) busca duplicada con `MismaLocalidad` excluyendo el propio `Id`; 4) actualiza si `Id` tiene valor, si no da de alta |
+| `GuardarAsync` | 1) valida campo por campo; 2) si hay errores, corta; 3) busca duplicada con `MismaLocalidad` excluyendo el propio `Id` («Ya existe una localidad con ese nombre en la provincia.», en `nombre`); 4) actualiza si `Id` tiene valor, si no da de alta |
 | `EliminarAsync` | Si la localidad ya no existe devuelve «La localidad ya no existe.» en el campo `nombre` |
 
-`GuardarAsync` recorta el nombre y el código postal antes de persistir. Los mensajes de alta y
-modificación nombran la localidad («Se agregó la localidad X.»), lo que las E2E aprovechan para
-distinguir una operación de la otra.
+`GuardarAsync` recorta el nombre y el código postal antes de persistir. Los mensajes de alta,
+modificación y baja nombran la localidad («Se agregó / Se actualizó / Se eliminó la localidad X.»),
+lo que las E2E aprovechan para distinguir una operación de la otra.
+
+Mensajes de error por campo: `nombre` («El nombre debe tener al menos 3 caracteres.»), `provincia`
+(«Seleccione una provincia.»), `codigoPostal` («El código postal debe tener 4 dígitos.»),
+`habitantes` («Ingrese una cantidad de habitantes mayor a cero.»). Los números se interpolan desde
+las constantes de la regla.
 
 `ModeloDeLocalidad` lleva `Habitantes` como `int?` **a propósito**: «vacío» y «cero» son dos errores
 distintos. `EsEdicion` es `Id is not null` y `Limpiar()` devuelve el formulario al estado de alta.
@@ -101,7 +106,8 @@ mientras el paso actual tenga errores.
 verificable: los medios se guardan **en el orden del catálogo y no en el de tipeo**, para que el
 resumen sea estable y la prueba pueda compararlo con un texto fijo.
 
-`ModeloDeEncuesta` acumula los tres pasos; `Medios` es un `HashSet<string>` con `AlternarMedio`.
+`ModeloDeEncuesta` acumula los tres pasos; `Medios` es un `HashSet<string>` con `AlternarMedio`;
+`Edad` y `Minutos` son `int?`.
 
 ## Políticas: el requisito antes del intento
 
@@ -119,5 +125,6 @@ Fuente: `CHANGELOG.md` (2026-09-04) y la sección «Diseño» de `README.md`.
 ## Cobertura de estas reglas
 
 Las 49 pruebas de `tests/MovilidadUrbana.UnitTests/` verifican **solo** este índice: bordes de cada
-validación del ABM (25 casos) y rangos de la encuesta paso por paso (24 casos), sin navegador ni
-servidor. Ver [05_Pruebas.md](05_Pruebas.md).
+validación del ABM (`ReglasDeLocalidadTests`, 25 casos: 23 `[TestCase]` + 2 `[Test]`) y rangos de la
+encuesta paso por paso (`ReglasDeEncuestaTests`, 24 casos: 23 + 1), sin navegador ni servidor. Ver
+[05_Pruebas.md](05_Pruebas.md).

@@ -43,7 +43,7 @@ O desde el asistente de creación de proyecto de Visual Studio, seleccionando el
 ### Estructura del proyecto
 
 En la carpeta test se alojan todos los proyectos de prueba, y en la carpeta src se alojan todos los proyectos de código fuente. La estructura del proyecto es la siguiente —solo se muestra lo que usa este ejemplo; el repositorio
-tiene además `MovilidadUrbana.Web` y `WebBlazor.E2E.Base.Login`, cada uno con su proyecto de pruebas—:
+tiene además `MovilidadUrbana.Web` y `WebBlazor.Login`, cada uno con su proyecto de pruebas—:
 
 ```
 Lab-E2E.WebBlazor
@@ -55,9 +55,9 @@ Lab-E2E.WebBlazor
 │           e2e-holamundo.yml
 │
 ├───src
-│   └───WebBlazor.E2E.Base.HolaMundo
+│   └───WebBlazor.HolaMundo
 │       │   Program.cs
-│       │   WebBlazor.E2E.Base.HolaMundo.csproj
+│       │   WebBlazor.HolaMundo.csproj
 │       │
 │       └───Components
 │           │
@@ -65,9 +65,9 @@ Lab-E2E.WebBlazor
 │                   HolaMundo.razor
 │
 └───tests
-        WebBlazor.E2E.Base.HolaMundo.E2ETests
+        WebBlazor.HolaMundo.E2ETests
             HolaMundoE2ETests.cs
-            WebBlazor.E2E.Base.HolaMundo.E2ETests.csproj
+            WebBlazor.HolaMundo.E2ETests.csproj
        
 ```
 
@@ -532,6 +532,6 @@ diferencia —si la superficie abre circuito o no—, y ese es el punto.
 Para resolver esto, ejecuta el comando sugerido en el mensaje de error para descargar los navegadores necesarios.
 
 ```bash
-cd WebBlazor.E2E.Base.HolaMundo.E2ETests\
+cd WebBlazor.HolaMundo.E2ETests\
 ./bin/Debug/net10.0/playwright.ps1 install
 ```

@@ -2,7 +2,9 @@
 
 > **Propósito**: explicar el mecanismo que hace posible probar en paralelo contra un único servidor
 > y una única base, y cómo se guardan los datos.
-> **Fuente primaria**: `src/MovilidadUrbana.Web/Infraestructura/`.
+> **Fuente primaria**: `src/MovilidadUrbana.Web/Infraestructura/`, `Components/App.razor` y
+> `Components/Routes.razor`.
+> **Vigencia**: 2026-09-12, commit `06528d3`.
 
 ## El problema que resuelve
 
@@ -35,7 +37,8 @@ sequenceDiagram
 El paso que sorprende: **un circuito de Blazor Server no tiene acceso a la petición HTTP** que lo
 originó, así que la cookie no se puede leer desde una página. Se lee en `App.razor` —que sí se
 renderiza dentro de la petición— y se pasa como parámetro `string` al componente raíz `Routes`, que
-es el puente entre el render estático y el interactivo.
+es el puente entre el render estático y el interactivo. Por eso el render mode se declara en la raíz
+y no por página (desviación declarada del template — ver [11](11_Template-Y-Superficies.md)).
 
 ## Piezas
 
@@ -48,7 +51,7 @@ es el puente entre el render estático y el interactivo.
 | --- | --- |
 | `NombreDeCookie` | `sesion-movilidad` |
 | `LargoMaximo` | 64 |
-| `Id` | Arranca con un `Guid` propio del ámbito |
+| `Id` | Arranca con un `Guid` propio del ámbito (formato `n`) |
 | `Establecer(id)` | Solo asigna si `EsValido(id)` |
 | `EsValido` | No vacío y de largo ≤ 64 |
 
@@ -139,4 +142,5 @@ filtró— y está puesta para dejar la garantía escrita en el código y no en 
 | `dotnet run` (valor por defecto) | `datos/movilidad.db` |
 | Pruebas E2E | `datos-e2e/movilidad.db`, o lo que indique `BASE_DE_DATOS` |
 
-Ambas carpetas están ignoradas por `.gitignore`, junto con `*.db`, `*.db-wal` y `*.db-shm`.
+`.gitignore` ignora `/datos-e2e/` como carpeta y, en cualquier ruta, `*.db`, `*.db-wal` y `*.db-shm`
+—lo que cubre también `datos/`—.

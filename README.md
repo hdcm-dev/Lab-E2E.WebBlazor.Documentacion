@@ -12,10 +12,10 @@ tabla de navegación indica qué índice cargar.
 
 | Workspace | Indexa | Punto de entrada |
 | --- | --- | --- |
-| [ia-db/Root/](ia-db/Root/) | [Lab-E2E.WebBlazor](../Lab-E2E.WebBlazor) — las tres aplicaciones, sus pruebas y sus workflows | [ia-db/Root/README.md](ia-db/Root/README.md) |
+| [ia-db/](ia-db/) | [Lab-E2E.WebBlazor](../Lab-E2E.WebBlazor) — las tres aplicaciones, sus pruebas y sus workflows | [ia-db/README.md](ia-db/README.md) |
 
 Hasta el 2026-09-12 hubo un segundo workspace, `ia-db/Base/`, para `Lab-E2E.WebBlazor.Base`. Ese
-repositorio se unificó en `Lab-E2E.WebBlazor` y su conocimiento vigente pasó a `ia-db/Root/`.
+repositorio se unificó en `Lab-E2E.WebBlazor` y su conocimiento vigente pasó a `ia-db/`, que ya no necesita subcarpeta por repositorio.
 
 ## Guías
 

@@ -3,7 +3,7 @@
 > **Propósito**: explicar cómo se reparte la aplicación en capas, qué depende de qué y dónde se
 > compone todo, para poder ubicar cualquier archivo sin recorrer el árbol.
 > **Fuente primaria**: `src/MovilidadUrbana.Web/` y `src/MovilidadUrbana.Web/Program.cs`.
-> **Vigencia**: 2026-09-12, commit `7262395`.
+> **Vigencia**: 2026-09-12, commit `06528d3`.
 
 ## Un proyecto, cuatro capas
 
@@ -49,7 +49,7 @@ Fuente: `src/MovilidadUrbana.Web/Program.cs`.
 | Sesión | `ContextoDeSesion` scoped, expuesto también como `IContextoDeSesion` | La misma instancia sirve a la implementación concreta y a la abstracción |
 | Repositorios | `RepositorioDeLocalidades`, `RepositorioDeEncuestas`, `SembradorDeSesion` — todos scoped | |
 | Casos de uso | `ServicioDeLocalidades`, `ServicioDeEncuestas` — scoped | |
-| Presentación | `IIdentidadDeVersion` singleton; `IServicioDeDialogos` y `IServicioDeFoco` scoped | Sumado con el template (2026-09-04): la versión se resuelve una sola vez en el host, y diálogos y foco son estado de interfaz del circuito |
+| Presentación | `IIdentidadDeVersion` singleton (`IdentidadDeVersion.DelEnsamblado`); `IServicioDeDialogos` y `IServicioDeFoco` scoped | La versión se resuelve una sola vez en el host, y diálogos y foco son estado de interfaz del circuito |
 | Arranque | `PreparadorDeBaseDeDatos.Preparar(app.Services)` | Crea el archivo y el esquema antes de atender la primera petición |
 | Pipeline | `UseExceptionHandler("/Error")` fuera de Development · `UseStatusCodePagesWithReExecute("/no-encontrado")` · `UseMiddleware<MiddlewareDeSesion>()` · `UseAntiforgery()` · `MapStaticAssets()` · `MapRazorComponents<App>().AddInteractiveServerRenderMode()` | El middleware de sesión va **antes** de antiforgery y del mapeo de componentes |
 
@@ -72,10 +72,12 @@ para que `NavigateTo` durante el render estático no se manifieste como excepci�
 | La salida de un caso de uso | `Aplicacion/Resultado.cs` |
 | El acceso a datos | `Infraestructura/Persistencia/` |
 | La cookie de sesión y su middleware | `Infraestructura/Sesiones/` |
-| Una pantalla | `Components/Pages/` |
+| Una pantalla | `Components/Pages/` (con su `.razor.cs` en `Localidades` y `Encuesta`) |
 | El shell: barra lateral, `#mq-main`, sello, host de diálogos, aviso de reconexión y testigo de interactividad | `Components/Layout/MainLayout.razor` |
 | Un patrón visual del catálogo (grilla, campo, asistente, diálogo, banda…) | `Components/Componentes/` — ver [11](11_Template-Y-Superficies.md) |
 | El requisito que un campo muestra antes del intento | `Aplicacion/*/Politica*.cs`, derivado de las constantes de `Dominio/Reglas/` |
+| Los trazos SVG y el tamaño por rol de cada ícono | `Theme/Iconos.cs`, `Theme/RolesDeIcono.cs` |
+| La interoperabilidad mínima con el navegador | `wwwroot/js/mq-dialogo.js`, `wwwroot/js/mq-foco.js` |
 
 ## Resultado — el contrato entre caso de uso y pantalla
 

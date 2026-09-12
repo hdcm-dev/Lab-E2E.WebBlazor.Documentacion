@@ -3,7 +3,7 @@
 > **Propósito**: fijar el vocabulario del laboratorio, incluidos los términos propios del binding de
 > .NET de Playwright que no coinciden con los del runner de JavaScript.
 > **Fuente primaria**: código y `README.md` del repositorio.
-> **Vigencia**: 2026-09-12, commit `7262395`.
+> **Vigencia**: 2026-09-12, commit `06528d3`.
 
 | Término | Qué significa acá |
 | --- | --- |
@@ -15,8 +15,9 @@
 | **Worker** | Cada hilo de ejecución de NUnit. La cantidad vive en `NumberOfTestWorkers` del `.runsettings` |
 | **Circuito** | La conexión WebSocket entre el navegador y el servidor en Blazor *interactive server*. Sin circuito la página se ve pero no responde |
 | **Prerender** | El HTML que el servidor entrega antes de establecer el circuito |
-| **Testigo de interactividad** | El elemento con `data-testid="estado-app"` y `data-interactivo`, que pasa a `true` cuando el circuito quedó conectado. En Movilidad Urbana es un `div` del layout; en Hola Mundo y Login, un `span` de la superficie |
+| **Testigo de interactividad (o de hidratación)** | El elemento con `data-testid="estado-app"` y `data-interactivo`, que pasa a `true` cuando el circuito quedó conectado. En Movilidad Urbana es un `div hidden` del layout; en Hola Mundo y Login, un `span` de la superficie |
 | **Estado de superficie** | Uno de los desenlaces excluyentes de una pantalla, del vocabulario `EstadoDeSuperficie` del template: `Vacio`, `Cargando`, `ConDatos`, `ErrorDeEntrada`… Ver [11](11_Template-Y-Superficies.md) |
+| **Superficie** | Una pantalla que promete algo verificable. Tres pasos de un asistente son **una** superficie si ningún paso promete nada por sí solo (`Caso-Encuesta-Page.md`) |
 | **Guard** | Lo que decide si alguien pasa a una superficie protegida. Solo existe en Login — ver [10](10_Hola-Mundo-Y-Login.md) |
 | **Sesión** | El espacio de datos de un visitante, identificado por la cookie `sesion-movilidad`. Cada prueba estrena la suya |
 | **Siembra** | El juego inicial de localidades —Corrientes y Resistencia— que recibe cada sesión la primera vez |
@@ -28,4 +29,5 @@
 | **Puerta** | En el pipeline, la verificación que bloquea un merge. Acá la puerta es el check `ci-ok` |
 | **Workflow reutilizable** | Uno invocable con `uses:` desde otro workflow (`workflow_call`). Acá es `e2e.yml` |
 | **Runner autoalojado** | El runner propio del laboratorio, etiquetado `i7infra-dev`. Activo solo en el job `publicar` de `e2e.yml`; en los demás jobs queda comentado |
-| **Modelo adoptado** | Tronco con ramas de release, documentado en el bloque «Modelo adoptado» de `Guides/Estandares-Modelo-Ramas.md`, en `Lab-E2E.WebBlazor.Documentacion`. **No** es GitFlow |
+| **Falsificación** | Correr una prueba en condiciones en que **debe** fallar —sin la aplicación levantada— para demostrar que no pasa en vacío. Registros `*-falsificacion-*.log` en `evidencia/` |
+| **Modelo adoptado** | Tronco con ramas de release, documentado en §6 de `Guides/Estandares-Modelo-Ramas.md`, en `Lab-E2E.WebBlazor.Documentacion`. **No** es GitFlow |

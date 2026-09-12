@@ -4,7 +4,7 @@
 > con los que las pruebas las ubican, para poder escribir o corregir un caso E2E sin abrir cada
 > `.razor`.
 > **Fuente primaria**: `src/MovilidadUrbana.Web/Components/`, incluidos `App.razor` y `Routes.razor`.
-> **Vigencia**: 2026-09-12, commit `7262395`. Las superficies de Hola Mundo y Login están en
+> **Vigencia**: 2026-09-12, commit `06528d3`. Las superficies de Hola Mundo y Login están en
 > [10](10_Hola-Mundo-Y-Login.md); la forma constructiva común a las tres, en
 > [11](11_Template-Y-Superficies.md).
 
@@ -17,8 +17,8 @@ identificadores cambiaron. La correspondencia está al final, en
 | Ruta | Componente | Qué es |
 | --- | --- | --- |
 | `/` | `Pages/Inicio.razor` | Portada con acceso a las dos pantallas |
-| `/localidades` | `Pages/Localidades.razor` | ABM de localidades |
-| `/encuesta` y `/encuesta/{Paso:int}` | `Pages/Encuesta.razor` | Asistente en tres pasos; el paso vigente está en la dirección |
+| `/localidades` | `Pages/Localidades.razor` + `.razor.cs` | ABM de localidades |
+| `/encuesta` y `/encuesta/{Paso:int}` | `Pages/Encuesta.razor` + `.razor.cs` | Asistente en tres pasos; el paso vigente está en la dirección |
 | `/Error` | `Pages/Error.razor` | Página de error (fuera de Development) |
 | `/no-encontrado` | `Pages/NoEncontrado.razor` | Reejecución de `UseStatusCodePagesWithReExecute` |
 
@@ -26,10 +26,10 @@ identificadores cambiaron. La correspondencia está al final, en
 
 | Pieza | Qué hace |
 | --- | --- |
-| `<HeadOutlet @rendermode="InteractiveServer" />` y `<Routes @rendermode="InteractiveServer" SesionId="…" />` | El render mode se fija **en la raíz** y no por página: el identificador de sesión se lee en `App.razor`, el único lugar con la petición HTTP a mano, y se pasa a `Routes`. Es una desviación declarada del template |
+| `<HeadOutlet @rendermode="InteractiveServer" />` y `<Routes @rendermode="InteractiveServer" SesionId="@Sesion.Id" />` | El render mode se fija **en la raíz** y no por página: el identificador de sesión se lee en `App.razor`, el único lugar con la petición HTTP a mano, y se pasa a `Routes`. Es una desviación declarada del template |
 | `<a class="mq-skip" href="#mq-main">Ir al contenido</a>` | Salto al contenido |
 | `FocusOnNavigate` sobre `#mq-main` (en `Routes.razor`) | Mueve el foco al contenido al navegar |
-| Hojas | `Tokens.css` → `Componentes.css` → `MovilidadUrbana.Web.styles.css` |
+| Hojas | `css/Tokens.css` → `css/Componentes.css` → `MovilidadUrbana.Web.styles.css`, vía `@Assets[...]` |
 | Scripts | `js/mq-dialogo.js`, `js/mq-foco.js`, `_framework/blazor.web.js` |
 
 ## El shell — MainLayout
@@ -38,12 +38,12 @@ identificadores cambiaron. La correspondencia está al final, en
 
 | Elemento | `data-testid` | Nota |
 | --- | --- | --- |
-| Barra lateral (`Componentes/BarraLateral.razor`) | `marca`; ítems `nav-inicio`, `nav-localidades`, `nav-encuesta` | El ítem activo lleva `aria-current="page"` |
+| Barra lateral (`Componentes/BarraLateral.razor`) | `marca`; ítems `nav-inicio`, `nav-localidades`, `nav-encuesta` | El ítem activo lleva `aria-current="page"` y la clase `mq-nav-item--activo` |
 | Contenido | — | `main#mq-main` |
 | Sello de versión | `sello-version` | Resuelto en el host por `IIdentidadDeVersion` |
 | Host de diálogos | — | `DialogoHost`, único en el layout |
 | Aviso de reconexión | — | `AvisoDeReconexion`, banda de atención que no bloquea la interacción |
-| **Testigo de interactividad** | `estado-app` | `div hidden` con `data-interactivo` |
+| **Testigo de interactividad** | `estado-app` | `div hidden` con `data-interactivo="@RendererInfo.IsInteractive"` en minúsculas |
 
 Debajo del único punto de quiebre, 768px, la barra lateral pasa a navegación superior **con los
 enlaces a la vista**: no hay menú que desplegar. Por eso `IrPorMenuAsync` de las pruebas ya solo hace
@@ -55,8 +55,8 @@ la pantalla se ve pero no responde, y los clics se pierden de forma intermitente
 
 ## Inicio
 
-`data-testid`: `titulo`, `ir-localidades`, `ir-encuesta`. Toda la tarjeta de acceso es el área
-activable.
+`data-testid`: `titulo` («Demostración de pruebas E2E»), `ir-localidades`, `ir-encuesta`. Toda la
+tarjeta de acceso (`.mq-tarjeta-entrada`) es el área activable.
 
 ## Localidades — el ABM
 
@@ -67,19 +67,20 @@ activable.
 | Campos | `campo-nombre`, `campo-provincia`, `campo-codigo-postal`, `campo-habitantes` |
 | Errores por campo | `error-nombre`, `error-provincia`, `error-codigo-postal`, `error-habitantes` |
 | Filtros | `campo-buscar` (nombre o código postal), `filtro-provincia` |
-| Colección (`Grilla`) | `contador`, `cuerpo-tabla`, `fila` (con `data-id`), `tarjeta`; celdas `celda-nombre`, `celda-provincia`, `celda-codigo-postal`, `celda-habitantes` |
+| Colección (`Grilla`) | `contador` (una `Insignia`), `cuerpo-tabla`, `fila` (con `data-id`), `tarjeta`; celdas `celda-nombre`, `celda-provincia`, `celda-codigo-postal`, `celda-habitantes` |
 | Acciones de fila | `boton-editar`, `boton-eliminar` |
 | Estados | `indisponible` + `boton-reintentar` · `sin-datos` + `boton-cargar-la-primera` · `sin-resultados` + `boton-limpiar-filtro` |
 | Diálogo de baja (`Dialogo`) | `dialogo`, `dialogo-titulo`, `dialogo-confirmacion`, `boton-cancelar-dialogo`, `boton-confirmar-dialogo` |
 
-Comportamiento:
+Comportamiento (`Localidades.razor` y `Localidades.razor.cs`):
 
 | Acción | Qué pasa |
 | --- | --- |
 | Guardar | Llama a `ServicioDeLocalidades.GuardarAsync`. Con errores, banda de error y error asociado a cada campo por `aria-describedby`; si va bien, banda de éxito y formulario limpio. Si la operación falla, «No pudimos guardar la localidad. Volvé a intentar en unos segundos.» |
 | Editar / Cancelar | El formulario pasa a modo edición y vuelve a modo alta |
-| Eliminar | Pide confirmación con `IServicioDeDialogos.ConfirmarAsync` —primer grado—, y la baja muestra su banda |
+| Eliminar | Pide confirmación con `IServicioDeDialogos.ConfirmarAsync` —primer grado—, y la baja muestra su banda; si falla, «No pudimos dar de baja la localidad…» |
 | Buscar / filtrar | Filtra lo ya traído; si hay datos y el filtro no encuentra nada, estado `FiltradoSinResultados` |
+| Cargar | Si el listado no se puede traer, estado `Indisponible` («No pudimos traer las localidades») con reintento |
 
 - **La colección se presenta de dos formas, las dos siempre en el marcado**: tabla con `caption` y
   `scope`, y tarjetas apiladas. Las conmuta el punto de quiebre, así que las pruebas buscan las
@@ -102,7 +103,7 @@ Comportamiento:
 | Paso 2 | `grupo-medios`, `medio-<clave>`, `campo-frecuencia` + `error-medios`, `error-frecuencia` |
 | Paso 3 | `campo-distancia`, `campo-minutos`, `campo-motivo` + `error-distancia`, `error-minutos`, `error-motivo` |
 | Navegación | `boton-anterior`, `boton-siguiente`, `boton-finalizar`, `boton-procesando`, `boton-reiniciar` |
-| Resumen | `resumen`, `mensaje-envio`, `resumen-<clave>` |
+| Resumen | `resumen`, `resumen-<clave>` |
 
 Comportamiento (`Encuesta.razor` y `Encuesta.razor.cs`):
 
@@ -112,16 +113,16 @@ Comportamiento (`Encuesta.razor` y `Encuesta.razor.cs`):
   «Complete los datos del paso antes de continuar.». **Hacia atrás nunca se valida** y lo cargado se
   conserva.
 - **El paso vigente está en la dirección**: cada cambio hace `NavigateTo("/encuesta/N", replace:
-  true)`. `OnParametersSet` **impide saltear** pasos pedidos por dirección, acotando al paso máximo
-  alcanzado.
+  true)`. `OnParametersSet` **impide saltear** pasos pedidos por dirección con
+  `Math.Min(pedido, _pasoMaximoAlcanzado)`.
 - Registrada la respuesta, la superficie pasa a su estado de éxito: `etiqueta-paso` dice «Encuesta
   completada» y el resumen se recorre desde `ResumenDeEncuesta`. `boton-reiniciar` («Cargar otra
   encuesta») vuelve al paso 1 con el modelo vacío.
 - **El desplegable de localidades se alimenta del ABM**, y `contador-encuestas` sale de
   `ServicioDeEncuestas.ContarAsync()`, los dos acotados a la sesión.
-- Si registrar falla, banda de error. **Ni ese camino ni el paso direccionable tienen caso de
-  prueba**: está registrado en `Guides/E2E-Guide/Caso-Encuesta-Page.md` §6, en
-  `Lab-E2E.WebBlazor.Documentacion`.
+- Si registrar falla, banda «No pudimos registrar la encuesta…». **Ni ese camino ni el paso
+  direccionable tienen caso de prueba**: está registrado en el `CHANGELOG.md` del 2026-09-04 y en
+  `Guides/E2E-Guide/Caso-Encuesta-Page.md`, en `Lab-E2E.WebBlazor.Documentacion`.
 
 ## Enlace de datos: `oninput`, no `onchange`
 
@@ -131,7 +132,7 @@ un formulario que en pantalla se ve completo. Por eso:
 
 | Pantalla | `@oninput` directo | `@bind:event="oninput"` | `@bind` a secas (`<select>`) |
 | --- | --- | --- | --- |
-| Localidades | `campo-nombre`, `campo-codigo-postal`, `campo-buscar` | `campo-habitantes` | `campo-provincia`, `filtro-provincia` (este con `@bind:after`) |
+| Localidades | `campo-nombre`, `campo-codigo-postal`, `campo-buscar` | `campo-habitantes` | `campo-provincia`, `filtro-provincia` (este con `@bind:after="Refiltrar"`) |
 | Encuesta | `campo-nombre` | `campo-edad`, `campo-distancia`, `campo-minutos` | `campo-localidad`, `campo-frecuencia`, `campo-motivo` |
 
 Los `<select>` usan `@bind` a secas porque un cambio de selección sí dispara `change`.

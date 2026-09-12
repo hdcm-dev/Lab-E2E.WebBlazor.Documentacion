@@ -47,19 +47,19 @@ pruebas unitarias de Movilidad Urbana.
 
 ```
 Lab-E2E.WebBlazor/
-├── Lab-E2E.WebBlazor.sln         Siete proyectos + carpetas de solución (github-workflow, scripts, Solution Items)
+├── Lab-E2E.WebBlazor.sln         Siete proyectos + carpetas de solución (src, tests, github-workflow, scripts, Solution Items)
 ├── src/
 │   ├── MovilidadUrbana.Web/          Dominio, Aplicacion, Infraestructura, Components
-│   ├── WebBlazor.E2E.Base.HolaMundo/ La superficie más simple
-│   └── WebBlazor.E2E.Base.Login/     La misma superficie detrás de un acceso
+│   ├── WebBlazor.HolaMundo/ La superficie más simple
+│   └── WebBlazor.Login/     La misma superficie detrás de un acceso
 ├── tests/
 │   ├── MovilidadUrbana.E2ETests/                22 casos + fixture que levanta la aplicación
 │   ├── MovilidadUrbana.UnitTests/               49 casos sobre las reglas de dominio
-│   ├── WebBlazor.E2E.Base.HolaMundo.E2ETests/   1 caso, sin fixture
-│   └── WebBlazor.E2E.Base.Login.E2ETests/       10 casos, sin fixture
+│   ├── WebBlazor.HolaMundo.E2ETests/   1 caso, sin fixture
+│   └── WebBlazor.Login.E2ETests/       10 casos, sin fixture
 ├── scripts/                      dotnet.sh, publicar.sh, pruebas.sh (todo por contenedor)
 ├── .github/workflows/            ci.yml, e2e.yml, e2e-holamundo.yml, e2e-login.yml, verificacion-entorno.yml
-├── evidencia/                    Registros de corridas que respaldan lo que afirman las guías
+├── evidencia/                    Registros de corridas que respaldan lo que afirman las guías (tres carpetas)
 ├── pruebas.runsettings           Navegador, timeouts y workers de las E2E
 ├── README.md                     Documento de referencia del repositorio (extenso)
 └── CHANGELOG.md                  Registro por fecha
@@ -78,9 +78,11 @@ Lab-E2E.WebBlazor/
 - **No dar por verificado lo que no lo está**: la ejecución desde el Explorador de pruebas de Visual
   Studio nunca se probó desde esta máquina. Los workflows, en cambio, sí se observaron corriendo — ver
   [06](indexes/06_CI-Y-Workflows.md).
-- **`Lab-E2E.WebBlazor.Base` ya no existe como repositorio aparte**: se unificó en este. Su
-  conocimiento vigente está en [10](indexes/10_Hola-Mundo-Y-Login.md) y
-  [11](indexes/11_Template-Y-Superficies.md); no hay `ia-db/Base` que consultar.
+- **`Lab-E2E.WebBlazor.Base` ya no existe como repositorio aparte**: se unificó en este el
+  2026-09-12. Su conocimiento vigente está en [10](indexes/10_Hola-Mundo-Y-Login.md) y
+  [11](indexes/11_Template-Y-Superficies.md); no hay una ia-db separada que consultar.
+- **No modificar el repositorio indexado desde esta base**: la ia-db vive en
+  `Lab-E2E.WebBlazor.Documentacion`, no en `Lab-E2E.WebBlazor`.
 - Si una tarea cambia el código o la documentación, **actualizar esta base de forma incremental** con
   `Actualizar-Indexado.md`, no reconstruirla.
 
@@ -88,20 +90,20 @@ Lab-E2E.WebBlazor/
 
 - Generado por : `/IA/PROMPTs/IA.Prompts/Tool-Prompts/Indexado-Documentado/Iniciar-Indexado.md`
   (invocado desde `/LAB/Lab-E2E.WebBlazor.Documentacion/PROMPTs/Indexado/Crear-Indexado.md`)
-- Alcance      : `/LAB/Lab-E2E.WebBlazor` — modo proyecto. Desde la versión 1.2 absorbe el
-  conocimiento vigente del workspace `ia-db/Base/` (`Lab-E2E.WebBlazor.Base`), retirado al unificarse
-  los dos repositorios
-- Fuentes      : `README.md`, `CHANGELOG.md`, `Lab-E2E.WebBlazor.sln`, `pruebas.runsettings`, `src/`
-  (tres proyectos), `tests/` (cuatro), `scripts/`, `.github/workflows/`, `evidencia/`
+- Alcance      : `/LAB/Lab-E2E.WebBlazor` — modo proyecto, un solo repositorio (siete proyectos:
+  tres aplicaciones web, tres suites E2E y una unitaria)
+- Destino      : `/LAB/Lab-E2E.WebBlazor.Documentacion/ia-db` (estructura canónica plana). Sucede al
+  workspace `ia-db/Root/` (versión 1.2, del 2026-09-12, commit `7262395`), retirado junto con
+  `ia-db/Base/` al quedar un solo repositorio de código
+- Fuentes      : `README.md`, `CHANGELOG.md`, `Lab-E2E.WebBlazor.sln`, `pruebas.runsettings`,
+  `.gitignore`, `src/` (tres proyectos), `tests/` (cuatro), `scripts/`, `.github/workflows/`,
+  `evidencia/` (`.log` y `.mjs`; las capturas solo se referencian). Para el índice 07, el árbol
+  `Guides/` de `Lab-E2E.WebBlazor.Documentacion`. Para las corridas observadas del índice 06, la API
+  pública de GitHub Actions consultada el 2026-09-12
 - Exclusiones  : `.git`, `.nuget/`, `.dotnet/`, `.navegadores/`, `publicacion/`, `datos-e2e/`,
-  `resultados/`, `bin/`, `obj/`, las capturas de `evidencia/` (solo se referencian) y lo ignorado por
-  `.gitignore`
-- Estado del repositorio : rama `main`, último commit `7262395` (2026-09-12)
-- Generado     : 2026-09-01 · Versión: 1.0
-- Actualizado  : 2026-09-02 · Versión: 1.1 — sincronizado `07_Guias.md` con la consolidación de
-  `Guides/` y corregida una referencia en `09_Glosario.md`
-- Actualizado  : 2026-09-12 · Versión: 1.2 — unificación con `Lab-E2E.WebBlazor.Base`: índices nuevos
-  `10` y `11` con lo vigente de `ia-db/Base/`, que se retira; `00`, `04`, `05`, `06` y `07` rehechos
-  por el template (2026-09-04), la mudanza de las guías (2026-09-09) y la unificación; `01`, `02`,
-  `08` y `09` corregidos en puntos; `03` sin cambios
+  `resultados/`, `bin/`, `obj/`, las capturas `.png` de `evidencia/` y lo ignorado por `.gitignore`
+- Estado del repositorio : rama `main`, último commit `06528d3` (2026-09-12, «Rescatar la evidencia
+  de la aplicacion del template»)
+- Generado     : 2026-09-12 · Versión: 1.0
 - Actualizar   : `/IA/PROMPTs/IA.Prompts/Tool-Prompts/Indexado-Documentado/Actualizar-Indexado.md`
+  (invocado desde `/LAB/Lab-E2E.WebBlazor.Documentacion/PROMPTs/Indexado/Actualizar-Indexado.md`)

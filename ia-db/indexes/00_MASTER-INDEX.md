@@ -2,8 +2,8 @@
 
 > **Propósito**: dar la visión general del laboratorio —qué es, con qué está hecho y qué decisiones
 > lo definen— para que un agente pueda situarse sin abrir el código.
-> **Fuente primaria**: `README.md` y `CHANGELOG.md` del repositorio.
-> **Vigencia**: 2026-09-12, commit `7262395`.
+> **Fuente primaria**: `README.md`, `CHANGELOG.md` y `Lab-E2E.WebBlazor.sln` del repositorio.
+> **Vigencia**: 2026-09-12, commit `06528d3`.
 
 ## Qué es
 
@@ -15,8 +15,8 @@ se pueda estudiar de a un escalón:
 
 | Escalón | Aplicación | Qué agrega |
 | --- | --- | --- |
-| 1 | `WebBlazor.E2E.Base.HolaMundo` | Una superficie interactiva con sus estados; sin capas ni datos |
-| 2 | `WebBlazor.E2E.Base.Login` | La misma superficie detrás de un acceso por cookies |
+| 1 | `WebBlazor.HolaMundo` | Una superficie interactiva con sus estados; sin capas ni datos |
+| 2 | `WebBlazor.Login` | La misma superficie detrás de un acceso por cookies |
 | 3 | `MovilidadUrbana.Web` | Servidor, SQLite, aislamiento por sesión, un ABM y un asistente; Clean Architecture en carpetas |
 
 Las dos primeras llegaron desde `Lab-E2E.WebBlazor.Base`, que se retiró; su detalle está en
@@ -35,7 +35,7 @@ Blazor — ver [08_Decisiones-Y-Trampas.md](08_Decisiones-Y-Trampas.md).
 | Datos | EF Core + provider SQLite (solo Movilidad Urbana) | 10.0.11 | `MovilidadUrbana.Web.csproj` |
 | Estilos | Template del Framework SDD: `Tokens.css` + `Componentes.css`, sin librería de componentes ni framework de CSS | — | `wwwroot/css/` de cada aplicación — ver [11](11_Template-Y-Superficies.md) |
 | E2E | `Microsoft.Playwright.NUnit` | 1.62.0 | los tres `.csproj` E2E |
-| Runner de pruebas | NUnit + `NUnit3TestAdapter` | 4.3.2 / 5.0.0 | los cuatro `.csproj` de `tests/` |
+| Runner de pruebas | NUnit + `NUnit3TestAdapter` + `Microsoft.NET.Test.Sdk` | 4.3.2 / 5.0.0 / 17.14.0 | los cuatro `.csproj` de `tests/` |
 | Contenedores de apoyo | `mcr.microsoft.com/dotnet/sdk:10.0`, `mcr.microsoft.com/playwright:v1.62.1-noble` | — | `scripts/dotnet.sh`, `scripts/pruebas.sh` |
 
 **Ya no hay Bootstrap**: se retiró el 2026-09-04 al aplicar el template.
@@ -45,15 +45,16 @@ Blazor — ver [08_Decisiones-Y-Trampas.md](08_Decisiones-Y-Trampas.md).
 | Proyecto | Ruta | Rol |
 | --- | --- | --- |
 | `MovilidadUrbana.Web` | `src/MovilidadUrbana.Web/` | La aplicación completa. Un solo proyecto, capas en carpetas |
-| `WebBlazor.E2E.Base.HolaMundo` | `src/WebBlazor.E2E.Base.HolaMundo/` | La superficie Hola Mundo |
-| `WebBlazor.E2E.Base.Login` | `src/WebBlazor.E2E.Base.Login/` | Hola Mundo detrás de un acceso |
+| `WebBlazor.HolaMundo` | `src/WebBlazor.HolaMundo/` | La superficie Hola Mundo |
+| `WebBlazor.Login` | `src/WebBlazor.Login/` | Hola Mundo detrás de un acceso |
 | `MovilidadUrbana.E2ETests` | `tests/MovilidadUrbana.E2ETests/` | 22 casos, con fixture que levanta la aplicación |
 | `MovilidadUrbana.UnitTests` | `tests/MovilidadUrbana.UnitTests/` | 49 casos sobre las reglas de dominio |
-| `WebBlazor.E2E.Base.HolaMundo.E2ETests` | `tests/WebBlazor.E2E.Base.HolaMundo.E2ETests/` | 1 caso, sin fixture |
-| `WebBlazor.E2E.Base.Login.E2ETests` | `tests/WebBlazor.E2E.Base.Login.E2ETests/` | 10 casos, sin fixture |
+| `WebBlazor.HolaMundo.E2ETests` | `tests/WebBlazor.HolaMundo.E2ETests/` | 1 caso, sin fixture |
+| `WebBlazor.Login.E2ETests` | `tests/WebBlazor.Login.E2ETests/` | 10 casos, sin fixture |
 
-Los archivos que no pertenecen a ningún proyecto están en tres **carpetas de solución**:
-`github-workflow`, `scripts` y `Solution Items`. Las guías ya no: se mudaron a
+El `.sln` los agrupa bajo las carpetas de solución `src` y `tests`, y los archivos que no pertenecen
+a ningún proyecto van en otras tres: `github-workflow`, `scripts` y `Solution Items` (`README.md`,
+`CHANGELOG.md`, `pruebas.runsettings`). Las guías ya no: se mudaron a
 `Lab-E2E.WebBlazor.Documentacion` el 2026-09-09 — ver [07](07_Guias.md).
 
 ## Decisiones que definen el proyecto
@@ -76,20 +77,21 @@ Cada una está desarrollada en [08_Decisiones-Y-Trampas.md](08_Decisiones-Y-Tram
 
 ## Estado verificado
 
-| Fecha | Comprobación | Resultado |
-| --- | --- | --- |
-| 2026-08-23 | `dotnet build … -warnaserror` | 0 avisos, 0 errores |
-| 2026-08-23 | `scripts/pruebas.sh` chromium / firefox / webkit / móvil | 22 pasadas en cada una |
-| 2026-08-24 | `dotnet test tests/MovilidadUrbana.UnitTests` | 49 pasadas |
-| 2026-08-24 | Traza de un caso fallido a propósito | `.zip` de 138 KB con DOM, red y consola |
-| 2026-09-12 | `dotnet build Lab-E2E.WebBlazor.sln -c Release -warnaserror`, siete proyectos | 0 avisos, 0 errores |
-| 2026-09-12 | Hola Mundo y Login con `scripts/pruebas.sh`, 3 corridas cada uno | 3 de 3 en verde |
-| 2026-09-12 | Movilidad Urbana con `scripts/pruebas.sh` | 22/22 |
-| 2026-09-12 | Login como lo corre su workflow —binario publicado, Production— | 10/10 en chromium y firefox |
-| 2026-09-12 | Hola Mundo y Login sin la aplicación levantada | Fallan: no pasan en vacío |
-| 2026-09-12 | GitHub Actions: `ci.yml`, `e2e-holamundo.yml` y `e2e-login.yml` sobre `f9f3ca2` | Los tres en verde |
-
-Registros de 2026-09-12 en `evidencia/2026-09-12-unificacion/`.
+| Fecha | Comprobación | Resultado | Fuente |
+| --- | --- | --- | --- |
+| 2026-08-23 | `dotnet build … -warnaserror` | 0 avisos, 0 errores | `README.md` §Evidencia |
+| 2026-08-23 | `scripts/pruebas.sh` chromium / firefox / webkit / móvil | 22 pasadas en cada una | ídem |
+| 2026-08-24 | `dotnet test tests/MovilidadUrbana.UnitTests` | 49 pasadas | ídem |
+| 2026-08-24 | Traza de un caso fallido a propósito | `.zip` de 138 KB con DOM, red y consola | ídem |
+| 2026-09-01 | Hola Mundo y Login con el template aplicado: `verificar.mjs` | 10 comprobaciones en verde, 12 capturas | `evidencia/2026-09-01-aplicacion-template/` |
+| 2026-09-03 | Testigo de hidratación en Hola Mundo | Cierra la intermitencia | `evidencia/2026-09-03-testigo-de-hidratacion/` |
+| 2026-09-04 | Build, unitarias y las 4 configuraciones E2E tras el template | Todo en verde: 49 y 22×4 | `README.md` §Evidencia |
+| 2026-09-12 | `dotnet build Lab-E2E.WebBlazor.sln -c Release -warnaserror`, siete proyectos | 0 avisos, 0 errores | `CHANGELOG.md` |
+| 2026-09-12 | Hola Mundo y Login con `scripts/pruebas.sh`, 3 corridas cada uno | 3 de 3 en verde | `evidencia/2026-09-12-unificacion/*-script-3-corridas.log` |
+| 2026-09-12 | Movilidad Urbana con `scripts/pruebas.sh` | 22/22 | `…/movilidad-script-por-defecto.log` |
+| 2026-09-12 | Login como lo corre su workflow —binario publicado, Production— | 10/10 en chromium y firefox | `…/login-falsificacion-y-binario-publicado.log` |
+| 2026-09-12 | Hola Mundo y Login sin la aplicación levantada | Fallan: no pasan en vacío | `…/*-falsificacion-*.log` |
+| 2026-09-12 | GitHub Actions: `ci.yml`, `e2e-holamundo.yml` y `e2e-login.yml` sobre `f9f3ca2`; `ci.yml` sobre `06528d3` | En verde | API pública de Actions — ver [06](06_CI-Y-Workflows.md) |
 
 **No verificado**: la ejecución desde el Explorador de pruebas de Visual Studio —no hay Windows en esa
 máquina—, incluido el paso previo que necesitan Hola Mundo y Login.
@@ -98,10 +100,10 @@ máquina—, incluido el paso previo que necesitan Hola Mundo y Login.
 
 | Fecha | Cambio |
 | --- | --- |
-| 2026-09-12 | Unificación con `Lab-E2E.WebBlazor.Base`: Hola Mundo y Login, un workflow E2E por aplicación, `scripts/pruebas.sh` con `PROYECTO`, `evidencia/` |
+| 2026-09-12 | Unificación con `Lab-E2E.WebBlazor.Base`: Hola Mundo y Login, un workflow E2E por aplicación, `scripts/pruebas.sh` con `PROYECTO` y `REPETIR`, `evidencia/` (incluida la del template, rescatada en `06528d3`) |
 | 2026-09-09 | Las guías se mudan a `Lab-E2E.WebBlazor.Documentacion` |
-| 2026-09-04 | Template del Framework SDD en la interfaz; se retira Bootstrap |
-| 2026-09-03 | El runner autoalojado vuelve a estar activo en `e2e.yml` —hoy, en el job `publicar`— |
+| 2026-09-04 | Template del Framework SDD en la interfaz; se retira Bootstrap; `Caso-Encuesta-Page.md` |
+| 2026-09-03 | El runner autoalojado vuelve a estar activo en `e2e.yml` —hoy, en el job `publicar`—; el `.sln` se pone al día |
 | 2026-08-31 | Guía de GitHub Actions |
 | 2026-08-30 | Proyecto de unitarias, traza de Playwright, guías del modelo de ramas, `CHANGELOG.md` |
 
