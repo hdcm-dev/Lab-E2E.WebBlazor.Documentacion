@@ -53,7 +53,7 @@ Blazor — ver [08_Decisiones-Y-Trampas.md](08_Decisiones-Y-Trampas.md).
 | `WebBlazor.Login` | `src/WebBlazor.Login/` | Hola Mundo detrás de un acceso |
 | `MovilidadUrbana.E2ETests` | `tests/MovilidadUrbana.E2ETests/` | 22 casos, con fixture que levanta la aplicación |
 | `MovilidadUrbana.UnitTests` | `tests/MovilidadUrbana.UnitTests/` | 49 casos sobre las reglas de dominio; referencia solo `Dominio` |
-| `MovilidadUrbana.ApiWeb.Tests` | `tests/MovilidadUrbana.ApiWeb.Tests/` | 11 casos en proceso sobre la API, con `WebApplicationFactory` |
+| `MovilidadUrbana.ApiWeb.Tests` | `tests/MovilidadUrbana.ApiWeb.Tests/` | 13 casos en proceso sobre la API, con `WebApplicationFactory` |
 | `WebBlazor.HolaMundo.E2ETests` | `tests/WebBlazor.HolaMundo.E2ETests/` | 1 caso, sin fixture |
 | `WebBlazor.Login.E2ETests` | `tests/WebBlazor.Login.E2ETests/` | 10 casos, sin fixture |
 
@@ -100,7 +100,7 @@ Cada una está desarrollada en [08_Decisiones-Y-Trampas.md](08_Decisiones-Y-Tram
 | 2026-09-12 | Hola Mundo y Login sin la aplicación levantada | Fallan: no pasan en vacío | `…/*-falsificacion-*.log` |
 | 2026-09-12 | GitHub Actions: `ci.yml`, `e2e-holamundo.yml` y `e2e-login.yml` sobre `f9f3ca2`; `ci.yml` sobre `06528d3` | En verde | API pública de Actions — ver [06](06_CI-Y-Workflows.md) |
 | 2026-09-12 | Solución de doce proyectos en Release con `-warnaserror`; unitarias y E2E de la web tras extraer las capas | 0 avisos; 49/49 y 22/22 sin cambios | `evidencia/2026-09-12-capas-y-api/` |
-| 2026-09-12 | API: pruebas en proceso; falsificación (200 en vez de 201); corrida real sobre Kestrel con OpenAPI y `curl` | 11/11; un caso en rojo; ocho rutas expuestas | ídem |
+| 2026-09-12 | API: pruebas en proceso; falsificación (200 en vez de 201); corrida real sobre Kestrel con OpenAPI y `curl` | 13/13; un caso en rojo; ocho rutas expuestas | ídem |
 
 **No verificado**: la ejecución desde el Explorador de pruebas de Visual Studio —no hay Windows en esa
 máquina—, incluido el paso previo que necesitan Hola Mundo y Login.

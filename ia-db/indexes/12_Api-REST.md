@@ -5,7 +5,7 @@
 > los controllers.
 > **Fuente primaria**: `src/MovilidadUrbana.ApiWeb/`, `tests/MovilidadUrbana.ApiWeb.Tests/`,
 > `evidencia/2026-09-12-capas-y-api/`.
-> **Vigencia**: 2026-09-12, commit `88e5caa`.
+> **Vigencia**: 2026-09-12, commit `3b53d14`.
 
 ## Qué es
 
@@ -19,7 +19,7 @@ src/MovilidadUrbana.ApiWeb/
 ├── Controllers/   LocalidadesController, EncuestasController, ProblemasDeValidacion
 ├── Contratos/     DTOs de entrada (Solicitud*) y de salida (*Dto)
 ├── Sesiones/      MiddlewareDeSesionPorEncabezado
-└── Program.cs     Compone las capas, AddControllers, AddProblemDetails, AddOpenApi
+└── Program.cs     Compone las capas, AddControllers, AddProblemDetails, AddOpenApi y Scalar
 ```
 
 ## Rutas
@@ -37,6 +37,13 @@ src/MovilidadUrbana.ApiWeb/
 
 El contrato OpenAPI 3.1 se sirve en `/openapi/v1.json` en Development (`Microsoft.AspNetCore.OpenApi`
 10.0.11). Las ocho rutas se verificaron en él sobre Kestrel el 2026-09-12.
+
+## Documentación navegable: Scalar
+
+`Scalar.AspNetCore` 2.17.3 sirve en **`/scalar/v1`**, solo en Development, la documentación del
+contrato: cada ruta con su esquema, y probable desde el navegador con ejemplos en `curl` (cliente
+por defecto configurado en `Program.cs`). Para ver datos propios hay que repetir el `X-Sesion-Id` en
+cada pedido. Verificado el 2026-09-12: `200 text/html` en Development y `404` en Production.
 
 ## La sesión: encabezado `X-Sesion-Id`
 
@@ -64,7 +71,7 @@ nombre y provincia —que el propio servicio garantiza únicos dentro de la sesi
 
 ## Pruebas
 
-`tests/MovilidadUrbana.ApiWeb.Tests`, 11 casos NUnit en proceso con `WebApplicationFactory<Program>`
+`tests/MovilidadUrbana.ApiWeb.Tests`, 13 casos NUnit en proceso con `WebApplicationFactory<Program>`
 (`Microsoft.AspNetCore.Mvc.Testing` 10.0.11). `FabricaDeApi` arranca la API en Development sobre una
 base SQLite **propia de la corrida** en la carpeta temporal, y la borra al terminar: no toca `datos/`.
 
@@ -72,10 +79,11 @@ base SQLite **propia de la corrida** en la carpeta temporal, y la borra al termi
 | --- | --- |
 | `LocalidadesTests` (7) | Sesión nueva con las sembradas · sin encabezado la respuesta devuelve uno · alta con `201` y `Location` · `400` por campo con las cuatro claves · no duplica · modifica y da de baja (`200`, `204`, `404`) · cada sesión tiene sus datos |
 | `EncuestasTests` (4) | Registra una completa (`201`, resumen `"Colectivo, Bicicleta"` y `"12,5 km"`, contador 1) · incompleta (`400` con las ocho claves) · valida un paso sin registrar · paso 4 es `404` |
+| `DocumentacionTests` (2) | El contrato declara las rutas · Scalar se sirve y apunta al contrato |
 
 `ci.yml` las corre en el job `compilacion`, después de las unitarias.
 
-**Verificado el 2026-09-12** (`evidencia/2026-09-12-capas-y-api/`): 11/11; una falsificación
+**Verificado el 2026-09-12** (`evidencia/2026-09-12-capas-y-api/`): 13/13; una falsificación
 —responder `200` en vez de `201` en el alta— pone un caso en rojo; y sobre Kestrel, el OpenAPI con
 las ocho rutas y un flujo por `curl`: `X-Sesion-Id` asignado, listado sembrado, `400` a un alta
 inválida, `201` a una encuesta y contador en 1.
