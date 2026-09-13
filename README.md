@@ -54,7 +54,7 @@ industria. Su [README](Guides/Test-Guide/README.md) trae el mapa.
 | --- | --- | --- |
 | [Panorama-De-Pruebas-Automatizadas.md](Guides/Test-Guide/Panorama-De-Pruebas-Automatizadas.md) | Quien tiene que probar una API, una app MAUI o una capa de dominio y no sabe con qué | Los tipos de prueba con su procedencia, qué prueba cada capa de Clean Architecture, base real o doble, y el mapa «estoy acá → aplico esto». Define el marco de referencia |
 | [Pruebas-Unitarias-Y-Arquitectura.md](Guides/Test-Guide/Pruebas-Unitarias-Y-Arquitectura.md) | Quien escribe la primera prueba que no abre un navegador | Qué es una unidad según dónde vive el código; cómo elegir el doble; cómo se prueban los ViewModels de MAUI sin el workload |
-| [Pruebas-De-Interfaz-Por-Pantalla.md](Guides/Test-Guide/Pruebas-De-Interfaz-Por-Pantalla.md) | Quien tiene que probar `MovilidadUrbana.MAUI` sin `GetByTestId` | Cuando no hay DOM: árbol de accesibilidad, niveles de localización, Appium y `AutomationId`, y lo que se hizo con `adb` en un teléfono físico |
+| [Pruebas-De-Interfaz-Por-Pantalla.md](Guides/Test-Guide/Pruebas-De-Interfaz-Por-Pantalla.md) | Quien tiene que probar `MovilidadUrbana.MAUI` sin `GetByTestId` | Cuando no hay DOM: árbol de accesibilidad, niveles de localización, Appium y `AutomationId`, lo que se hizo con `adb` en un teléfono físico y la suite Appium que corre contra él |
 
 ### [Guides/](Guides/) — ramas, integración y releases
 

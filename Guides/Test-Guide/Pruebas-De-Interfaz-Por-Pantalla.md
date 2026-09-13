@@ -2,7 +2,7 @@
 
 > **De qué va** — Cómo se prueba una interfaz que no es un documento HTML: una app Android o de escritorio, donde no hay DOM que consultar y lo que existe es un árbol de controles nativos, una pantalla de píxeles y un dispositivo. Qué localiza cada enfoque, qué cuesta, y qué se traslada del método E2E de la web.
 > **Para quién** — Quien ya sabe escribir una E2E con Playwright y tiene que probar `MovilidadUrbana.MAUI` —o cualquier app MAUI, WPF o WinUI— sin `page.GetByTestId`.
-> **Qué deja** — Los tres niveles de localización (árbol de accesibilidad, texto, coordenadas) con su fragilidad; la herramienta que Microsoft recomienda para MAUI y cómo se conecta con `AutomationId`; lo que se hizo de verdad en el laboratorio con `adb` en un teléfono físico, con su alcance declarado; y el criterio para decidir qué probar en el dispositivo y qué dejar en el ViewModel.
+> **Qué deja** — Los tres niveles de localización (árbol de accesibilidad, texto, coordenadas) con su fragilidad; la herramienta que Microsoft recomienda para MAUI y cómo se conecta con `AutomationId`; lo que se hizo de verdad en el laboratorio con `adb` y con Appium en un teléfono físico, con su alcance declarado; y el criterio para decidir qué probar en el dispositivo y qué dejar en el ViewModel.
 
 **Qué es:** el tercer documento de `Guides/Test-Guide/`. Cubre el escenario S4 en el contexto
 C-Móvil (y, por extensión declarada, C-Escritorio) del
@@ -21,7 +21,7 @@ emulador**, y eso decide qué corre en CI y qué no.
 - **[2. Qué promete una prueba de pantalla](#2-qué-promete-una-prueba-de-pantalla)** — lo mismo que la E2E web, con un dispositivo en el medio
 - **[3. Los tres niveles de localización](#3-los-tres-niveles-de-localización)** — accesibilidad, texto, posición; y la fragilidad de cada uno
 - **[4. Las herramientas](#4-las-herramientas)** — Appium para MAUI, UI Automator y Espresso en Android, `adb` como instrumento mínimo
-- **[5. Lo que se hizo en el laboratorio](#5-lo-que-se-hizo-en-el-laboratorio)** — el teléfono por USB, el volcado del árbol, los toques por coordenadas y las capturas
+- **[5. Lo que se hizo en el laboratorio](#5-lo-que-se-hizo-en-el-laboratorio)** — el teléfono por USB, el volcado del árbol, los toques por coordenadas, las capturas y la suite Appium
 - **[6. Lo que se traslada de la E2E web y lo que no](#6-lo-que-se-traslada-de-la-e2e-web-y-lo-que-no)**
 - **[7. Criterios de diseño](#7-criterios-de-diseño)** — qué va al dispositivo, qué va al ViewModel, cómo se espera, cómo se aísla
 - **[8. Lo que este documento no cubre](#8-lo-que-este-documento-no-cubre)**
@@ -215,8 +215,8 @@ El SDK de Android trae `adb`, y con tres comandos se tiene un ciclo completo:
 
 Es el nivel «driver» a mano. Lo que falta para que sea una *prueba* es el bucle que localiza por
 identificador, deriva la coordenada, actúa y **afirma** sobre el árbol siguiente. En el laboratorio
-ese bucle fue un guion de apoyo de la sesión de trabajo, no un proyecto de pruebas: por eso la §5
-declara su alcance con cuidado.
+ese bucle fue primero un guion de apoyo de la sesión de trabajo (§5.3) y después la suite Appium de
+la §5.5, que hace lo mismo con el driver.
 
 ---
 
@@ -296,9 +296,9 @@ indexada **[E: evidencia/2026-09-12-maui/README.md]**.
 
 | Es | No es |
 | --- | --- |
-| Una verificación por ejecución de cada promesa de las dos pantallas, con evidencia guardada | Una suite de pruebas: nadie la corre con `dotnet test` y ninguna afirmación es automática |
-| El mismo método de localización que usaría Appium (identificador → elemento → acción) | Reproducible sin el teléfono: depende de `ZE22223QKV` conectado |
-| La base para escribir la suite Appium: los identificadores ya están y se sabe qué se ve en cada estado | Regresión: si mañana se rompe el editor, nada lo avisa |
+| Una verificación por ejecución de cada promesa de las dos pantallas, con evidencia guardada | Una suite de pruebas: nadie lo corre con `dotnet test` y ninguna afirmación es automática |
+| El mismo método de localización que usa Appium (identificador → elemento → acción) | Reproducible sin el teléfono: depende de `ZE22223QKV` conectado |
+| La base sobre la que se escribió la suite de la §5.5 | Regresión: eso lo hace la suite |
 
 ### 5.4 ¿Qué encontró el recorrido que las 18 unitarias no vieron?
 
@@ -316,6 +316,40 @@ indexada **[E: evidencia/2026-09-12-maui/README.md]**.
 La cuarta fila es la que justifica todo el documento: **un dato mal capturado por el teclado del
 sistema pasó la validación de dominio, la de aplicación y las 18 pruebas del ViewModel**, porque
 para todas ellas «125» es una distancia válida. Solo se vio tocando el teléfono.
+
+### 5.5 ¿Y la suite Appium?
+
+**Respuesta: existe, tiene cinco casos, y corre en verde contra el teléfono desde el devcontainer con `dev.sh uitests`.**
+
+`tests/MovilidadUrbana.MAUI.UITests` sigue la forma de la guía de Microsoft **[B: 7]** —`[SetUpFixture]`
+que abre una sesión `AndroidDriver` con `AutomationName = "UIAutomator2"`, una clase base, NUnit—
+con tres diferencias que salieron de la §5.3 y de la §7:
+
+| Decisión | Dónde | Por qué |
+| --- | --- | --- |
+| Esperas por condición, hasta 60 s, nunca `Task.Delay` fijo | `PruebaDePantalla.Esperar` **[E: tests/MovilidadUrbana.MAUI.UITests/Infraestructura/PruebaDePantalla.cs]** | La primera corrida falló con 30 s: guardar y volver a la lista puede pasarlos en el moto e6 play |
+| Cerrar el teclado y **esperar a que se cierre** antes de tocar | `CerrarTeclado` | Un toque durante la animación aterriza en otro lugar |
+| `UiScrollable.scrollIntoView` para lo que queda debajo del pliegue | `Ver`, `VerTexto` | «Eliminar localidad» no está en pantalla al abrir el editor; la segunda corrida falló ahí |
+| `[SetUp]` que vuelve atrás hasta ver la barra de pestañas | `IrAPestaña` | Una prueba que falla en el editor lo deja abierto sin pestañas y tumbaría a las siguientes |
+| Nombre único por corrida en el alta | `LocalidadesTests.AltaEdicionYBaja` | El dispositivo conserva los datos: un resto de una corrida a medias no puede chocar |
+| `ActivateApp` al abrir la sesión y esperar la primera pantalla | `SesionDeAppium.Abrir` **[E: tests/MovilidadUrbana.MAUI.UITests/Infraestructura/SesionDeAppium.cs]** | Con `NoReset`, si el proceso quedó vivo en segundo plano el driver no lo trae al frente: el log de Appium dice «already running and noReset is enabled» y las cinco pruebas fallaron buscando la pestaña |
+| `[SetUpFixture]` en el namespace raíz del proyecto | `SesionDeAppium.cs` | NUnit lo aplica solo a su namespace y a los de abajo; en `…Infraestructura` no alcanzaba a las pruebas |
+| `[assembly: NonParallelizable]` | `ParalelismoDelEnsamblado.cs` | Una pantalla |
+| `[Register("ar.lab.movilidadurbana.MainActivity")]` | `MainActivity.cs` | Sin él, la activity se llama `crc…MainActivity` y Appium no la puede lanzar por nombre **[B: 7]** |
+
+Los cinco casos: filtro sin coincidencias y «Limpiar filtro»; alta inválida con `aviso`; alta,
+edición y baja confirmada; paso 1 vacío que no avanza; los tres pasos con «12,5» y el resumen con
+«12,5 km». Lo que se observó **[V 2026-09-13]**: dos corridas seguidas 5/5 en verde (3 min 21 s y
+3 min 5 s), y una falsificación —esperar «Paso 2 de 3» donde tiene que decir «Paso 1 de 3»— que puso
+en rojo exactamente esa prueba (`Expected: "Paso 2 de 3" But was: "Paso 1 de 3"`) con las otras
+cuatro en verde. Los registros, el `.trx`, la falsificación y las capturas que cada prueba adjunta
+están en `evidencia/2026-09-13-uitests/` **[E: evidencia/2026-09-13-uitests/README.md]**. Antes de
+eso hubo tres corridas en rojo por defectos de la suite, no de la app; el README de la evidencia
+dice cuáles.
+
+Lo que la suite **no** hace, a propósito: no borra los datos de la app (`pm clear`) antes de correr
+—cada prueba deja lo que encontró—, y no corre en CI: `android.yml` sigue compilando el APK sin
+ejecutarlo.
 
 ---
 
@@ -417,13 +451,10 @@ quedaría sin respaldo.
 
 ## 8. Lo que este documento no cubre
 
-- **Una suite Appium escrita y corriendo.** No existe en el laboratorio; la §4.1 muestra la forma
-  según la guía de Microsoft y la §5 muestra que los identificadores y los estados ya están. Es el
-  paso siguiente natural, y está fuera del alcance de este documento.
+- **Appium en CI.** La suite de la §5.5 corre desde el devcontainer contra el teléfono; cómo
+  correrla en un runner con emulador no se probó.
 - **iOS, Mac Catalyst, Windows y escritorio en general** (WinAppDriver, FlaUI, WinUI). La tabla de
   drivers de **[B: 7]** los nombra; nada de esta guía los verificó.
-- **Emuladores en CI** y granjas de dispositivos. Se afirma solo que `android.yml` no ejecuta la
-  app; cómo hacerlo ejecutar en un runner no se probó.
 - **Comparación automática de imágenes.** Se describe como nivel de juicio (§3.3); no se usó ninguna
   herramienta.
 - **Pruebas en el proceso de la app** (device runners, XHarness, las plantillas `androidtest` de

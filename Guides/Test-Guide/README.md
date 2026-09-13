@@ -17,7 +17,7 @@ Se leen en este orden si es la primera vez; si no, por la columna del medio.
 | --- | --- | --- |
 | [Panorama-De-Pruebas-Automatizadas.md](Panorama-De-Pruebas-Automatizadas.md) | Quien ya escribió E2E y tiene que probar una API, una app MAUI o una capa de dominio, y no sabe con qué | Los tipos de prueba con su procedencia (pirámide, trofeo, dobles de Meszaros); qué prueba cada capa de Clean Architecture; base real o doble; qué cambia entre web, API y móvil; y el mapa «estoy acá → aplico esto». **Define el marco de referencia** que los otros dos usan |
 | [Pruebas-Unitarias-Y-Arquitectura.md](Pruebas-Unitarias-Y-Arquitectura.md) | Quien tiene que escribir la primera prueba que no abre un navegador | Qué es una unidad según dónde vive el código: la regla pura, el servicio con colaboradores, el ViewModel detrás de la plataforma. Cómo elegir el doble. Cómo se prueba lo que vive en `net10.0-android` sin el workload |
-| [Pruebas-De-Interfaz-Por-Pantalla.md](Pruebas-De-Interfaz-Por-Pantalla.md) | Quien tiene que probar `MovilidadUrbana.MAUI` sin `GetByTestId` | Cuando no hay DOM: el árbol de accesibilidad, los tres niveles de localización, Appium y `AutomationId`, lo que se hizo con `adb` en el moto e6 play y su alcance declarado, y qué va al dispositivo y qué al ViewModel |
+| [Pruebas-De-Interfaz-Por-Pantalla.md](Pruebas-De-Interfaz-Por-Pantalla.md) | Quien tiene que probar `MovilidadUrbana.MAUI` sin `GetByTestId` | Cuando no hay DOM: el árbol de accesibilidad, los tres niveles de localización, Appium y `AutomationId`, lo que se hizo con `adb` en el moto e6 play, la suite Appium que corre contra él, y qué va al dispositivo y qué al ViewModel |
 
 ## El mapa, en una pantalla
 
@@ -51,6 +51,5 @@ que es dueña; el criterio compartido vive en un solo lugar.
 ## Lo que no hay acá, declarado
 
 Ninguno de los tres documentos cubre pruebas de carga, de contrato entre servicios, de mutación, de
-seguridad ni de cobertura como métrica; tampoco iOS, Windows ni emuladores en CI; ni una suite Appium
-escrita. Cada documento lo declara en su sección «Lo que no cubre», con el motivo: nada del
+seguridad ni de cobertura como métrica; tampoco iOS, Windows ni emuladores en CI. Cada documento lo declara en su sección «Lo que no cubre», con el motivo: nada del
 laboratorio lo ejercita, y la regla es no afirmar lo que no se verificó.

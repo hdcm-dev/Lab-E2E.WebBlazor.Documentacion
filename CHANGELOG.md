@@ -8,6 +8,14 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ### Añadido
 
+- **`Pruebas-De-Interfaz-Por-Pantalla.md` §5.5 — la suite Appium**: el laboratorio ya tiene
+  `MovilidadUrbana.MAUI.UITests` (5 casos) corriendo contra el teléfono. La sección documenta sus
+  decisiones —esperas por condición, teclado cerrado antes de tocar, `UiScrollable`, `ActivateApp`
+  con `NoReset`, `[SetUpFixture]` en el namespace raíz, nombre único por corrida— con el defecto que
+  motivó cada una, y lo observado el 2026-09-13: dos corridas 5/5 y una falsificación que pone en rojo
+  solo la prueba modificada. §4.3, §5.3, §8 y el README de `Test-Guide/` dejan de decir que la suite
+  no existe.
+
 - **`Guides/Test-Guide/`** — tres guías de estudio que ubican a la E2E por navegador entre los demás
   tipos de prueba, con un marco de referencia común (escenarios S1–S6, contextos, actores) y un
   README con el mapa. `Panorama-De-Pruebas-Automatizadas.md`: taxonomía con procedencia (pirámide de
