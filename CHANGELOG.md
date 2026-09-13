@@ -8,6 +8,19 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ### Añadido
 
+- **`Guides/Test-Guide/`** — tres guías de estudio que ubican a la E2E por navegador entre los demás
+  tipos de prueba, con un marco de referencia común (escenarios S1–S6, contextos, actores) y un
+  README con el mapa. `Panorama-De-Pruebas-Automatizadas.md`: taxonomía con procedencia (pirámide de
+  Cohn/Fowler, trofeo de Dodds, los cinco dobles de Meszaros), qué prueba cada capa de Clean
+  Architecture, la estrategia de base de datos según EF Core, qué cambia entre web, API y móvil, y el
+  mapa «estoy acá → aplico esto». `Pruebas-Unitarias-Y-Arquitectura.md`: la unidad en el dominio, en
+  la aplicación y en MVVM, la elección del doble, y cómo se compilan las capas de la app Android como
+  archivos enlazados. `Pruebas-De-Interfaz-Por-Pantalla.md`: el árbol de accesibilidad como DOM, los
+  tres niveles de localización, Appium/UI Automator/Espresso, el recorrido real con `adb` en el moto
+  e6 play y su alcance declarado. Catorce fuentes consultadas el 2026-09-12 con su grado de
+  verificación; 68 citas a archivos de `Lab-E2E.WebBlazor` en `10ce735`, comprobadas una por una;
+  56 enlaces internos que resuelven.
+
 - **`ia-db/indexes/12_Api-REST.md`** — qué expone `MovilidadUrbana.ApiWeb`, la sesión por encabezado
   `X-Sesion-Id`, los errores como `ValidationProblemDetails` con las mismas claves que la web, sus
   11 pruebas en proceso y lo que la API todavía no tiene.

@@ -44,6 +44,18 @@ Se leen en este orden si es la primera vez; si no, por la columna del medio.
 | [Template-SDD-Aplicado.md](Guides/E2E-Guide/Template-SDD-Aplicado.md) | Quien construye la superficie | Qué se aplicó del template SDD, qué se decidió al aplicarlo y cómo se verificó |
 | [Notas.GitHub.md](Guides/E2E-Guide/Notas.GitHub.md) | Quien administra el repositorio | Cómo se evita que un pull request desde un fork corra en el runner propio |
 
+### [Guides/Test-Guide/](Guides/Test-Guide/) — pruebas automatizadas más allá del navegador
+
+Ubica a la E2E por navegador entre los demás tipos de prueba —unitarias, de integración, de API, de
+pantalla nativa— con un marco de referencia común y todo anclado al laboratorio o a fuentes de la
+industria. Su [README](Guides/Test-Guide/README.md) trae el mapa.
+
+| Documento | Para quién | De qué va |
+| --- | --- | --- |
+| [Panorama-De-Pruebas-Automatizadas.md](Guides/Test-Guide/Panorama-De-Pruebas-Automatizadas.md) | Quien tiene que probar una API, una app MAUI o una capa de dominio y no sabe con qué | Los tipos de prueba con su procedencia, qué prueba cada capa de Clean Architecture, base real o doble, y el mapa «estoy acá → aplico esto». Define el marco de referencia |
+| [Pruebas-Unitarias-Y-Arquitectura.md](Guides/Test-Guide/Pruebas-Unitarias-Y-Arquitectura.md) | Quien escribe la primera prueba que no abre un navegador | Qué es una unidad según dónde vive el código; cómo elegir el doble; cómo se prueban los ViewModels de MAUI sin el workload |
+| [Pruebas-De-Interfaz-Por-Pantalla.md](Guides/Test-Guide/Pruebas-De-Interfaz-Por-Pantalla.md) | Quien tiene que probar `MovilidadUrbana.MAUI` sin `GetByTestId` | Cuando no hay DOM: árbol de accesibilidad, niveles de localización, Appium y `AutomationId`, y lo que se hizo con `adb` en un teléfono físico |
+
 ### [Guides/](Guides/) — ramas, integración y releases
 
 | Documento | Para quién | De qué va |
