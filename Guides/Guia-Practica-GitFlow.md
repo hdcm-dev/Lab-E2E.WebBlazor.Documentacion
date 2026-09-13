@@ -778,7 +778,7 @@ afirma que la primera opción real del desplegable es `"Corrientes (Corrientes)"
 git checkout main
 git pull --ff-only
 git checkout -b feature/151-listado-mas-recientes-primero
-# src/MovilidadUrbana.Infraestructura/Persistencia/RepositorioDeLocalidades.cs
+# src/MovilidadUrbana.Web/Infraestructura/Persistencia/RepositorioDeLocalidades.cs
 #   .OrderBy(l => l.Id)  →  .OrderByDescending(l => l.Id)
 # ... más la prueba propia del ABM, en verde ...
 git push -u origin feature/151-listado-mas-recientes-primero

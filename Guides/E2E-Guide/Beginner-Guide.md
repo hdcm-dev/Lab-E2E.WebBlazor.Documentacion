@@ -155,7 +155,7 @@ no dice qué componente se rompió, solo que el recorrido dejó de funcionar.
 
 | No es | Por qué |
 | --- | --- |
-| Una prueba unitaria con navegador | Una unitaria verifica una regla aislada. `ReglasDeLocalidad` **[E: src/MovilidadUrbana.Dominio/Reglas/ReglasDeLocalidad.cs]** merece unitarias; el recorrido de alta merece una E2E |
+| Una prueba unitaria con navegador | Una unitaria verifica una regla aislada. `ReglasDeLocalidad` **[E: src/MovilidadUrbana.Web/Dominio/Reglas/ReglasDeLocalidad.cs]** merece unitarias; el recorrido de alta merece una E2E |
 | Una prueba de integración de API | La de API llama al endpoint sin navegador. La E2E pasa por el DOM, el CSS y el JavaScript reales |
 | Una prueba de carga | Verifica comportamiento funcional, no cuántos usuarios soporta |
 | Un reemplazo del testeo manual exploratorio | Automatiza lo conocido y repetitivo; descubrir lo desconocido sigue siendo trabajo humano |
@@ -716,10 +716,10 @@ como hace el caso de la baja confirmada, que verifica el aviso, el conteo **y** 
 
 Cada caso del laboratorio arranca con las mismas dos localidades —Corrientes y Resistencia— porque la
 aplicación siembra ese juego la primera vez que la sesión pide o toca localidades
-**[E: src/MovilidadUrbana.Infraestructura/Persistencia/SembradorDeSesion.cs, líneas 13-17]**. El
+**[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/SembradorDeSesion.cs, líneas 13-17]**. El
 disparo no está en un middleware ni en el arranque: cada operación del repositorio de localidades
 empieza llamando a `AsegurarAsync`, y es esa llamada la que crea la marca de sesión y las dos filas
-**[E: src/MovilidadUrbana.Infraestructura/Persistencia/RepositorioDeLocalidades.cs, líneas 20-22]**.
+**[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/RepositorioDeLocalidades.cs, líneas 20-22]**.
 La prueba no crea los datos ni los borra al terminar: recibe un espacio limpio por construcción.
 
 Es una de las tres estrategias posibles, y conviene conocerlas:
@@ -775,7 +775,7 @@ real solo debería correr un subconjunto de solo lectura. **[C]**
 >    aplicación», pero la parte interesante es *cuándo*: no hay middleware ni siembra al arrancar,
 >    cada operación del repositorio empieza llamando a `AsegurarAsync` y es esa llamada la que crea
 >    la marca de sesión y las dos filas
->    **[E: src/MovilidadUrbana.Infraestructura/Persistencia/RepositorioDeLocalidades.cs, líneas 20-22]**.
+>    **[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/RepositorioDeLocalidades.cs, líneas 20-22]**.
 >    **Reparo:** las tres opciones que ofrece la pregunta no son excluyentes ni valen lo mismo según
 >    dónde corras. Contra un entorno ya desplegado (**CTX-03**) la restricción es otra —no destruir
 >    estado ajeno— y «los siembra la aplicación» recién es una respuesta aceptable porque el
@@ -840,7 +840,7 @@ compartida, dos pruebas que corren a la vez se pisan.
 
 El laboratorio resuelve el problema en la aplicación, no en las pruebas: un middleware emite una
 cookie de sesión y todos los repositorios filtran por ella
-**[E: src/MovilidadUrbana.Infraestructura/Sesiones/MiddlewareDeSesion.cs]**. La prueba solo tiene
+**[E: src/MovilidadUrbana.Web/Sesiones/MiddlewareDeSesion.cs]**. La prueba solo tiene
 que estrenar la cookie antes de navegar:
 
 ```csharp
@@ -887,7 +887,7 @@ El aislamiento por sesión es lógico —cada prueba ve solo sus filas—, pero 
 la vez sobre el único archivo SQLite hay que habilitar además la concurrencia física: la aplicación
 pone la base en `journal_mode=WAL` al preparar el esquema y el fixture le pasa `Default Timeout=30`
 en la cadena de conexión
-**[E: src/MovilidadUrbana.Infraestructura/Persistencia/PreparadorDeBaseDeDatos.cs, línea 29;
+**[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/PreparadorDeBaseDeDatos.cs, línea 29;
 tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs, línea 68]**.
 
 Esta es la técnica que hace que la corrida de chromium termine en 7 segundos con 22 casos **[V]**.
@@ -1144,7 +1144,7 @@ antes obligaba a agregar capturas de pantalla a mano y adivinar el resto.
 >    testigo, y qué hace que nadie pueda escribir un caso sin esperarlo.
 > 2. *Dónde vive el estado que dos pruebas se podrían pisar.* En el laboratorio vive en un único
 >    archivo SQLite y lo particiona una cookie que emite un middleware y por la que filtran todos
->    los repositorios **[E: src/MovilidadUrbana.Infraestructura/Sesiones/MiddlewareDeSesion.cs]**:
+>    los repositorios **[E: src/MovilidadUrbana.Web/Sesiones/MiddlewareDeSesion.cs]**:
 >    la partición está en la aplicación, no en las pruebas
 >    ([§7.3](#73-aislar-el-estado-cuando-vive-en-el-servidor)). **Reparo:** la partición lógica no
 >    alcanza, y contestar solo eso deja pasar el fallo. Que cada prueba vea únicamente sus filas no

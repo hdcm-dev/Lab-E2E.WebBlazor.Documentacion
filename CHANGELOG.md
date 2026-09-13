@@ -14,6 +14,15 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ### Cambiado
 
+- **Las guías vuelven a citar las capas dentro de `MovilidadUrbana.Web`**: en `Lab-E2E.WebBlazor`
+  las tres aplicaciones —web, API y la nueva app Android `MovilidadUrbana.MAUI`— quedaron
+  independientes, cada una con sus carpetas `Dominio/`, `Aplicacion/` e `Infraestructura/`, y los
+  proyectos de capa compartidos se eliminaron. Las citas `src/MovilidadUrbana.{Dominio,Aplicacion,
+  Infraestructura}/…` de `Beginner-Guide`, `Quick-Guide-ABM`, `Caso-Encuesta-Page` y las dos guías
+  prácticas pasan a `src/MovilidadUrbana.Web/{Dominio,Aplicacion,Infraestructura}/…`, y el middleware
+  de sesión a `src/MovilidadUrbana.Web/Sesiones/`. Las líneas citadas se comprobaron una por una y no
+  corrieron. La ia-db no se toca en este cambio: está en reestructuración.
+
 - **La ia-db pasa a versión 1.1** por `Actualizar-Indexado.md`: las capas de Movilidad Urbana ya no
   son carpetas de `MovilidadUrbana.Web` sino proyectos propios —`Dominio`, `Aplicacion`,
   `Infraestructura`— y hay una segunda cabeza, la API. Se corrigen `00`, `01`, `05` y `06`; `02` y `03`

@@ -175,14 +175,14 @@ public async Task EstrenarSesionAsync()
 Del lado de la aplicación hace falta un middleware que emita la cookie, repositorios que filtren por
 ella y una marca durable de que esa sesión ya recibió su siembra —acá, la entidad `Sesion`—: sin la
 marca, el caso que borra todo vuelve a sembrar y el estado vacío nunca aparece.
-**[E: src/MovilidadUrbana.Dominio/Entidades/Sesion.cs:7]**
-**[E: src/MovilidadUrbana.Infraestructura/Persistencia/SembradorDeSesion.cs:27]**
+**[E: src/MovilidadUrbana.Web/Dominio/Entidades/Sesion.cs:7]**
+**[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/SembradorDeSesion.cs:27]**
 El desarrollo está en [§7.3 de la guía de estudio](Beginner-Guide.md#73-aislar-el-estado-cuando-vive-en-el-servidor).
 
 El aislamiento lógico no alcanza: sobre un único archivo SQLite hay que habilitar además la
 concurrencia física, con `PRAGMA journal_mode=WAL` al arrancar y un `Default Timeout` en la cadena
 de conexión.
-**[E: src/MovilidadUrbana.Infraestructura/Persistencia/PreparadorDeBaseDeDatos.cs:29]**
+**[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/PreparadorDeBaseDeDatos.cs:29]**
 
 La base de las pruebas no la elige la aplicación: vive en `datos-e2e/` en la raíz del repositorio y
 el fixture se la impone al lanzarla, por `ConnectionStrings__BaseDeDatos`.
