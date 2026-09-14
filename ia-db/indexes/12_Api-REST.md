@@ -5,17 +5,22 @@
 > los controllers.
 > **Fuente primaria**: `src/MovilidadUrbana.ApiWeb/`, `tests/MovilidadUrbana.ApiWeb.Tests/`,
 > `evidencia/2026-09-12-capas-y-api/`.
-> **Vigencia**: 2026-09-12, commit `3b53d14`.
+> **Vigencia**: 2026-09-12, commit `10ce735`.
 
 ## Qué es
 
-La misma aplicación de Movilidad Urbana **sin interfaz**: una segunda cabeza sobre las mismas capas
-que la web —`MovilidadUrbana.Aplicacion` e `Infraestructura`—, con dos controllers. Existe desde el
-2026-09-12, y para que existiera sin duplicar las reglas las capas se extrajeron a proyectos propios
-— ver [01](01_Arquitectura.md). Escucha en `http://localhost:5250` (`launchSettings.json`).
+La misma aplicación de Movilidad Urbana **sin interfaz**: dos controllers sobre casos de uso,
+repositorios y base **equivalentes a los de la web, pero propios**. Es un proyecto independiente:
+trae `Dominio/`, `Aplicacion/` e `Infraestructura/` en el namespace `MovilidadUrbana.ApiWeb.*`,
+idénticos a los de la web salvo el `namespace` ([01](01_Arquitectura.md)). Existe desde el
+2026-09-12; ese día las capas pasaron primero a proyectos compartidos (`88e5caa`) y volvieron a
+cada aplicación como carpetas (`10ce735`). Escucha en `http://localhost:5250` (`launchSettings.json`).
 
 ```
 src/MovilidadUrbana.ApiWeb/
+├── Dominio/       Entidades, reglas y catálogos (copia propia)
+├── Aplicacion/    Casos de uso, modelos, políticas, Resultado (copia propia)
+├── Infraestructura/  EF Core sobre SQLite, repositorios, siembra, ContextoDeSesion (copia propia)
 ├── Controllers/   LocalidadesController, EncuestasController, ProblemasDeValidacion
 ├── Contratos/     DTOs de entrada (Solicitud*) y de salida (*Dto)
 ├── Sesiones/      MiddlewareDeSesionPorEncabezado
@@ -48,8 +53,8 @@ cada pedido. Verificado el 2026-09-12: `200 text/html` en Development y `404` en
 ## La sesión: encabezado `X-Sesion-Id`
 
 La web aísla los datos de cada visitante con una cookie; en una API eso no es idiomático.
-`MiddlewareDeSesionPorEncabezado` lee `X-Sesion-Id` y lo establece en el mismo `ContextoDeSesion` de
-Infraestructura. **Si el cliente no lo manda, la respuesta lo devuelve** —un identificador nuevo—
+`MiddlewareDeSesionPorEncabezado` lee `X-Sesion-Id` y lo establece en el `ContextoDeSesion` de su
+propia `Infraestructura/`. **Si el cliente no lo manda, la respuesta lo devuelve** —un identificador nuevo—
 para que lo repita en las siguientes. Sin repetirlo, cada petición es una sesión distinta: la
 siembra vuelve a aparecer y lo creado no.
 
@@ -59,7 +64,8 @@ estrena un `X-Sesion-Id`, igual que cada E2E estrena su cookie.
 ## Errores
 
 - **Validación**: `400` con `ValidationProblemDetails` (RFC 9457). `ProblemasDeValidacion.De`
-  traduce el `Resultado.Errores` de Aplicación, así que las claves son **las mismas que en la web**:
+  traduce el `Resultado.Errores` de su `Aplicacion/`, así que las claves son **las mismas que en la web**
+  (las copias son idénticas):
   `nombre`, `provincia`, `codigoPostal`, `habitantes`, `edad`, `medios`, … La API no valida por su
   cuenta: reutiliza `ServicioDeLocalidades.GuardarAsync` y `ServicioDeEncuestas.ValidarPaso`.
 - **No encontrado**: `404` sin cuerpo (`NotFound()`).
@@ -81,7 +87,7 @@ base SQLite **propia de la corrida** en la carpeta temporal, y la borra al termi
 | `EncuestasTests` (4) | Registra una completa (`201`, resumen `"Colectivo, Bicicleta"` y `"12,5 km"`, contador 1) · incompleta (`400` con las ocho claves) · valida un paso sin registrar · paso 4 es `404` |
 | `DocumentacionTests` (2) | El contrato declara las rutas · Scalar se sirve y apunta al contrato |
 
-`ci.yml` las corre en el job `compilacion`, después de las unitarias.
+`ci.yml` las corre en el job `compilacion`, después de las unitarias y antes de las de ViewModels.
 
 **Verificado el 2026-09-12** (`evidencia/2026-09-12-capas-y-api/`): 13/13; una falsificación
 —responder `200` en vez de `201` en el alta— pone un caso en rojo; y sobre Kestrel, el OpenAPI con

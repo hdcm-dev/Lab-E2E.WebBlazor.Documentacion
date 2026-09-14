@@ -4,8 +4,8 @@
 > qué `data-testid` se las ubica, cómo está resuelto el acceso en Login y cómo se prueban sin
 > fixture—, para que un agente no las confunda con Movilidad Urbana ni las «uniforme» con ella.
 > **Fuente primaria**: `src/WebBlazor.HolaMundo/`, `src/WebBlazor.Login/`,
-> `tests/WebBlazor.{HolaMundo,Login}/`, `evidencia/`.
-> **Vigencia**: 2026-09-12, commit `88e5caa`.
+> `tests/WebBlazor.{HolaMundo,Login}.E2ETests/`, `evidencia/`.
+> **Vigencia**: 2026-09-12, commit `10ce735`.
 
 ## De dónde vienen y para qué están
 
@@ -147,13 +147,14 @@ Del repositorio de origen no hacía falta traer su `README.md`, `CHANGELOG.md`, 
 `.devcontainer/` —imagen de Playwright + SDK + `libnss3-tools`, para confiar el certificado de
 desarrollo— ni su `scripts/pruebas.sh`: nada de eso es necesario con http. Se rescataron a
 `evidencia/` las corridas del template (`2026-09-01-aplicacion-template/`, en el commit `88e5caa`) y
-del testigo (`2026-09-03-testigo-de-hidratacion/`).
+del testigo (`2026-09-03-testigo-de-hidratacion/`). El renombre sin el prefijo `E2E.Base` dejó su
+propia evidencia en `2026-09-12-renombre/` (`holamundo.log`, `login.log`).
 
 ## Cómo verificar todo esto
 
 | Afirmación | Comprobación |
 | --- | --- |
-| URL fija de cada prueba | `grep -n localhost tests/WebBlazor.{HolaMundo,Login}/*.cs` |
+| URL fija de cada prueba | `grep -n localhost tests/WebBlazor.{HolaMundo,Login}.E2ETests/*.cs` |
 | Testigo en el marcado | `grep -rn estado-app src/WebBlazor.{HolaMundo,Login}/Components/Paginas/HolaMundo.razor` |
 | Cantidad de casos | `dotnet test <proyecto> --list-tests` |
 | El guard corta en el middleware | `curl -s -o /dev/null -w '%{redirect_url}' http://localhost:5181/HolaMundo` con la aplicación levantada |

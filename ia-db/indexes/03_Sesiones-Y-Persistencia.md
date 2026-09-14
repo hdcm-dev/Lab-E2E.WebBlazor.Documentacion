@@ -1,146 +1,140 @@
 # 03 — Sesiones y persistencia
 
-> **Propósito**: explicar el mecanismo que hace posible probar en paralelo contra un único servidor
-> y una única base, y cómo se guardan los datos.
-> **Fuente primaria**: `src/MovilidadUrbana.Infraestructura/`, `Components/App.razor` y
-> `Components/Routes.razor`.
-> **Vigencia**: 2026-09-12, commit `88e5caa`.
+> **Propósito**: cómo se aísla el estado por visitante —cookie en la web, encabezado en la API,
+> el dispositivo entero en Android— y cómo se persiste en SQLite con EF Core: esquema, siembra, WAL
+> y el ciclo de vida del `DbContext`.
+> **Fuente primaria**: `src/MovilidadUrbana.Web/Infraestructura/` (`Sesiones/`, `Persistencia/`,
+> `ServiciosDeInfraestructura.cs`; idéntico salvo el `namespace` en `ApiWeb/` y `MAUI/`),
+> `src/MovilidadUrbana.Web/Sesiones/MiddlewareDeSesion.cs`,
+> `src/MovilidadUrbana.ApiWeb/Sesiones/MiddlewareDeSesionPorEncabezado.cs`,
+> `src/MovilidadUrbana.MAUI/Servicios/SesionDelDispositivo.cs`, `App.razor`, `Routes.razor`.
+> **Vigencia**: 2026-09-12, commit `10ce735`.
 
-## El problema que resuelve
+## El problema
 
-En la versión estática del laboratorio cada prueba tenía su `localStorage`. Acá hay **una sola base
-SQLite** y todas las pruebas —incluidas las que corren en paralelo— la comparten. Sin aislamiento,
-un alta de una prueba aparecería en la tabla de otra.
+En `Lab-E2E.StaticHtml` cada prueba tenía su `localStorage`. Acá hay **una sola base SQLite** y
+todas las pruebas —incluidas las paralelas— la comparten. La solución es que la aplicación reparta
+un **espacio de datos por sesión** y que todo repositorio filtre por él (`README.md` §2).
 
-La solución es que la aplicación reparta un **espacio de datos por sesión**, y que todos los
-repositorios filtren por él.
-
-## El recorrido del identificador de sesión
-
-```mermaid
-sequenceDiagram
-    participant N as Navegador / prueba
-    participant M as MiddlewareDeSesion
-    participant A as App.razor (SSR)
-    participant R as Routes (circuito)
-    participant Rep as Repositorios
-
-    N->>M: GET /localidades (con o sin cookie)
-    M->>M: ¿cookie válida y es un documento?
-    M-->>N: Set-Cookie sesion-movilidad (solo si falta)
-    M->>A: ContextoDeSesion.Establecer(id)
-    A->>R: <Routes SesionId="@Sesion.Id" />
-    R->>R: OnParametersSet → Contexto.Establecer(SesionId)
-    R->>Rep: consultas ya filtradas por sesión
-```
-
-El paso que sorprende: **un circuito de Blazor Server no tiene acceso a la petición HTTP** que lo
-originó, así que la cookie no se puede leer desde una página. Se lee en `App.razor` —que sí se
-renderiza dentro de la petición— y se pasa como parámetro `string` al componente raíz `Routes`, que
-es el puente entre el render estático y el interactivo. Por eso el render mode se declara en la raíz
-y no por página (desviación declarada del template — ver [11](11_Template-Y-Superficies.md)).
-
-## Piezas
-
-### ContextoDeSesion
-
-`Infraestructura/Sesiones/ContextoDeSesion.cs`. Implementación *scoped* de `IContextoDeSesion`: un
-ámbito es una petición HTTP **o** un circuito de Blazor.
+## `ContextoDeSesion` (`Infraestructura/Sesiones/ContextoDeSesion.cs`)
 
 | Miembro | Valor / comportamiento |
 | --- | --- |
 | `NombreDeCookie` | `sesion-movilidad` |
 | `LargoMaximo` | 64 |
-| `Id` | Arranca con un `Guid` propio del ámbito (formato `n`) |
-| `Establecer(id)` | Solo asigna si `EsValido(id)` |
-| `EsValido` | No vacío y de largo ≤ 64 |
+| `Id` | Arranca en `Guid.NewGuid().ToString("n")`: un ámbito sin cookie nunca lee un espacio compartido |
+| `Establecer(id)` | Solo reemplaza si `EsValido(id)` |
+| `EsValido(id)` | No vacío ni espacios y largo ≤ 64 |
 
-El identificador provisorio del constructor no es decorativo: evita que un ámbito sin cookie termine
-leyendo o escribiendo en un espacio de datos compartido.
+Es *scoped* —una petición HTTP, un circuito o, en Android, el único ámbito de la aplicación— y la
+**misma instancia** sirve a `ContextoDeSesion` y a `IContextoDeSesion`
+(`ServiciosDeInfraestructura.cs`).
 
-### MiddlewareDeSesion
+## Tres formas de identificar la sesión
 
-`Infraestructura/Sesiones/MiddlewareDeSesion.cs`. Emite la cookie y publica el valor en el contexto.
+| | Web (`MiddlewareDeSesion`) | API (`MiddlewareDeSesionPorEncabezado`) |
+| --- | --- | --- |
+| Portador | Cookie `sesion-movilidad` | Encabezado `X-Sesion-Id` |
+| Si no llega | Emite una cookie **solo al pedir un documento** (GET, sin extensión, fuera de `/_framework` y `/_blazor`) | Toma el `Id` provisorio y lo devuelve en el **mismo encabezado** de la respuesta (`Response.OnStarting`) para que el cliente lo repita |
+| Opciones | `HttpOnly`, `IsEssential`, `SameSite=Lax`, `Path=/`, `MaxAge=1 día` | — |
+| Por qué así | Si se emitiera también en css/js —que el navegador pide en paralelo— la primera visita generaría varios identificadores y se quedaría con el último | Es la forma idiomática en una API; equivale a la cookie |
+| Prueba que lo verifica | «Cada prueba trabaja sobre su propio conjunto de datos» (`LocalidadesTests`) | «Sin encabezado de sesión, la respuesta devuelve uno» y «Cada sesión trabaja sobre su propio conjunto de datos» (`LocalidadesTests` de la API) |
 
-Opciones de la cookie: `HttpOnly`, `IsEssential`, `SameSite=Lax`, `Path=/`, `MaxAge` de 1 día.
+Cada prueba E2E escribe la cookie con un GUID propio antes de navegar (`PruebaE2E.EstrenarSesionAsync`);
+cada prueba de la API agrega el encabezado con un GUID propio (`Cliente()`).
 
-La regla no obvia: **la cookie se emite únicamente al pedir un documento**. `EsUnDocumento` exige
-GET, descarta `/_framework` y `/_blazor`, y descarta todo lo que tenga extensión. Si se emitiera
-también en las peticiones de css y js —que el navegador lanza en paralelo— la primera visita
-generaría varios identificadores a la vez y se quedaría con el último en llegar.
+**En Android el dispositivo es una sola sesión** (`Servicios/SesionDelDispositivo.cs`): el
+identificador se genera la primera vez, queda en `Preferences` bajo la clave `sesion-dispositivo`, y
+un único `IServiceScope` —abierto en el constructor y vivo lo que vive la aplicación— recibe
+`ContextoDeSesion.Establecer(id)`. Los ViewModels se crean desde ese ámbito con
+`ActivatorUtilities`, así los repositorios ya ven la sesión puesta. Los datos sobreviven a cerrar la
+aplicación. En las pruebas de ViewModels cada `Entorno` es «un dispositivo nuevo»: base propia y
+sesión provisoria ([13](13_App-Android.md)).
 
-### SembradorDeSesion
+## El puente al circuito de Blazor
 
-`Infraestructura/Persistencia/SembradorDeSesion.cs`. La primera vez que se toca una sesión le deja
-su juego inicial: **Corrientes** (Corrientes, 3400, 346 334) y **Resistencia** (Chaco, 3500,
-291 720).
+Un circuito **no tiene acceso a la petición HTTP** que lo originó. La cookie se lee en
+`App.razor` (`@inject ContextoDeSesion Sesion` → `<Routes SesionId="@Sesion.Id" />`) y `Routes`
+la establece en el `ContextoDeSesion` del ámbito del circuito en `OnParametersSet`, antes de que se
+renderice cualquier página. El parámetro es `string` porque debe ser serializable. Diagrama en
+[01](01_Arquitectura.md).
 
-Dos detalles de diseño:
-- La marca en la tabla `Sesiones` es lo que impide volver a sembrar cuando la persona borró todas
-  las localidades a mano. La prueba «Al borrar todas las localidades avisa que no hay datos»
-  depende exactamente de eso.
-- `SaveChangesAsync` va dentro de un `try/catch (DbUpdateException)` vacío a propósito: si otra
-  petición de la misma sesión ganó la carrera insertando la marca, los datos ya están.
+## Persistencia
 
-El campo `_yaVerificada` evita repetir la consulta dentro del mismo ámbito.
+### `ContextoDeDatos` (`Persistencia/ContextoDeDatos.cs`)
 
-### ContextoDeDatos
+Único lugar que conoce el motor. Tres `DbSet`: `Localidades`, `Encuestas`, `Sesiones`.
 
-`Infraestructura/Persistencia/ContextoDeDatos.cs` — el **único** lugar que conoce el motor.
-
-| `DbSet` | Entidad |
+| Entidad | Configuración |
 | --- | --- |
-| `Localidades` | `Localidad` |
-| `Encuestas` | `RespuestaDeEncuesta` |
-| `Sesiones` | `Sesion` |
+| `Sesion` | clave `Id` (`HasMaxLength(64)`) |
+| `Localidad` | `SesionId` ≤ 64 requerido, `Nombre` ≤ 60, `Provincia` ≤ 60, `CodigoPostal` ≤ 4, todos requeridos; **índice en `SesionId`** porque toda consulta del ABM filtra por sesión |
+| `RespuestaDeEncuesta` | `SesionId` ≤ 64, `Nombre` ≤ 80, índice en `SesionId`; `Medios` con `ValueConverter` lista ↔ texto separado por comas y `ValueComparer` por secuencia (SQLite no tiene tipo lista) |
 
-Mapeo relevante:
-- `Sesion.Id` es la clave, `HasMaxLength(64)`.
-- `Localidad`: `SesionId` (64) requerido, `Nombre` (60), `Provincia` (60), `CodigoPostal` (4), e
-  **índice por `SesionId`** —toda consulta del ABM filtra por sesión.
-- `RespuestaDeEncuesta`: `SesionId` (64), `Nombre` (80), índice por `SesionId`, y un
-  `ValueConverter` + `ValueComparer` para `Medios`: **SQLite no tiene tipo lista**, así que se
-  guardan como texto separado por comas.
+### `PreparadorDeBaseDeDatos.Preparar(IServiceProvider)`
 
-### PreparadorDeBaseDeDatos
+1. Crea la carpeta del `DataSource` si no existe.
+2. `EnsureCreated()` — **no migraciones**, a propósito: el laboratorio no versiona el esquema y así
+   el binario publicado arranca en cualquier máquina sin pasos previos.
+3. `PRAGMA journal_mode=WAL` — permite leer mientras otra conexión escribe; con las E2E en paralelo
+   varias sesiones tocan el mismo archivo a la vez.
 
-`Infraestructura/Persistencia/PreparadorDeBaseDeDatos.cs`, invocado desde `Program.cs` al arrancar:
+Lo invocan los dos `Program.cs`, `MauiProgram.cs` y el `Entorno` de las pruebas de ViewModels justo
+después de `Build()`. En el teléfono crea `movilidad.db` en `FileSystem.AppDataDirectory`.
 
-1. Resuelve el `DataSource` de la cadena de conexión y **crea la carpeta** si falta.
-2. `EnsureCreated()` — no migraciones. El laboratorio no versiona el esquema, y así el binario
-   publicado arranca en cualquier máquina sin pasos previos.
-3. `PRAGMA journal_mode=WAL` — permite leer mientras otra conexión escribe. Con las E2E en paralelo,
-   varias sesiones tocan el mismo archivo al mismo tiempo.
+### Cadenas de conexión
 
-### Los repositorios
+| Contexto | Cadena | Origen |
+| --- | --- | --- |
+| Por defecto (web en desarrollo) | `Data Source=datos/movilidad.db;Default Timeout=30` | `ServiciosDeInfraestructura.CadenaDeConexionPorDefecto` |
+| API | `Data Source=datos/movilidad-api.db;Default Timeout=30` | `ApiWeb/appsettings.json` |
+| Web bajo las E2E | `datos-e2e/movilidad.db` en la raíz del repositorio (o `BASE_DE_DATOS`) | `ServidorDeLaAplicacion.cs` vía `ConnectionStrings__BaseDeDatos` |
+| API bajo sus pruebas | `%TEMP%/movilidad-api-{guid}.db`, borrado (con `-wal` y `-shm`) al terminar | `FabricaDeApi.cs` |
+| Android | `{FileSystem.AppDataDirectory}/movilidad.db;Default Timeout=30` — almacenamiento privado de la app, sin permisos de red | `MauiProgram.cs` |
+| ViewModels bajo sus pruebas | `%TEMP%/movilidad-maui-{guid}.db` (sin `Default Timeout`), borrado con `ClearAllPools()` previo | `tests/MovilidadUrbana.MAUI.Tests/Entorno.cs` |
 
-`RepositorioDeLocalidades` y `RepositorioDeEncuestas`. Ambos reciben
-`IDbContextFactory<ContextoDeDatos>` y **abren un contexto por operación**: es lo recomendado en
-Blazor Server, porque un `DbContext` con alcance de ámbito viviría lo que dura el circuito —minutos
-u horas— y no está pensado para eso.
+`datos/`, `*.db`, `*.db-wal`, `*.db-shm` y `/datos-e2e/` están en `.gitignore`.
 
-Ninguna consulta sale del espacio de datos del visitante:
+### Repositorios (`Persistencia/`)
 
-| Operación | Aislamiento |
+Ambos usan `IDbContextFactory<ContextoDeDatos>` y **abren un contexto por operación**: en Blazor
+Server un `DbContext` de ámbito viviría lo que dura el circuito —minutos u horas— y no está pensado
+para eso (comentario en `RepositorioDeLocalidades.cs`).
+
+| `RepositorioDeLocalidades` | Comportamiento |
 | --- | --- |
-| `ListarAsync`, `ObtenerAsync` | `Where(l => l.SesionId == sesion.Id)`, con `AsNoTracking()` |
-| `AgregarAsync` | Asigna `SesionId` antes de insertar |
-| `ActualizarAsync` | Corta en silencio si la entidad no es de la sesión actual |
-| `EliminarAsync` | `ExecuteDeleteAsync` con el filtro de sesión en el `Where` |
-| Encuestas: `ContarAsync` | Cuenta solo las de la sesión |
+| `ListarAsync` | `AsegurarAsync` del sembrador → `AsNoTracking`, filtra `SesionId`, ordena por `Id` |
+| `ObtenerAsync(id)` | Siembra → busca por `Id` **y** `SesionId`: un id de otra sesión devuelve `null` |
+| `AgregarAsync` | Siembra → fija `SesionId` y guarda |
+| `ActualizarAsync` | Si `SesionId` no coincide, **no hace nada** (la garantía escrita en el código) |
+| `EliminarAsync(id)` | `ExecuteDeleteAsync` filtrando por `Id` y `SesionId` |
 
-`ListarAsync`, `ObtenerAsync` y `AgregarAsync` de localidades llaman antes a
-`sembrador.AsegurarAsync()`. `RepositorioDeEncuestas` no siembra nada.
+`RepositorioDeEncuestas`: `AgregarAsync` fija `SesionId` y devuelve el `Id`; `ContarAsync` cuenta
+por sesión. No pasa por el sembrador.
 
-La comprobación de `ActualizarAsync` es redundante —la entidad llegó de `ObtenerAsync`, que ya
-filtró— y está puesta para dejar la garantía escrita en el código y no en la memoria de quien lo lea.
+### `SembradorDeSesion.AsegurarAsync`
 
-## Dónde vive el archivo
+La primera vez que se toca una sesión inserta la marca `Sesion` y dos localidades:
 
-| Contexto | Ruta de la base |
-| --- | --- |
-| `dotnet run` (valor por defecto) | `datos/movilidad.db` |
-| Pruebas E2E | `datos-e2e/movilidad.db`, o lo que indique `BASE_DE_DATOS` |
+| Nombre | Provincia | CP | Habitantes |
+| --- | --- | --- | --- |
+| Corrientes | Corrientes | 3400 | 346334 |
+| Resistencia | Chaco | 3500 | 291720 |
 
-`.gitignore` ignora `/datos-e2e/` como carpeta y, en cualquier ruta, `*.db`, `*.db-wal` y `*.db-shm`
-—lo que cubre también `datos/`—.
+Un `bool _yaVerificada` por instancia (*scoped*) evita repetir la consulta dentro del mismo
+ámbito. Si otra petición de la misma sesión gana la carrera, el `DbUpdateException` se traga: los
+datos ya están. Como la marca `Sesion` persiste, **borrar las dos localidades no vuelve a
+sembrarlas** al recargar (lo verifica «Al borrar todas las localidades avisa que no hay datos»).
+
+## Observaciones
+
+- **Hecho**: la web y la API en desarrollo usan archivos SQLite distintos (`movilidad.db` y
+  `movilidad-api.db`), así que una sesión creada por la API no es visible desde la web ni al revés.
+  Ningún documento del repositorio afirma lo contrario.
+- **Hecho**: ninguna `Infraestructura/` depende de ASP.NET Core. `MiddlewareDeSesion` vive en
+  `MovilidadUrbana.Web/Sesiones/` justamente para eso: cuando estaba en la capa, la capa arrastraba
+  `Microsoft.AspNetCore.App` y no podía usarse desde la app Android (comentario del archivo y
+  `CHANGELOG.md` 2026-09-12).
+- **Hecho**: las tres aplicaciones tienen **tres bases distintas** y ninguna comparte datos con otra:
+  la app Android no habla con ningún servidor (`AndroidManifest.xml`: sin permiso `INTERNET` salvo el
+  que agrega el SDK en Debug para el depurador).

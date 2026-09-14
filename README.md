@@ -1,8 +1,10 @@
 # Lab-E2E.WebBlazor.Documentacion
 
-Documentación del laboratorio [Lab-E2E.WebBlazor](../Lab-E2E.WebBlazor): una aplicación .NET Blazor
-con render *interactive server* usada para practicar pruebas de extremo a extremo con Playwright y su
-integración en la cadena de desarrollo con GitHub Actions.
+Documentación del laboratorio [Lab-E2E.WebBlazor](../Lab-E2E.WebBlazor): tres aplicaciones .NET
+Blazor con render *interactive server* usadas para practicar pruebas de extremo a extremo con
+Playwright y su integración en la cadena de desarrollo con GitHub Actions, más una API REST y una app
+Android .NET MAUI sobre la misma temática, independientes entre sí, para estudiar las pruebas que no
+pasan por el navegador.
 
 ## ia-db
 
@@ -12,7 +14,7 @@ tabla de navegación indica qué índice cargar.
 
 | Workspace | Indexa | Punto de entrada |
 | --- | --- | --- |
-| [ia-db/](ia-db/) | [Lab-E2E.WebBlazor](../Lab-E2E.WebBlazor) — las tres aplicaciones, sus pruebas y sus workflows | [ia-db/README.md](ia-db/README.md) |
+| [ia-db/](ia-db/) | [Lab-E2E.WebBlazor](../Lab-E2E.WebBlazor) — las tres webs, la API REST y la app Android, sus seis suites de pruebas y sus seis workflows, en catorce índices (versión 2.0) | [ia-db/README.md](ia-db/README.md) |
 
 Hasta el 2026-09-12 hubo un segundo workspace, `ia-db/Base/`, para `Lab-E2E.WebBlazor.Base`. Ese
 repositorio se unificó en `Lab-E2E.WebBlazor` y su conocimiento vigente pasó a `ia-db/`, que ya no necesita subcarpeta por repositorio.

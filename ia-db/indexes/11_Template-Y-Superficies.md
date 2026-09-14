@@ -6,11 +6,11 @@
 > `Components/Componentes/`, `Theme/`, la sección «Diseño» de `README.md`,
 > `evidencia/2026-09-01-aplicacion-template/` y `Guides/E2E-Guide/Template-SDD-Aplicado.md` (en
 > `Lab-E2E.WebBlazor.Documentacion`).
-> **Vigencia**: 2026-09-12, commit `88e5caa`.
+> **Vigencia**: 2026-09-12, commit `10ce735`.
 
-## Las tres aplicaciones, la misma forma
+## Las tres aplicaciones web, la misma forma
 
-Las tres están construidas con el **template por defecto del Framework SDD**: Hola Mundo y Login
+Las tres webs están construidas con el **template por defecto del Framework SDD**: Hola Mundo y Login
 desde el 2026-09-01, Movilidad Urbana desde el 2026-09-04. Tokens del catálogo, clases `mq-`, un
 componente propio por patrón, ninguna librería de componentes ni framework de CSS. **Bootstrap se
 retiró de las tres.**
@@ -19,6 +19,14 @@ Las tres bases de conocimiento aplicadas viven fuera de este repositorio, en el 
 (`IA/SDD/IA.SDD/`): `Knowledge-Template-HTML-SDD-Default.md` (la forma de la maqueta),
 `Knowledge-Template-Blazor-Interactive-Server-SDD-Default.md` (su realización en Blazor) y
 `Design-Rules-Web-Generico.md` §2 (el valor de cada token).
+
+La app Android no es Blazor y no usa el template, pero toma **la misma paleta**: `Resources/Styles/Colors.xaml`
+declara `Primary #0F6E56`, `PrimaryDark #04342C`, `Secondary #E1F5EE` y `PrimaryDarkText #1A1A18` —los
+valores de `--color-brand-primary`, `--color-brand-primary-dark`, `--color-brand-primary-tint` y
+`--color-text-primary` de `Tokens.css`—, `Movilidad.xaml` define los estilos por rol (`Titulo`,
+`Rotulo`, `Ayuda`, `Error`, `Campo`, `Tarjeta`, `BotonPrimario`, `BotonSecundario`, `BotonPeligro`,
+`Banda`) y `App.xaml.cs` fija `UserAppTheme = Light` («no se deriva un tema oscuro que nadie
+diseñó»). Detalle en [13](13_App-Android.md).
 
 ## Estilos: dos hojas y ninguna tercera fuente
 

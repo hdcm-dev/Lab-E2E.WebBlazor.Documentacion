@@ -3,7 +3,7 @@
 > **Propósito**: fijar el vocabulario del laboratorio, incluidos los términos propios del binding de
 > .NET de Playwright que no coinciden con los del runner de JavaScript.
 > **Fuente primaria**: código y `README.md` del repositorio.
-> **Vigencia**: 2026-09-12, commit `88e5caa`.
+> **Vigencia**: 2026-09-12, commit `10ce735`.
 
 | Término | Qué significa acá |
 | --- | --- |
@@ -19,7 +19,16 @@
 | **Estado de superficie** | Uno de los desenlaces excluyentes de una pantalla, del vocabulario `EstadoDeSuperficie` del template: `Vacio`, `Cargando`, `ConDatos`, `ErrorDeEntrada`… Ver [11](11_Template-Y-Superficies.md) |
 | **Superficie** | Una pantalla que promete algo verificable. Tres pasos de un asistente son **una** superficie si ningún paso promete nada por sí solo (`Caso-Encuesta-Page.md`) |
 | **Guard** | Lo que decide si alguien pasa a una superficie protegida. Solo existe en Login — ver [10](10_Hola-Mundo-Y-Login.md) |
-| **Sesión** | El espacio de datos de un visitante, identificado por la cookie `sesion-movilidad`. Cada prueba estrena la suya |
+| **Sesión** | El espacio de datos de un visitante: la cookie `sesion-movilidad` en la web, el encabezado `X-Sesion-Id` en la API, el dispositivo entero en Android. Cada prueba estrena la suya |
+| **Aplicación independiente** | Cada una de las tres de Movilidad Urbana —web, API, Android—, que lleva sus propias copias de `Dominio/`, `Aplicacion/` e `Infraestructura/` y no referencia a otro proyecto. No hay proyecto compartido, a propósito |
+| **Cabeza** | Término usado en el `CHANGELOG.md` del 2026-09-12 para la web y la API como presentaciones sobre las mismas capas; desde `10ce735` cada «cabeza» es una aplicación independiente |
+| **Sesión del dispositivo** | En Android, el identificador único generado la primera vez y guardado en `Preferences` (`sesion-dispositivo`); el único ámbito de DI de la app lo lleva puesto |
+| **ViewModel** | En la app Android, la clase de `Presentacion/` que expone estado y comandos a una página XAML (CommunityToolkit.Mvvm). Se prueba sin teléfono con dobles de `INavegador` e `IAvisos` |
+| **Archivos enlazados** | `<Compile Include="..\..\src\…" LinkBase="…">`: la forma en que `MovilidadUrbana.MAUI.Tests` compila las capas de la app sin referenciar el proyecto `net10.0-android` |
+| **Workload** | El paquete `maui-android` del SDK de .NET que hace compilable `net10.0-android`. Solo lo tienen el devcontainer y `android.yml`; el runner de `ci.yml` no |
+| **Filtro de solución (`.slnf`)** | `Lab-E2E.WebBlazor.SinMaui.slnf`: la solución sin la app Android, para compilar donde no está el workload |
+| **ABI** | Arquitectura del APK: `android-arm` (armeabi-v7a, la del teléfono de prueba) por defecto en `dev.sh`; `ABI=android-arm64` para 64 bits |
+| **Devcontainer** | `.devcontainer/`: imagen `lab-e2e-maui-dev:net10` con SDK 10, JDK 17, Android SDK y el workload; `dev.sh` la maneja desde el host y toma el `adb` del teléfono USB |
 | **Siembra** | El juego inicial de localidades —Corrientes y Resistencia— que recibe cada sesión la primera vez |
 | **Apphost** | El ejecutable nativo que produce `dotnet publish`: `MovilidadUrbana.Web.exe` en Windows, sin extensión en Linux y macOS |
 | **Publicación autocontenida** | La que incluye el runtime de .NET; es la que usa CI, para no depender del runtime del ejecutor |

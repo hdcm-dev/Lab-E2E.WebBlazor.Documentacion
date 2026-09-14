@@ -33,7 +33,21 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   `X-Sesion-Id`, los errores como `ValidationProblemDetails` con las mismas claves que la web, sus
   11 pruebas en proceso y lo que la API todavía no tiene.
 
+- **`ia-db/indexes/13_App-Android.md`** — qué es `MovilidadUrbana.MAUI`, cómo se compone —capas
+  propias más `Presentacion/`, páginas y servicios de plataforma—, cómo resuelve la sesión por
+  dispositivo y el teclado, cómo se compila sin SDKs en el host (`.devcontainer/dev.sh`,
+  `android.yml`, el filtro `Lab-E2E.WebBlazor.SinMaui.slnf`) y cómo se prueban sus ViewModels.
+
 ### Cambiado
+
+- **La ia-db pasa a versión 2.0**, regenerada completa contra `Lab-E2E.WebBlazor` en `10ce735`: las
+  tres aplicaciones de Movilidad Urbana —web, API y Android— ya no comparten proyectos de capa sino
+  que **repiten a propósito** `Dominio/`, `Aplicacion/` e `Infraestructura/`, y la ia-db lo registra
+  como restricción para IA. `00`, `01`, `03`, `05`, `06`, `08`, `09` y `12` se reescriben o amplían;
+  `02`, `04`, `07`, `10` y `11` quedan con rutas y vigencia al día. Los enlaces relativos de `ia-db/`
+  resuelven.
+- **`README.md`** — la bajada y la fila de la ia-db dejan de hablar de «las tres aplicaciones»: suman
+  la API REST y la app Android, las seis suites, los seis workflows y los catorce índices.
 
 - **Las guías vuelven a citar las capas dentro de `MovilidadUrbana.Web`**: en `Lab-E2E.WebBlazor`
   las tres aplicaciones —web, API y la nueva app Android `MovilidadUrbana.MAUI`— quedaron

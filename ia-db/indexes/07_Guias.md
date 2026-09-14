@@ -3,8 +3,9 @@
 > **Propósito**: saber dónde están las guías y cuál responde qué pregunta, sin abrirlas todas.
 > **Fuente primaria**: `CHANGELOG.md` de `Lab-E2E.WebBlazor` (2026-09-09) y el árbol `Guides/` de
 > `Lab-E2E.WebBlazor.Documentacion`, con la tabla de su `README.md`.
-> **Vigencia**: 2026-09-12, commit `88e5caa` del laboratorio. Inventario tomado ese día sobre
-> `Lab-E2E.WebBlazor.Documentacion`.
+> **Vigencia**: 2026-09-12, commit `10ce735` del laboratorio y `677d0c9` de
+> `Lab-E2E.WebBlazor.Documentacion` («Actualizar las citas de las guías a las capas dentro de
+> `MovilidadUrbana.Web`»). Inventario tomado ese día.
 
 ## Ya no viven en el repositorio de código
 
@@ -21,6 +22,11 @@ Ese día `Lab-E2E.WebBlazor.sln` retiró las carpetas de solución `Guides` y `E
 (`../../../Lab-E2E.WebBlazor/src/…`), así que se leen bien solo con los dos repositorios clonados
 como carpetas hermanas. En github.com esos enlaces no resuelven: una ruta relativa no puede salir de
 su repositorio.
+
+Tras la vuelta de las capas a cada aplicación (`10ce735`), las citas de las guías apuntan a
+`src/MovilidadUrbana.Web/Dominio/…` y similares: verificado que ninguna guía menciona ya los
+proyectos `MovilidadUrbana.Dominio`, `.Aplicacion` o `.Infraestructura` (`grep -rn` sin resultados
+el 2026-09-12).
 
 ## Inventario
 
@@ -94,3 +100,4 @@ estándares explica cuándo esa verificación bloquea un merge.
 | Las guías no están en el repositorio de código | `ls Guides` (no existe) y `grep -n Guides Lab-E2E.WebBlazor.sln` (sin resultados), en `Lab-E2E.WebBlazor` |
 | Qué documentos hay | `find Guides -name '*.md' \| sort`, en `Lab-E2E.WebBlazor.Documentacion` |
 | Las guías citan el código por ruta relativa | `grep -c 'Lab-E2E.WebBlazor/' Guides/E2E-Guide/Caso-HolaMundo-Page.md` (17 el 2026-09-12) |
+| Ninguna guía cita los proyectos de capa retirados | `grep -rn 'MovilidadUrbana.Dominio' Guides` (sin resultados) |

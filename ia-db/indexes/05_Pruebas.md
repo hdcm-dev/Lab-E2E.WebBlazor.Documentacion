@@ -2,22 +2,25 @@
 
 > **Propósito**: registrar qué cubre cada suite, cómo se ejecutan, qué hace la infraestructura de
 > las E2E y qué variables de entorno la gobiernan.
-> **Fuente primaria**: `tests/`, `pruebas.runsettings`, `scripts/pruebas.sh` y
-> `evidencia/2026-09-12-unificacion/`.
-> **Vigencia**: 2026-09-12, commit `88e5caa`.
+> **Fuente primaria**: `tests/`, `pruebas.runsettings`, `scripts/pruebas.sh`,
+> `evidencia/2026-09-12-unificacion/`, `evidencia/2026-09-12-capas-y-api/` y la sección «Evidencia»
+> de `README.md`.
+> **Vigencia**: 2026-09-12, commit `10ce735`.
 
-## Las cinco suites
+## Las seis suites
 
 | Suite | Proyecto | Casos | Qué verifica | Quién levanta la aplicación |
 | --- | --- | --- | --- | --- |
-| Unitarias | `tests/MovilidadUrbana.UnitTests` | 49 | Las reglas de dominio de Movilidad Urbana, sin navegador ni servidor | Nadie: no hace falta |
+| Unitarias | `tests/MovilidadUrbana.UnitTests` | 49 | Las reglas de dominio de la **web** de Movilidad Urbana (referencia `MovilidadUrbana.Web.csproj`), sin navegador ni servidor | Nadie: no hace falta |
 | API | `tests/MovilidadUrbana.ApiWeb.Tests` | 13 | Los dos controllers y su documentación de `MovilidadUrbana.ApiWeb`, en proceso | **`WebApplicationFactory`**, sobre una base SQLite propia de la corrida — ver [12](12_Api-REST.md) |
+| ViewModels | `tests/MovilidadUrbana.MAUI.Tests` | 18 | Los tres ViewModels de la app Android contra sus capas reales, con dobles de `INavegador` e `IAvisos` | Nadie: las capas se compilan como **archivos enlazados** y cada caso abre su SQLite — ver [13](13_App-Android.md) |
 | E2E | `tests/MovilidadUrbana.E2ETests` | 22 | El circuito completo de Movilidad Urbana | **Su fixture**, que publica y arranca la aplicación |
 | E2E | `tests/WebBlazor.Login.E2ETests` | 10 | El acceso, el guard y la superficie protegida | **Quien corre la prueba**: URL fija `http://localhost:5181` |
 | E2E | `tests/WebBlazor.HolaMundo.E2ETests` | 1 | La superficie Hola Mundo | **Quien corre la prueba**: URL fija `http://localhost:5027` |
 
-Conteo verificado el 2026-09-12 contando los atributos `[Test]` y `[TestCase]` de cada proyecto;
-coincide con los `--list-tests` que registra el `CHANGELOG.md`. Los tres proyectos E2E usan
+Conteo verificado el 2026-09-12 sobre `10ce735` contando los atributos `[Test]` y `[TestCase]` de
+cada proyecto (E2E 9 + 9 + 4; unitarias 1 + 23 y 2 + 23; API 7 + 4 + 2; ViewModels 5 + 6 + 7; Login
+9 + 1); coincide con lo que registra el `CHANGELOG.md`. Los tres proyectos E2E usan
 `Microsoft.Playwright.NUnit` **1.62.0**, así que comparten la build de navegadores.
 
 La diferencia en quién levanta la aplicación **es a propósito**: las tres aplicaciones escalonan la
@@ -27,7 +30,10 @@ complejidad del laboratorio — ver [00](00_MASTER-INDEX.md).
 
 `ReglasDeLocalidadTests.cs` (25 casos) y `ReglasDeEncuestaTests.cs` (24 casos), casi todos
 `[TestCase]` sobre los bordes de cada validación. El proyecto referencia `MovilidadUrbana.Web.csproj`:
-prueba las reglas directamente, sin dobles.
+prueba las reglas directamente, sin dobles. **Solo cubre la copia de la web**: las de la API y de
+Android son idénticas salvo el `namespace` ([01](01_Arquitectura.md)), pero no tienen unitarias
+propias —la API se cubre por sus 13 casos en proceso y Android por los 18 de ViewModels, que llegan a
+las reglas a través de los servicios—.
 
 ## Movilidad Urbana — el catálogo
 
@@ -191,7 +197,9 @@ ninguna.
 
 ### Desde Visual Studio
 
-`Lab-E2E.WebBlazor.sln` descubre las pruebas de los cuatro proyectos: 33 casos E2E y 49 unitarios.
+`Lab-E2E.WebBlazor.sln` descubre las pruebas de los seis proyectos: 33 casos E2E, 49 unitarios, 13
+de la API y 18 de ViewModels (la solución completa incluye la app Android, que exige el workload
+`maui-android` para cargarse; sin él, abrir `Lab-E2E.WebBlazor.SinMaui.slnf`).
 Movilidad Urbana **no tiene paso previo**: publicar e instalar el navegador son responsabilidad del
 fixture. **Hola Mundo y Login sí**: hay que arrancar antes la aplicación con su perfil `http`, y usan
 el navegador que instala la primera corrida de Movilidad Urbana. **No verificado en Windows.**
@@ -200,6 +208,8 @@ el navegador que instala la primera corrida de Movilidad Urbana. **No verificado
 
 ```bash
 dotnet test tests/MovilidadUrbana.UnitTests
+dotnet test tests/MovilidadUrbana.ApiWeb.Tests
+dotnet test tests/MovilidadUrbana.MAUI.Tests
 dotnet test tests/MovilidadUrbana.E2ETests --settings pruebas.runsettings
 dotnet test tests/MovilidadUrbana.E2ETests --settings pruebas.runsettings -- Playwright.BrowserName=firefox
 # Hola Mundo y Login, con la aplicación ya levantada en su URL:
@@ -245,6 +255,23 @@ para buscar intermitencias: «una prueba que pasó una vez no probó nada».
 | `login-falsificacion-y-binario-publicado.log` | Login como lo corre su workflow: binario publicado, Production | 10/10 en chromium y en firefox; y **falla 10/10** sin la aplicación |
 | `holamundo-falsificacion-sin-aplicacion.log` | Hola Mundo **sin** la aplicación levantada | Falla: la prueba no pasa en vacío |
 
-Las otras dos carpetas de `evidencia/` —`2026-09-01-aplicacion-template/` y
-`2026-09-03-testigo-de-hidratacion/`— respaldan lo que dicen [10](10_Hola-Mundo-Y-Login.md) y
-[11](11_Template-Y-Superficies.md).
+`evidencia/2026-09-12-capas-y-api/`: `movilidad-e2e-tras-extraer-capas.log` (22/22 tras mover las
+capas), `api-tests.log` (13/13), `api-falsificacion-201.log` (responder `200` en vez de `201` pone
+un caso en rojo), `api-kestrel-openapi-y-curl.log` y `scalar-development-y-production.log` — ver
+[12](12_Api-REST.md).
+
+Del último commit (`10ce735`), la sección «Evidencia» de `README.md` registra la corrida del
+2026-09-12 con las tres aplicaciones independientes: el filtro `.slnf` compila en Release con
+`-warnaserror`; 49 unitarias, 13 de la API y 18 de ViewModels en verde con `--no-build`; y el APK
+Debug construido en el devcontainer. Las capturas del recorrido en el teléfono están en
+`evidencia/2026-09-12-maui/` ([13](13_App-Android.md)). **No hay en `evidencia/` un `.log` de las
+22 E2E sobre `10ce735`**; sí las corrió `ci.yml` en GitHub Actions sobre ese commit, en verde
+([06](06_CI-Y-Workflows.md)).
+
+Las otras carpetas de `evidencia/` —`2026-09-01-aplicacion-template/`,
+`2026-09-03-testigo-de-hidratacion/` y `2026-09-12-renombre/`— respaldan lo que dicen
+[10](10_Hola-Mundo-Y-Login.md) y [11](11_Template-Y-Superficies.md).
+
+Un detalle del entorno del autor, no del laboratorio: con `fs.inotify.max_user_instances` agotado
+la aplicación moría con código 134 al construir su configuración; las corridas llevan
+`DOTNET_USE_POLLING_FILE_WATCHER=1`, que `scripts/pruebas.sh` deja pasar al contenedor.

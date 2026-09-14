@@ -4,8 +4,9 @@
 > se resolvieron, para no revertirlos por «prolijidad» ni volver a pisarlos.
 > **Fuente primaria**: `README.md` (secciones «Por qué las pruebas E2E son un proyecto de la
 > solución», «Lo que cambia respecto del ejemplo estático», «Los workflows» y «Evidencia»),
-> `CHANGELOG.md` y los comentarios del código citado.
-> **Vigencia**: 2026-09-12, commit `88e5caa`.
+> `CHANGELOG.md`, las cabeceras de `.devcontainer/dev.sh` y `Dockerfile`, y los comentarios del
+> código citado.
+> **Vigencia**: 2026-09-12, commit `10ce735`.
 
 ## Decisiones de fondo
 
@@ -24,7 +25,23 @@ configuración es un TRX y el paralelismo lo maneja NUnit.
 La alternativa —dejar las E2E fuera de la solución, en una carpeta `e2e/` con specs de TypeScript—
 es la que eligió `dotnet/eShop`. **Las dos son defendibles**; esta prioriza el IDE.
 
-### Tres aplicaciones de complejidad creciente, cada una con su forma
+### Tres aplicaciones independientes de Movilidad Urbana, con el código repetido
+
+La web, la API y la app Android **no comparten proyectos**: cada una lleva `Dominio/`,
+`Aplicacion/` e `Infraestructura/` como carpetas propias, y las tres copias son idénticas salvo el
+`namespace`. El `README.md` lo declara: «el código se repite a propósito: cada proyecto tiene que
+poder estudiarse, compilarse y llevarse por separado». Los proyectos por capa existieron unas horas
+(`88e5caa`) y volvieron a carpetas el mismo día (`10ce735`, `CHANGELOG.md`). Lo que quedó de ese
+paso es la separación en capas con registro propio (`AgregarAplicacion()`,
+`AgregarInfraestructura(cadena)`) y los puntos de composición que solo componen.
+
+El costo, a la vista: un cambio de regla se replica a mano en tres lugares y las unitarias cubren
+solo la copia de la web ([05](05_Pruebas.md)). **No proponer «extraer lo común»**: es exactamente lo
+que se deshizo. Un beneficio concreto: la `Infraestructura/` de la app Android se compila enlazada
+en su proyecto de pruebas, cosa que un proyecto compartido con `FrameworkReference` a ASP.NET Core
+no permitía — por eso `MiddlewareDeSesion` se mudó a `Web/Sesiones/`.
+
+### Tres aplicaciones web de complejidad creciente, cada una con su forma
 
 Hola Mundo y Login no tienen fixture, prueban contra una URL fija y tienen cada una su workflow, con
 menos piezas que el de Movilidad Urbana. **No es una deuda**: es la escalera didáctica que declara
@@ -129,6 +146,27 @@ Puesto en `MovilidadUrbana.E2ETests.Infraestructura` no se ejecuta para las prue
 `MovilidadUrbana.E2ETests`, y el síntoma es desconcertante —la URL base llega vacía y Playwright se
 queja de la cookie—.
 
+## Trampas de la app Android, ya pagadas
+
+Todas están registradas en comentarios del código o en `evidencia/2026-09-12-maui/README.md`; el
+detalle de cada pieza está en [13](13_App-Android.md).
+
+| Trampa | Dónde se ve | Solución |
+| --- | --- | --- |
+| El teclado numérico de Android filtra caracteres según el idioma y puede descartar la coma: «12,5» llegaba como «125» y se registraba sin error | Captura `24-encuesta-paso3-completo.png` | `Controles/EntradaDecimal` + un mapeo de `EntryHandler` que fija `InputType` decimal y un `DigitsKeyListener` con `0123456789,.`; el ViewModel acepta coma o punto (`LeerDecimal`) |
+| MAUI aplica su propio modo de teclado a la ventana (`Pan`) y pisa el `AdjustResize` del manifiesto: enfocar un campo bajo corre toda la pantalla y corta el encabezado | `App.xaml.cs` | `UseWindowSoftInputModeAdjust(Resize)` en el constructor de `App`, además del atributo de `MainActivity` |
+| En una página **apilada** por Shell la ventana no se achica con el teclado; `SafeAreaEdges` deja un hueco que no se cierra y los insets del IME no llegan a la vista | `Servicios/TecladoEnPantalla.cs` | Medir en cada `GlobalLayout` cuánto del borde inferior de la barra quedó bajo la zona visible y corregir su margen por esa diferencia hasta converger; al desaparecer la página, margen cero |
+| Android dibuja un subrayado propio bajo `Entry`, `Picker` y `SearchBar`, que dentro de la caja con borde del estilo «Campo» queda como una segunda línea | `MauiProgram.QuitarSubrayadoNativo` | `BackgroundTintList` transparente por handler; el `search_plate` del `SearchView` se resuelve por nombre porque el binding no expone su id |
+| El teclado numérico deja tipear separadores de miles en «Habitantes» | `LocalidadEditorViewModel.LeerEntero` | Se conservan solo los dígitos |
+| `CultureInfo.DefaultThreadCurrent*` no alcanza al hilo principal, que ya existe al arrancar | `MauiProgram.cs` | Se fija además `CultureInfo.CurrentCulture` / `CurrentUICulture` |
+| El proyecto `net10.0-android` no se puede referenciar desde un proyecto de pruebas `net10.0` sin el workload | `MovilidadUrbana.MAUI.Tests.csproj` | Las carpetas `Dominio/`, `Aplicacion/`, `Infraestructura/` y `Presentacion/` se compilan como `<Compile Include=... LinkBase=...>`; queda fuera solo lo que toca la plataforma |
+| El runner de `ci.yml` no tiene el workload de MAUI y la solución completa no compila allí | `Lab-E2E.WebBlazor.SinMaui.slnf` | CI compila el filtro; `android.yml` instala el workload y construye el APK aparte |
+| Dos servidores de `adb` se disputan el mismo teléfono y el síntoma aparece en el otro contenedor | `.devcontainer/dev.sh` | `up` apaga el adb de `gda-core-app-dev` antes de levantar el propio; `devolver` lo restituye |
+| Si el keystore de Debug se regenera, el APK nuevo no se instala sobre el anterior | `devcontainer.json` | Volumen nombrado `lab-maui-keystore` para `~/.local/share/Xamarin` |
+| El nodo USB del teléfono no es escribible para el usuario normal del contenedor | `Dockerfile`, `dev.sh` | El servidor de adb corre como root (`docker exec -u 0`), con `sudo` sin contraseña para el arranque desde VS Code |
+| Sin locales reales, el runtime de build y la app se quedan sin ICU útil | `Dockerfile` | `locale-gen` de `es_AR.UTF-8` y `en_US.UTF-8`; `LANG=es_AR.UTF-8` |
+| Un Toast dura menos que un ciclo de captura y no se puede evidenciar por pantalla | `evidencia/2026-09-12-maui/toast-logcat.txt` | La prueba es la línea de `logcat` con `Toast#0 … producer=(…:ar.lab.movilidadurbana)` |
+
 ## Trampas menores, ya resueltas
 
 | Trampa | Solución en el repositorio |
@@ -159,3 +197,8 @@ queja de la cookie—.
   el socket de Docker.
 - Dos promesas de la Encuesta no tienen caso de prueba (paso direccionable y fallo al registrar) —
   ver [05](05_Pruebas.md).
+- La app Android se recorrió en **un solo teléfono** (Motorola moto e6 play, Android 9,
+  armeabi-v7a); `TecladoEnPantalla` está calibrado contra lo observado ahí. No hay pruebas de
+  interfaz sobre Android: solo los 18 casos de ViewModels y las capturas de `evidencia/2026-09-12-maui/`.
+- Las unitarias cubren la copia de las reglas de la web; las de la API y de Android se verifican
+  indirectamente ([05](05_Pruebas.md)).

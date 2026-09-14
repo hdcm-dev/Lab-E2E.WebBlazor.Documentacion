@@ -4,9 +4,10 @@
 > con los que las pruebas las ubican, para poder escribir o corregir un caso E2E sin abrir cada
 > `.razor`.
 > **Fuente primaria**: `src/MovilidadUrbana.Web/Components/`, incluidos `App.razor` y `Routes.razor`.
-> **Vigencia**: 2026-09-12, commit `88e5caa`. Las superficies de Hola Mundo y Login están en
-> [10](10_Hola-Mundo-Y-Login.md); la forma constructiva común a las tres, en
-> [11](11_Template-Y-Superficies.md).
+> **Vigencia**: 2026-09-12, commit `10ce735`. Las superficies de Hola Mundo y Login están en
+> [10](10_Hola-Mundo-Y-Login.md); la forma constructiva común a las tres webs, en
+> [11](11_Template-Y-Superficies.md); las pantallas equivalentes de la app Android, en
+> [13](13_App-Android.md).
 
 Desde el 2026-09-04 la interfaz es el **template del Framework SDD**: ya no hay Bootstrap, y varios
 identificadores cambiaron. La correspondencia está al final, en

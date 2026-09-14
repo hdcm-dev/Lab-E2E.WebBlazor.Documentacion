@@ -1,10 +1,10 @@
 # 06 — CI y workflows
 
-> **Propósito**: describir los cinco workflows, cuándo se dispara cada uno y qué prácticas de
+> **Propósito**: describir los seis workflows, cuándo se dispara cada uno y qué prácticas de
 > GitHub Actions aplica el laboratorio, que es una parte central de lo que enseña.
 > **Fuente primaria**: `.github/workflows/` y la sección «Los workflows» de `README.md`. Las
 > corridas observadas salen de la API pública de GitHub Actions.
-> **Vigencia**: 2026-09-12, commit `88e5caa`.
+> **Vigencia**: 2026-09-12, commit `10ce735`.
 
 ## El mapa
 
@@ -16,6 +16,7 @@ graph TD
     S[schedule 03:15 UTC] --> E2E
     PH[push o PR que toca Hola Mundo] --> HM[e2e-holamundo.yml]
     PL[push o PR que toca Login] --> LG[e2e-login.yml]
+    PA[push o PR que toca la app Android] --> AN[android.yml]
 ```
 
 ## Un workflow E2E por proyecto web, en escalera
@@ -29,8 +30,9 @@ cada uno tiene la complejidad que su proyecto necesita, para estudiarlos de a un
 | `e2e-login.yml` («E2E — Login») | Login | Publica una vez y reparte la aplicación como artefacto a una matriz de navegadores |
 | `e2e.yml` («E2E») | Movilidad Urbana | Reporte unificado, invocable desde otros workflows, regresión nocturna y prueba contra un entorno desplegado |
 
-Son **independientes**: no se invocan entre sí ni desde `ci.yml`. `ci.yml` compila la solución
-entera —Hola Mundo y Login incluidos— pero solo invoca `e2e.yml`.
+Son **independientes**: no se invocan entre sí ni desde `ci.yml`. `ci.yml` compila el filtro
+`Lab-E2E.WebBlazor.SinMaui.slnf` —Hola Mundo y Login incluidos, la app Android no— pero solo invoca
+`e2e.yml`. La app Android tiene su propio workflow, `android.yml`, que tampoco se invoca desde `ci.yml`.
 
 ## e2e-holamundo.yml — el escalón más simple
 
@@ -133,7 +135,7 @@ jobs:
 
 | Job | Qué hace |
 | --- | --- |
-| `compilacion` («Compilación y unitarias», 15 min) | `restore` → `build Lab-E2E.WebBlazor.sln -warnaserror` —los doce proyectos— → **pruebas unitarias** con TRX (`resultados-unitarias`, 7 días) → **pruebas de la API** en proceso (`api.trx`) → `dotnet test --list-tests` sobre las E2E **de Movilidad Urbana** |
+| `compilacion` («Compilación y unitarias», 15 min) | `restore` → `build Lab-E2E.WebBlazor.SinMaui.slnf -warnaserror` —diez proyectos: todos menos la app Android, que pide el workload de MAUI— → **pruebas unitarias** (`unitarias.trx`) → **pruebas de la API** en proceso (`api.trx`) → **pruebas de los ViewModels de Android** (`maui-viewmodels.trx`, sin emulador: las capas van enlazadas) → sube `resultados` como `resultados-unitarias` (7 días) → `dotnet test --list-tests` sobre las E2E **de Movilidad Urbana** |
 | `e2e` | Invoca `./.github/workflows/e2e.yml` con `navegadores` según el evento y `referencia` = SHA de la cabeza del PR |
 | `comentario-en-pr` | Deja **o actualiza** un comentario con el resultado y el enlace a la corrida; solo para ramas del propio repositorio (un fork no tiene permisos de escritura) |
 | `ci-ok` («CI aprobada») | Resume todos los jobs en un único check |
@@ -141,6 +143,26 @@ jobs:
 `ci-ok` es **el único check que conviene exigir** en la regla de protección de rama. Acepta
 `success` y `skipped`. Si esa regla está o no configurada en GitHub **no se pudo verificar** desde
 esta máquina: la API de protección de rama exige autenticación.
+
+## android.yml — pruebas de los ViewModels y APK
+
+| Aspecto | Valor |
+| --- | --- |
+| Disparadores | `push` a `main` y `pull_request` hacia `main`, filtrados por ruta a `src/MovilidadUrbana.MAUI/**`, `tests/MovilidadUrbana.MAUI.Tests/**` y el propio YAML; `workflow_dispatch` |
+| `concurrency` | `android-<ref>`, cancelando solo en pull requests |
+| Jobs | Uno, `compilar` («Pruebas y APK»), `ubuntu-latest`, `timeout-minutes: 45`, `permissions: contents: read` |
+
+Pasos: checkout · `setup-dotnet` 10 · **pruebas de los ViewModels** (`dotnet test
+tests/MovilidadUrbana.MAUI.Tests`, antes de instalar nada de Android: no necesitan el workload) ·
+`setup-java@v6` Temurin 17 · `dotnet workload install maui-android` · `dotnet build
+-t:InstallAndroidDependencies` con `AcceptAndroidSDKLicenses=True` (la imagen del runner trae un SDK
+de Android pero no garantiza la plataforma ni las build-tools que espera `net10.0-android`) ·
+`dotnet publish -c Release -f net10.0-android -p:AndroidPackageFormat=apk -o apk` · sube
+`apk/*-Signed.apk` como artefacto **`movilidad-urbana-apk`** por 14 días (`if-no-files-found: error`).
+
+El APK va firmado con la clave de depuración del runner: sirve para instalarlo en un teléfono de
+prueba, no para una tienda (cabecera del YAML). Es el único workflow que instala el workload; por
+eso `ci.yml` compila el filtro sin la app.
 
 ## verificacion-entorno.yml
 
@@ -157,7 +179,7 @@ No todas están en los tres workflows E2E: repartirlas es parte de la escalera.
 | `concurrency` por rama | Cancela en pull requests, conserva en `main` | `ci.yml`, `e2e.yml`, `e2e-login.yml` |
 | `permissions` mínimos | `contents: read`; `pull-requests: write` solo en el job que comenta | todos |
 | Compilar una vez, probar muchas | Se publica en un job y se reutiliza como artefacto | `e2e.yml`, `e2e-login.yml` |
-| Filtro de rutas | `paths-ignore` de documentación; `paths` del proyecto | `ci.yml`; `e2e-holamundo.yml`, `e2e-login.yml` |
+| Filtro de rutas | `paths-ignore` de documentación; `paths` del proyecto | `ci.yml`; `e2e-holamundo.yml`, `e2e-login.yml`, `android.yml` |
 | `timeout-minutes` en todos los jobs y `fail-fast: false` en las matrices | | todos |
 | Coincidencia SDK ↔ framework | Compara `<TargetFramework>` con el SDK del runner | `e2e.yml` |
 | SDK explícito | `actions/setup-dotnet`, porque la imagen de GitHub no garantiza la versión | todos |
@@ -167,8 +189,8 @@ No todas están en los tres workflows E2E: repartirlas es parte de la escalera.
 Casi todos los jobs corren en `runs-on: ubuntu-latest`. **La excepción es `publicar` de
 `e2e.yml`** (línea 89), con el runner propio `[self-hosted, i7infra-dev]` activo; en los demás jobs
 de `e2e.yml` y de `ci.yml` esa línea queda comentada encima de `ubuntu-latest`, para volver al runner
-propio descomentando una y comentando la otra. `e2e-holamundo.yml` y `e2e-login.yml` corren enteros
-en `ubuntu-latest`.
+propio descomentando una y comentando la otra. `e2e-holamundo.yml`, `e2e-login.yml` y `android.yml`
+corren enteros en `ubuntu-latest`.
 
 Nada corre dentro de un contenedor de job: el runner autoalojado es él mismo un contenedor sin el
 socket de Docker, y un job con `container:` falla en *Initialize containers*.
@@ -179,14 +201,16 @@ igual, así que a esta escala no hace falta `--disable-dev-shm-usage` (fuente: `
 ## Corridas observadas
 
 Consultadas en la API pública de GitHub Actions
-(`/repos/hdcm-dev/Lab-E2E.WebBlazor/actions/workflows/<archivo>/runs`) el 2026-09-12.
+(`/repos/hdcm-dev/Lab-E2E.WebBlazor/actions/workflows/<archivo>/runs`) el 2026-09-12 (hora local;
+las corridas más recientes figuran con fecha 2026-09-13 UTC).
 
 | Workflow | Corridas | Resultado |
 | --- | --- | --- |
-| `e2e.yml` | 23 | Las 23 en verde: 20 programadas y 3 manuales; la última programada sobre `98fde5f` |
-| `ci.yml` | 31 | 28 en verde (17 `push`, 11 `pull_request`), 2 `push` canceladas por `concurrency`, 1 `pull_request` en rojo; las últimas dos, sobre `f9f3ca2` y `06528d3`, en verde |
-| `e2e-holamundo.yml` | 1 | En verde, `push` sobre `f9f3ca2` |
-| `e2e-login.yml` | 1 | En verde, `push` sobre `f9f3ca2` |
+| `ci.yml` | 36 | 33 en verde (22 `push`, 11 `pull_request`), 2 `push` canceladas por `concurrency`, 1 `pull_request` en rojo; las últimas tres, sobre `88e5caa`, `3b53d14` y **`10ce735`**, en verde |
+| `e2e.yml` | 23 | Las 23 en verde: 20 programadas y 3 manuales; la última programada (2026-09-12) sobre `98fde5f`. Ninguna todavía sobre `10ce735` por `schedule`; las E2E de ese commit corrieron vía `ci.yml` |
+| `e2e-holamundo.yml` | 2 | En verde, `push` sobre `f9f3ca2` y `e0f3e9d` (el renombre) |
+| `e2e-login.yml` | 2 | En verde, `push` sobre `f9f3ca2` y `e0f3e9d` |
+| `android.yml` | 1 | En verde, `push` sobre `10ce735`: los 18 casos y el APK como artefacto |
 | `verificacion-entorno.yml` | 0 | Nunca se disparó |
 
 El workflow que Hola Mundo traía de su repositorio de origen (`e2e_2.yml`) tuvo **0 corridas verdes

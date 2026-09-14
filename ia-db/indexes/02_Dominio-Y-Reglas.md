@@ -1,130 +1,130 @@
 # 02 — Dominio y reglas de negocio
 
-> **Propósito**: registrar qué se modela, qué valida cada regla y con qué límites, para poder
-> razonar sobre el comportamiento esperado sin abrir el código.
-> **Fuente primaria**: `src/MovilidadUrbana.Dominio/` y `src/MovilidadUrbana.Aplicacion/`.
-> **Vigencia**: 2026-09-12, commit `88e5caa`.
+> **Propósito**: qué entidades existen, qué valida cada regla, qué catálogos comparten las pantallas
+> y cómo los casos de uso traducen esas reglas en errores por campo.
+> **Fuente primaria**: `src/MovilidadUrbana.Web/Dominio/` (`Entidades/`, `Reglas/`, `Catalogos.cs`) y
+> `src/MovilidadUrbana.Web/Aplicacion/` (`Localidades/`, `Encuestas/`, `Resultado.cs`, `Abstracciones/`).
+> Las mismas carpetas existen en `MovilidadUrbana.ApiWeb/` y `MovilidadUrbana.MAUI/` y difieren solo
+> en el `namespace` (verificado con `diff -r`, ver [01](01_Arquitectura.md)): lo que sigue vale para
+> las tres copias.
+> **Vigencia**: 2026-09-12, commit `10ce735`.
 
-## Entidades
+## Entidades (`Dominio/Entidades/`)
 
-`Dominio/Entidades/`. Las tres llevan `SesionId` o son la sesión misma: el aislamiento por sesión es
-parte del modelo, no un agregado de infraestructura.
-
-| Entidad | Campos | Nota |
+| Entidad | Campos | Notas |
 | --- | --- | --- |
-| `Localidad` | `Id`, `SesionId`, `Nombre`, `Provincia`, `CodigoPostal`, `Habitantes` | `SesionId` es lo que en la versión estática del laboratorio resolvía `localStorage` |
-| `RespuestaDeEncuesta` | `Id`, `SesionId`, `Nombre`, `Edad`, `Localidad`, `Medios` (lista), `Frecuencia`, `Distancia`, `Minutos`, `Motivo`, `RegistradaEn` | `Medios` se persiste como texto separado por comas — ver [03](03_Sesiones-Y-Persistencia.md) |
-| `Sesion` | `Id`, `CreadaEn` | Marca de que la sesión **ya recibió** su juego de datos inicial. Sin ella, borrar todas las localidades volvería a sembrarlas |
+| `Localidad` | `Id`, `SesionId`, `Nombre`, `Provincia`, `CodigoPostal`, `Habitantes` | `SesionId` aísla los datos de cada visitante: es lo que en la versión estática resolvía `localStorage` |
+| `RespuestaDeEncuesta` | `Id`, `SesionId`, `Nombre`, `Edad`, `Localidad` (nombre, no clave), `Medios` (`IReadOnlyList<string>`), `Frecuencia`, `Distancia`, `Minutos`, `Motivo`, `RegistradaEn` | `Medios` se persiste como texto separado por comas ([03](03_Sesiones-Y-Persistencia.md)); guarda el **nombre** de la localidad, por eso la baja de una localidad no arrastra dependientes |
+| `Sesion` | `Id`, `CreadaEn` | Marca de que la sesión ya recibió su siembra: sin ella, borrar todas las localidades volvería a sembrarlas |
 
-## Catálogos
+Las entidades son clases con setters públicos, sin comportamiento: las reglas viven aparte.
 
-`Dominio/Catalogos.cs` — valores fijos que comparten pantallas y reglas.
+## Reglas (`Dominio/Reglas/`)
 
-| Catálogo | Valores |
-| --- | --- |
-| `Provincias` | Buenos Aires, Chaco, Córdoba, Corrientes, Entre Ríos, Mendoza, Santa Fe |
-| `Medios` | `colectivo` (Colectivo), `auto` (Auto particular), `bicicleta`, `moto`, `caminata` (A pie), `tren` |
-| `Frecuencias` | `diaria` (Todos los días), `semanal` (Algunos días por semana), `ocasional` (Ocasionalmente) |
-| `Motivos` | `trabajo`, `estudio`, `salud`, `otros` |
+### `ReglasDeLocalidad` (clase estática parcial)
 
-Los tres últimos son pares **(clave persistida, etiqueta mostrada)**, con `EtiquetaDeMedio`,
-`EtiquetaDeFrecuencia` y `EtiquetaDeMotivo` para traducir. Lo que se guarda es la clave; lo que se
-verifica en pantalla es la etiqueta.
+| Constante | Valor | Regla | Función |
+| --- | --- | --- | --- |
+| `LargoMinimoDelNombre` | 3 | Nombre recortado con al menos 3 caracteres | `NombreValido(string?)` |
+| `LargoMaximoDelNombre` | 60 | Solo se usa como `maxlength` en la vista y `HasMaxLength` en EF | — |
+| `DigitosDelCodigoPostal` | 4 | Exactamente 4 dígitos (`^\d{4}$`, `GeneratedRegex`), recortado antes de validar | `CodigoPostalValido(string?)` |
+| `HabitantesMinimos` | 1 | Entero no nulo ≥ 1 | `HabitantesValidos(int?)` |
+| — | — | Provincia no vacía ni espacios | `ProvinciaValida(string?)` |
+| — | — | Misma localidad = mismo nombre (recortado, **sin** distinguir mayúsculas) **y** misma provincia (comparación **ordinal**) | `MismaLocalidad(nombreA, provA, nombreB, provB)` |
 
-## ReglasDeLocalidad
+### `ReglasDeEncuesta`
 
-`Dominio/Reglas/ReglasDeLocalidad.cs` — clase `static partial`, con el código postal como
-`[GeneratedRegex]`.
-
-| Regla | Criterio |
-| --- | --- |
-| `NombreValido` | Al menos 3 caracteres **una vez recortado** (`LargoMinimoDelNombre`) |
-| `ProvinciaValida` | No vacía ni solo espacios |
-| `CodigoPostalValido` | Exactamente 4 dígitos: `^\d{4}$`, sobre el valor recortado |
-| `HabitantesValidos` | No nulo y ≥ 1 (`HabitantesMinimos`) |
-| `MismaLocalidad` | Mismo nombre **sin distinguir mayúsculas** y misma provincia **de forma ordinal** |
-
-Constantes públicas: `LargoMinimoDelNombre = 3`, `LargoMaximoDelNombre = 60`,
-`HabitantesMinimos = 1` y `DigitosDelCodigoPostal = 4` —el patrón `^\d{4}$` la espeja—. El largo
-máximo lo aplica el mapeo de EF y el `maxlength` del campo.
-
-La asimetría de `MismaLocalidad` es deliberada y está cubierta por una prueba unitaria propia
-(«La provincia se compara de forma ordinal»): el nombre lo escribe la persona, la provincia sale de
-un catálogo cerrado.
-
-## ReglasDeEncuesta
-
-`Dominio/Reglas/ReglasDeEncuesta.cs` — solo rangos; el orden de los pasos lo gobierna el servicio.
-
-| Constante | Valor |
-| --- | --- |
-| `TotalDePasos` | 3 |
-| `LargoMinimoDelNombre` / `LargoMaximoDelNombre` | 3 / 80 |
-| `EdadMinima` / `EdadMaxima` | 16 / 110 |
-| `DistanciaMinima` / `DistanciaMaxima` | 0 / 500 (km, `double`) |
-| `MinutosMinimos` / `MinutosMaximos` | 1 / 600 |
-
-`NombreValido` pide `LargoMinimoDelNombre` (3) caracteres recortados, igual que en localidades.
-
-## Casos de uso
-
-### ServicioDeLocalidades
-
-`Aplicacion/Localidades/ServicioDeLocalidades.cs`. Recibe `IRepositorioDeLocalidades` por
-constructor primario.
-
-| Operación | Comportamiento |
-| --- | --- |
-| `ListarAsync` | Delega en el repositorio |
-| `GuardarAsync` | 1) valida campo por campo; 2) si hay errores, corta; 3) busca duplicada con `MismaLocalidad` excluyendo el propio `Id` («Ya existe una localidad con ese nombre en la provincia.», en `nombre`); 4) actualiza si `Id` tiene valor, si no da de alta |
-| `EliminarAsync` | Si la localidad ya no existe devuelve «La localidad ya no existe.» en el campo `nombre` |
-
-`GuardarAsync` recorta el nombre y el código postal antes de persistir. Los mensajes de alta,
-modificación y baja nombran la localidad («Se agregó / Se actualizó / Se eliminó la localidad X.»),
-lo que las E2E aprovechan para distinguir una operación de la otra.
-
-Mensajes de error por campo: `nombre` («El nombre debe tener al menos 3 caracteres.»), `provincia`
-(«Seleccione una provincia.»), `codigoPostal` («El código postal debe tener 4 dígitos.»),
-`habitantes` («Ingrese una cantidad de habitantes mayor a cero.»). Los números se interpolan desde
-las constantes de la regla.
-
-`ModeloDeLocalidad` lleva `Habitantes` como `int?` **a propósito**: «vacío» y «cero» son dos errores
-distintos. `EsEdicion` es `Id is not null` y `Limpiar()` devuelve el formulario al estado de alta.
-
-### ServicioDeEncuestas
-
-`Aplicacion/Encuestas/ServicioDeEncuestas.cs`. Validación **por paso**: el asistente no deja avanzar
-mientras el paso actual tenga errores.
-
-| Paso | Campos validados | Claves de error |
+| Constante | Valor | Función |
 | --- | --- | --- |
-| 1 | Nombre (≥3), edad (16–110), localidad elegida | `nombre`, `edad`, `localidad` |
-| 2 | Al menos un medio, frecuencia elegida | `medios`, `frecuencia` |
-| 3 | Distancia (0–500), minutos (1–600), motivo elegido | `distancia`, `minutos`, `motivo` |
+| `TotalDePasos` | 3 | Regla de dominio con prueba propia; gobierna el asistente y la API |
+| `LargoMinimoDelNombre` / `LargoMaximoDelNombre` | 3 / 80 | `NombreValido` (mínimo; el máximo es `maxlength` y `HasMaxLength`) |
+| `EdadMinima` / `EdadMaxima` | 16 / 110 | `EdadValida(int?)` — inclusivo |
+| `DistanciaMinima` / `DistanciaMaxima` | 0 / 500 | `DistanciaValida(double?)` — **cero es válido**: se puede no viajar |
+| `MinutosMinimos` / `MinutosMaximos` | 1 / 600 | `MinutosValidos(int?)` — **cero no es válido**, a diferencia de la distancia |
 
-`RegistrarAsync` persiste la respuesta y la devuelve ya construida. Detalle con consecuencia
-verificable: los medios se guardan **en el orden del catálogo y no en el de tipeo**, para que el
-resumen sea estable y la prueba pueda compararlo con un texto fijo.
+Las 49 pruebas unitarias cubren exactamente estos bordes ([05](05_Pruebas.md)).
 
-`ModeloDeEncuesta` acumula los tres pasos; `Medios` es un `HashSet<string>` con `AlternarMedio`;
-`Edad` y `Minutos` son `int?`.
+## Catálogos (`Dominio/Catalogos.cs`)
 
-## Políticas: el requisito antes del intento
+| Catálogo | Valores (clave → etiqueta) |
+| --- | --- |
+| `Provincias` (solo nombre) | Buenos Aires, Chaco, Córdoba, Corrientes, Entre Ríos, Mendoza, Santa Fe |
+| `Medios` | `colectivo` Colectivo · `auto` Auto particular · `bicicleta` Bicicleta · `moto` Moto · `caminata` A pie · `tren` Tren |
+| `Frecuencias` | `diaria` Todos los días · `semanal` Algunos días por semana · `ocasional` Ocasionalmente |
+| `Motivos` | `trabajo` Trabajo · `estudio` Estudio · `salud` Salud · `otros` Otros |
 
-Desde el 2026-09-04, `Aplicacion/Localidades/PoliticaDeLocalidades.cs` y
-`Aplicacion/Encuestas/PoliticaDeEncuestas.cs` derivan de las constantes de `Dominio/Reglas/` el texto
-de requisito que cada campo muestra **antes** del intento. Los límites que estaban escritos a mano en
-la vista y en los mensajes —60 caracteres, 4 dígitos, 3 caracteres— pasaron a constantes de las
-reglas. Los errores los sigue decidiendo el servicio de aplicación.
+`EtiquetaDeMedio`, `EtiquetaDeFrecuencia` y `EtiquetaDeMotivo` devuelven la etiqueta o, si la
+clave no está, la clave misma. La clave es lo que se persiste; la etiqueta, lo que se muestra.
 
-`Aplicacion/Encuestas/ResumenDeEncuesta.cs` arma las filas clave/valor que la superficie recorre al
-registrar una respuesta, en vez de escribirlas a mano en la vista.
+## Casos de uso (`Aplicacion/`)
 
-Fuente: `CHANGELOG.md` (2026-09-04) y la sección «Diseño» de `README.md`.
+### `Resultado` (`Resultado.cs`)
 
-## Cobertura de estas reglas
+`record Resultado(bool EsCorrecto, string Mensaje, IReadOnlyDictionary<string,string> Errores)`.
+Las claves de `Errores` son los nombres de campo que la pantalla conoce: `nombre`, `provincia`,
+`codigoPostal`, `habitantes`, `edad`, `localidad`, `medios`, `frecuencia`, `distancia`, `minutos`,
+`motivo`. Constructores: `Correcto(mensaje)`, `Invalido(errores)` —con el mensaje fijo «Revise los
+campos marcados en rojo.»— e `Invalido(campo, mensaje)`. La API reutiliza las mismas claves en
+`ValidationProblemDetails` ([12](12_Api-REST.md)).
 
-Las 49 pruebas de `tests/MovilidadUrbana.UnitTests/` verifican **solo** este índice: bordes de cada
-validación del ABM (`ReglasDeLocalidadTests`, 25 casos: 23 `[TestCase]` + 2 `[Test]`) y rangos de la
-encuesta paso por paso (`ReglasDeEncuestaTests`, 24 casos: 23 + 1), sin navegador ni servidor. Ver
-[05_Pruebas.md](05_Pruebas.md).
+### `ServicioDeLocalidades` (`Localidades/ServicioDeLocalidades.cs`)
+
+| Método | Flujo | Mensajes |
+| --- | --- | --- |
+| `ListarAsync` | delega al repositorio | — |
+| `GuardarAsync(ModeloDeLocalidad)` | 1) `Validar` campo por campo → `Invalido(errores)`; 2) duplicado por `MismaLocalidad` contra los existentes (excluyendo el propio `Id`) → `Invalido("nombre", …)`; 3) si `Id` tiene valor, actualiza (si ya no existe: «La localidad ya no existe.»); si no, agrega | «El nombre debe tener al menos 3 caracteres.» · «Seleccione una provincia.» · «El código postal debe tener 4 dígitos.» · «Ingrese una cantidad de habitantes mayor a cero.» · «Ya existe una localidad con ese nombre en la provincia.» · «Se agregó la localidad {nombre}.» · «Se actualizó la localidad {nombre}.» |
+| `EliminarAsync(id)` | si no existe → `Invalido("nombre", "La localidad ya no existe.")`; si no, elimina | «Se eliminó la localidad {nombre}.» |
+
+`ModeloDeLocalidad` es lo que edita el ABM: `Id?`, `Nombre`, `Provincia`, `CodigoPostal`,
+`Habitantes` (**anulable**, para distinguir «vacío» de «cero»), `EsEdicion => Id is not null`,
+`Limpiar()`.
+
+### `ServicioDeEncuestas` (`Encuestas/ServicioDeEncuestas.cs`)
+
+| Método | Qué hace |
+| --- | --- |
+| `ContarAsync` | Encuestas de la sesión |
+| `ValidarPaso(paso, ModeloDeEncuesta)` | Devuelve el diccionario de errores **del paso pedido** (1: nombre, edad, localidad · 2: medios, frecuencia · 3: distancia, minutos, motivo). Un paso fuera de 1..3 devuelve vacío |
+| `RegistrarAsync(modelo)` | Construye `RespuestaDeEncuesta` con `Nombre` recortado, `Medios` **en el orden del catálogo** (no en el de tipeo, para que el resumen sea estable), `RegistradaEn = UtcNow`; persiste y devuelve la entidad |
+
+Mensajes de `ValidarPaso`: «Ingrese nombre y apellido (mínimo 3 caracteres).» · «La edad debe
+estar entre 16 y 110 años.» · «Seleccione una localidad.» · «Seleccione al menos un medio de
+transporte.» · «Seleccione la frecuencia de uso.» · «Ingrese una distancia entre 0 y 500 km.» ·
+«Ingrese un tiempo entre 1 y 600 minutos.» · «Seleccione el motivo principal del viaje.»
+
+`ModeloDeEncuesta` acumula los tres pasos (`Nombre`, `Edad?`, `Localidad`; `Medios` como
+`HashSet<string>` + `Frecuencia`; `Distancia?`, `Minutos?`, `Motivo`) y expone
+`AlternarMedio(clave, elegido)`.
+
+### Políticas: el requisito antes del intento
+
+`PoliticaDeLocalidades` y `PoliticaDeEncuestas` son clases estáticas con propiedades de texto
+derivadas de las constantes de las reglas («Entre 3 y 60 caracteres, único por provincia.»,
+«4 dígitos.», «Entre 16 y 110 años.», «Entre 0 y 500 km por día.», …). Existen para que la pantalla
+**no transcriba la política**: si un límite cambia en las reglas, el requisito cambia con él. Se
+muestran antes del intento; el error al fallar lo decide el servicio (comentario en
+`PoliticaDeLocalidades.cs`).
+
+### `ResumenDeEncuesta` (`Encuestas/ResumenDeEncuesta.cs`)
+
+`De(RespuestaDeEncuesta)` devuelve siete `CampoDeResumen(Clave, Etiqueta, Valor)` **ya
+formateados**: `persona` «{Nombre} ({Edad} años)», `localidad`, `medios` (etiquetas unidas por
+«, »), `frecuencia`, `distancia` «{0.###} km», `minutos` «{n} min», `motivo`. La vista y la API lo
+recorren en vez de escribir la ficha a mano: agregar un campo lo hace aparecer sin tocar la
+superficie. Con la cultura `es-AR` fijada en los `Program.cs`, `12.5` se muestra «12,5 km» (lo
+verifican una E2E y una prueba de la API).
+
+## Abstracciones (`Aplicacion/Abstracciones/`)
+
+| Interfaz | Métodos | Implementación |
+| --- | --- | --- |
+| `IRepositorioDeLocalidades` | `ListarAsync`, `ObtenerAsync(id)`, `AgregarAsync`, `ActualizarAsync`, `EliminarAsync(id)` | `Infraestructura/Persistencia/RepositorioDeLocalidades.cs` |
+| `IRepositorioDeEncuestas` | `AgregarAsync`, `ContarAsync` | `Infraestructura/Persistencia/RepositorioDeEncuestas.cs` |
+| `IContextoDeSesion` | `string Id` | `Infraestructura/Sesiones/ContextoDeSesion.cs` |
+
+Todos reciben `CancellationToken` opcional. No hay abstracción para «obtener una encuesta»: la API
+devuelve `Location: /api/v1/encuestas/{id}` pero **no** expone ese GET ([12](12_Api-REST.md)).
+
+En la app Android los ViewModels consumen `ServicioDeLocalidades` y `ServicioDeEncuestas` tal
+cual —mismos mensajes de error, mismas claves— ([13](13_App-Android.md)); los 18 casos de
+`MovilidadUrbana.MAUI.Tests` corren contra las capas reales de esa copia.
