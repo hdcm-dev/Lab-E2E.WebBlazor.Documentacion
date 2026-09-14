@@ -44,7 +44,9 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   alternativa que funciona** (`SqlUserRepository` frente a `InMemoryUserRepository`, con una secuencia de alta,
   consulta y baja que muestra su estado), con el riesgo del atajo respaldado por EF Core, la síntesis
   «Stub: reemplaza una ausencia. Mock: simula un comportamiento. Fake: implementa el comportamiento de
-  otra manera», y el esquema pasa a tres dobles. El §1 deja de despachar los
+  otra manera», el esquema pasa a tres dobles, y se suma la
+  progresión por fidelidad al comportamiento real (dummy → stub → mock → fake → real) con un segundo
+  eje —si la prueba interroga al doble— que es el que separa al mock del stub. El §1 deja de despachar los
   dobles solo con la tabla de Meszaros. **Stub: tapar la dependencia** —una implementación mínima que
   deja seguir al código que depende de ella, con el origen del término— y **mock: la ilusión de que la
   dependencia existe o se la sustituye**, junto a la clase real que el mock imita, más un esquema de

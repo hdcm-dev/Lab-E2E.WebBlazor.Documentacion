@@ -194,6 +194,58 @@ construyó el doble sino de **si la prueba afirma sobre él**. Microsoft lo form
 like stubs, except for the Assert process. You run Assert operations against a mock object, but not
 against a stub» **[B: 5]**. La §7.4 lo muestra con el mismo objeto de Moq funcionando de las dos formas.
 
+**Una progresión: cuánto de la dependencia real reproduce cada doble.** Ordenados por fidelidad al
+comportamiento real, los dobles forman una escalera:
+
+```
+                REAL
+                 ▲
+                 │
+          comportamiento
+                 │
+               FAKE
+                 │
+          comportamiento
+           simplificado
+                 │
+               MOCK
+                 │
+          comportamiento
+            programado
+                 │
+               STUB
+                 │
+          presencia mínima
+                 │
+               DUMMY
+                 │
+          ni siquiera se usa
+```
+
+Leída de abajo hacia arriba, cada peldaño agrega algo: el *dummy* solo ocupa un parámetro; el
+*stub* devuelve algo del tipo correcto; el *mock* devuelve lo que se le programó para cada llamada;
+el *fake* calcula sus respuestas con una implementación propia; lo *real* es la dependencia de
+producción. **Cuanto más arriba, más confianza en que la prueba dice algo sobre producción, y más
+costo** —de construirlo, de mantenerlo y, en el caso de lo real, de correrlo—.
+
+La escalera mide una sola cosa, y hay otra que no entra en ella: **si la prueba interroga al doble
+después.** Esa dimensión es la que separa al mock del stub, y no tiene que ver con cuánto se parece a
+la dependencia —un mock y un stub pueden devolver exactamente lo mismo— sino con dónde va la
+afirmación. Por eso conviene leerla como dos ejes:
+
+| | Fidelidad al comportamiento real (la escalera) | ¿La prueba lo interroga después? |
+| --- | --- | --- |
+| **Dummy** | Ninguna: no se usa | No |
+| **Stub** | Presencia mínima o respuestas fijas | No: se afirma sobre el SUT |
+| **Spy** | La de un stub | Sí: registra y se le pregunta |
+| **Mock** | Comportamiento programado por llamada | Sí: sus expectativas son la afirmación |
+| **Fake** | Comportamiento simplificado, con estado | Normalmente no: se afirma sobre el SUT o sobre el estado del fake |
+| **Real** | Total | No aplica |
+
+El primer eje decide **cuánto se puede confiar** en lo que la prueba verifica; el segundo decide
+**qué** verifica —el resultado o la interacción—. La §7.3 elige el doble por el segundo; la §5.1
+recuerda el costo del primero cuando la dependencia es la base.
+
 En el uso corriente de .NET las palabras se mezclan: la guía de Microsoft advierte que «Testing
 literature and tools use the terms fake, stub, and mock inconsistently» y que en su propio uso «a
 fake can be a stub or a mock» **[B: 5]**. Esta guía usa las cinco de Meszaros, porque distinguen cosas
