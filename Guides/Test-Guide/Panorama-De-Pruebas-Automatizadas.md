@@ -80,11 +80,35 @@ siga funcionando. La palabra viene de ahí. Un *method stub* es «a short and si
 method that is not yet written», y contiene «just enough code to allow it to be used – a declaration
 with any parameters, and if applicable, a return value» **[B: 15]**:
 
+Los ejemplos de este apartado usan **una sola dependencia**, `IUserRepository`, para que los cuatro
+dobles se puedan comparar sobre lo mismo:
+
+```csharp
+public interface IUserRepository
+{
+    User GetUser(int id);
+    void AddUser(User user);
+    void DeleteUser(int id);
+}
+
+// La implementación real, la de producción: la lógica vive acá.
+public class SqlUserRepository : IUserRepository
+{
+    public User GetUser(int id)       { /* consulta SQL Server */ }
+    public void AddUser(User user)    { /* INSERT */ }
+    public void DeleteUser(int id)    { /* DELETE */ }
+}
+```
+
+Un stub de esa dependencia:
+
 ```csharp
 // Stub: alcanza con que devuelva algo del tipo correcto.
-public User GetUser(int id)
+public class StubUserRepository : IUserRepository
 {
-    return new User();
+    public User GetUser(int id)       => new User();
+    public void AddUser(User user)    { }
+    public void DeleteUser(int id)    { }
 }
 ```
 
@@ -94,17 +118,21 @@ cubrir lo que falta, sino para controlar lo que responde. El `ReadThermometer` q
 dependería del clima.
 
 **Mock: la ilusión de que la dependencia existe, o de que se la sustituye.** El punto de partida es
-que sí hay una implementación real, con su lógica:
+que sí hay una implementación real con su lógica —`SqlUserRepository`, arriba—. El mock **no es esa
+clase ni otra clase escrita a mano**: con Moq no se escribe ninguna clase, se crea con
+`new Mock<IUserRepository>()`, y lo único que tiene adentro es lo que la prueba le programó **[B: 16]**:
 
 ```csharp
-// La dependencia real: consulta, reglas, lo que haga falta.
-public class UserService : IUserService
-{
-    public User GetUser(int id)
-    {
-        // Lógica real
-    }
-}
+// Mock: no hay implementación. Hay un guion.
+var repository = new Mock<IUserRepository>();
+repository.Setup(x => x.GetUser(15))
+          .Returns(new User { Id = 15, Name = "Fernando", IsActive = true });
+
+IUserRepository dependencia = repository.Object;   // esto es lo que recibe el código bajo prueba
+
+// … se ejercita el código …
+
+repository.Verify(x => x.GetUser(15), Times.Once());
 ```
 
 El mock no la tapa con cualquier cosa: la **sustituye** por algo que parece ser ella y se comporta de
@@ -117,18 +145,8 @@ lee en las dos metáforas: el stub **tapa un hueco** para que el código siga an
 
 **Fake: hago una versión alternativa que funciona.** No pretende simplemente ocupar el lugar ni fingir
 determinadas respuestas: es una implementación alternativa, simplificada pero funcional, de la
-dependencia. Si la real consulta SQL Server,
-
-```csharp
-public class SqlUserRepository : IUserRepository
-{
-    public User GetUser(int id)       { /* consulta SQL Server */ }
-    public void AddUser(User user)    { /* INSERT */ }
-    public void DeleteUser(int id)    { /* DELETE */ }
-}
-```
-
-para las pruebas se puede construir otra que guarde en una lista y opere sobre ella:
+dependencia. Si la real —`SqlUserRepository`— consulta SQL Server, para las pruebas se puede construir
+otra que guarde en una lista y opere sobre ella:
 
 ```csharp
 public class InMemoryUserRepository : IUserRepository
@@ -169,6 +187,23 @@ base: SQLite compara cadenas distinguiendo mayúsculas y SQL Server no, así que
 contra el fake y fallar contra la real **[B: 3]**. Por eso la §5.1 prefiere la base real, y por eso el
 `RepositorioEnMemoria` de [Pruebas-Unitarias-Y-Arquitectura.md](Pruebas-Unitarias-Y-Arquitectura.md#43-cómo-se-ve-un-stub-a-mano-de-un-repositorio)
 —que es un fake— se reserva para lo que la base no puede simular.
+
+**¿Y cuál es la diferencia sustantiva entre el fake, el mock y la lógica real, si los tres «responden»?**
+La pregunta aparece sola al leer los tres ejemplos seguidos, y la respuesta es **de dónde sale la
+respuesta**:
+
+| | ¿Tiene lógica? | De dónde sale lo que devuelve `GetUser(20)` después de un `AddUser` con id 20 |
+| --- | --- | --- |
+| **Real** (`SqlUserRepository`) | La de producción | Se **calcula** contra SQL Server: devuelve el usuario |
+| **Fake** (`InMemoryUserRepository`) | Una segunda, más corta | Se **calcula** contra la lista: devuelve el usuario, porque `AddUser` lo agregó |
+| **Mock** (`Mock<IUserRepository>`) | Ninguna | **No se calcula**: devuelve lo que diga un `Setup` para `GetUser(20)`; si no hay ninguno, el valor por defecto —`null`—, aunque se haya llamado a `AddUser` |
+| **Stub** (`StubUserRepository`) | Ninguna | Siempre lo mismo: un `new User()` vacío |
+
+El valor por defecto del mock es el comportamiento *Loose* de Moq, que «never throws and returns default
+values or empty arrays, enumerables, etc. if no expectation is set for a member» **[B: 20]**. **El fake calcula; el mock recita; lo
+real calcula contra el recurso verdadero.** Por eso el fake puede reemplazar a la dependencia en una
+secuencia de operaciones y el mock no: el mock no sabe que `AddUser` y `GetUser` tienen algo que ver
+entre sí, salvo que la prueba se lo escriba.
 
 **Spy: te dejo hacer y te observo.** Su pregunta no es qué responde la dependencia sino qué le pasó:
 ¿se llamó a `GetUser`? ¿con qué id? ¿cuántas veces? ¿en qué orden? Hay dos maneras de construirlo, y
@@ -982,6 +1017,7 @@ Todas consultadas el **2026-09-12**. La columna «Verificación» dice qué se c
 | 17 | Moq. `src/Moq/Times.cs` (devlooped/moq, commit `b5bd0cf`, 2026-06-22). https://github.com/devlooped/moq/blob/main/src/Moq/Times.cs | `public static Times Once()`, `Never()`, `AtMostOnce()` | Leído en el código fuente: `Times.Once()` no figura en el readme ni en el Quickstart de la wiki |
 | 18 | Mockito. *Mockito* (javadoc de la clase), §13 «Spying on real objects». https://site.mockito.org/javadoc/current/org/mockito/Mockito.html | El spy que llama a los métodos reales salvo los stubeados; usarlo «carefully and occasionally» | Leída; citas literales. La página servida en esa URL se identifica como Mockito 2.2.7 API |
 | 19 | Jest. *The Jest Object*, `jest.spyOn`. https://jestjs.io/docs/jest-object | `spyOn` rastrea llamadas y por defecto llama al método espiado, «different behavior from most other test libraries» | Leída; citas literales |
+| 20 | Moq. *Quickstart* (wiki de devlooped/moq). https://github.com/devlooped/moq/wiki/Quickstart | Mock *Loose* por defecto: sin expectativa, devuelve valores por defecto; *Strict* lanza excepción | Leída; cita literal |
 
 **No consultadas, y por eso no citadas:** el syllabus de ISTQB (niveles de prueba), *xUnit Test
 Patterns* de Meszaros en su texto original (se cita a través de Fowler), *The Art of Unit Testing*

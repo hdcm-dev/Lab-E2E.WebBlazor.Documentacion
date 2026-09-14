@@ -52,7 +52,10 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   funcional, espía) y las cuatro frases en primera persona que separan a los que reemplazan del que
   acompaña. Qué se busca al espiar —observar una interacción que ya ocurre, no
   reemplazar— y el contraste con el mock: controlar la escena frente a observarla; las metáforas se
-  declaran criterio didáctico, sin afirmar el origen de los nombres. La nueva §7.5 convierte la escalera en un criterio: cuánto
+  declaran criterio didáctico, sin afirmar el origen de los nombres. Corregido: la sección del mock mostraba solo la clase real y un
+  lector la tomaba por el mock; ahora los cuatro dobles usan la misma dependencia (`IUserRepository`),
+  el mock se muestra en código (Moq, sin implementación) y una pregunta guía responde de dónde sale la
+  respuesta en cada uno: lo real y el fake calculan, el mock recita. La nueva §7.5 convierte la escalera en un criterio: cuánto
   realismo pagar en cada dependencia, con las fuerzas que tiran en contra, el compromiso que tomó el
   laboratorio en las pruebas de los ViewModels, el caso del «12,5» que las unitarias no podían ver y
   cubrió el teléfono, y cuatro preguntas para decidir el peldaño; las viejas §7.5 y §7.6 pasan a §7.6 y §7.7. El §1 deja de despachar los
