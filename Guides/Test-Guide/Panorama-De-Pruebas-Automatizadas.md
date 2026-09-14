@@ -225,6 +225,32 @@ most other test libraries» **[B: 19]**, y Mockito recomienda usar los spies rea
 occasionally, for example when dealing with legacy code» **[B: 18]**: cuando hace falta espiar a un
 objeto real, suele ser porque no hay una costura para reemplazarlo.
 
+**La familia, con sus metáforas.** Cada doble tiene una imagen que ayuda a recordarlo, y la imagen
+dice qué hace:
+
+| Tipo | Metáfora | Qué hace |
+| --- | --- | --- |
+| **Stub** | Tapón | Tapa un faltante |
+| **Mock** | Actor | Representa un comportamiento esperado |
+| **Fake** | Sustituto funcional | Implementa realmente, pero de otra manera |
+| **Spy** | Espía | Deja actuar y observa, registra |
+
+**La diferencia más importante**, dicha por cada uno en primera persona. Lo que las separa es qué hay
+detrás del doble y qué le promete a la prueba:
+
+> **Stub** — «No tengo la dependencia. Te doy algo para que puedas continuar.»
+
+> **Mock** — «No tengo la dependencia. Voy a hacer que se comporte como necesito.»
+
+> **Fake** — «No tengo la dependencia real. Construí otra implementación que funciona.»
+
+> **Spy** — «Tengo la dependencia. Dejala funcionar y yo voy a mirar qué hace.»
+
+Las tres primeras empiezan igual —*no tengo*— y la cuarta no, y ese es el corte que la escalera no
+mostraba: stub, mock y fake **reemplazan**; el spy que envuelve **acompaña**. La frase del spy
+corresponde a esa versión. El spy de Meszaros diría otra cosa —«No tengo la dependencia. Te doy algo y
+anoto cómo me lo pediste»—, que es un stub con memoria.
+
 En una línea cada uno:
 
 > **Stub: reemplaza una ausencia. Mock: simula un comportamiento. Fake: implementa el comportamiento de otra manera. Spy: deja hacer y observa.**
