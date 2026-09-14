@@ -115,20 +115,20 @@ expectations»— y lo que Fowler llama *behavior verification* **[B: 2]**. La d
 lee en las dos metáforas: el stub **tapa un hueco** para que el código siga andando; el mock
 **representa** a la dependencia, lo bastante bien como para interrogarlo después.
 
-**Fake: hago una versión alternativa que funciona.** Ni tapa un hueco ni recita respuestas: implementa
-la dependencia de verdad, por un camino más corto. Si la real consulta SQL Server,
+**Fake: hago una versión alternativa que funciona.** No pretende simplemente ocupar el lugar ni fingir
+determinadas respuestas: es una implementación alternativa, simplificada pero funcional, de la
+dependencia. Si la real consulta SQL Server,
 
 ```csharp
 public class SqlUserRepository : IUserRepository
 {
-    public User GetUser(int id)
-    {
-        // consulta SQL Server
-    }
+    public User GetUser(int id)       { /* consulta SQL Server */ }
+    public void AddUser(User user)    { /* INSERT */ }
+    public void DeleteUser(int id)    { /* DELETE */ }
 }
 ```
 
-para las pruebas se puede construir otra que guarde en una lista y busque ahí:
+para las pruebas se puede construir otra que guarde en una lista y opere sobre ella:
 
 ```csharp
 public class InMemoryUserRepository : IUserRepository
@@ -138,12 +138,28 @@ public class InMemoryUserRepository : IUserRepository
         new User { Id = 15, Name = "Fernando", IsActive = true }
     ];
 
-    public User GetUser(int id)
-    {
-        return _users.FirstOrDefault(x => x.Id == id);
-    }
+    public User GetUser(int id) => _users.FirstOrDefault(x => x.Id == id);
+
+    public void AddUser(User user) => _users.Add(user);
+
+    public void DeleteUser(int id) => _users.RemoveAll(x => x.Id == id);
 }
 ```
+
+Lo que lo distingue se ve cuando se lo usa **más de una vez**:
+
+```csharp
+repository.GetUser(15);                                         // Fernando
+repository.GetUser(20);                                         // null: no existe
+repository.AddUser(new User { Id = 20, Name = "Ana", IsActive = true });
+repository.GetUser(20);                                         // Ana: lo agregado ahora está
+repository.DeleteUser(15);
+repository.GetUser(15);                                         // null: lo borrado ya no está
+```
+
+Nadie programó que `GetUser(20)` devuelva `null` la primera vez y a Ana la segunda: sale solo, porque
+el fake **tiene estado y reglas**, como la dependencia real. Un stub habría devuelto siempre lo mismo;
+un mock habría devuelto lo que se le configuró para cada llamada.
 
 Es la definición de Meszaros al pie de la letra: «actually have working implementations, but usually
 take some shortcut» **[B: 2]**. Pedirle el 15 devuelve el 15; pedirle el 99 devuelve `null`, igual
@@ -153,6 +169,10 @@ base: SQLite compara cadenas distinguiendo mayúsculas y SQL Server no, así que
 contra el fake y fallar contra la real **[B: 3]**. Por eso la §5.1 prefiere la base real, y por eso el
 `RepositorioEnMemoria` de [Pruebas-Unitarias-Y-Arquitectura.md](Pruebas-Unitarias-Y-Arquitectura.md#43-cómo-se-ve-un-stub-a-mano-de-un-repositorio)
 —que es un fake— se reserva para lo que la base no puede simular.
+
+En una línea cada uno:
+
+> **Stub: reemplaza una ausencia. Mock: simula un comportamiento. Fake: implementa el comportamiento de otra manera.**
 
 Puestos uno al lado del otro:
 
