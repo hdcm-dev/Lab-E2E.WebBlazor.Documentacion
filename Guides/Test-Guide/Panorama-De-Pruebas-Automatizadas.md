@@ -19,7 +19,7 @@ y de correr, así que no puede ser la única. Este documento ubica a la E2E entr
 ## Índice
 
 - **[Marcas de evidencia](#marcas-de-evidencia)**
-- **[1. Definiciones](#1-definiciones)** — prueba automatizada, sistema bajo prueba, doble de prueba (stub: tapar la dependencia; mock: la ilusión de que existe o se la sustituye), nivel, aislamiento
+- **[1. Definiciones](#1-definiciones)** — prueba automatizada, sistema bajo prueba, doble de prueba (stub: tapar la dependencia; fake: una versión alternativa que funciona; mock: la ilusión de que existe o se la sustituye), nivel, aislamiento
 - **[2. El marco de referencia](#2-el-marco-de-referencia)** — escenarios, contextos y actores que usan los tres documentos
 - **[3. La taxonomía de la industria](#3-la-taxonomía-de-la-industria)** — unitaria, integración, sistema/E2E, y las dos figuras (pirámide y trofeo) que discuten la proporción
 - **[4. Qué prueba cada capa de Clean Architecture](#4-qué-prueba-cada-capa-de-clean-architecture)** — la regla de dependencia convertida en regla de prueba
@@ -115,10 +115,54 @@ expectations»— y lo que Fowler llama *behavior verification* **[B: 2]**. La d
 lee en las dos metáforas: el stub **tapa un hueco** para que el código siga andando; el mock
 **representa** a la dependencia, lo bastante bien como para interrogarlo después.
 
-```
-STUB ──── «te doy algo»
+**Fake: hago una versión alternativa que funciona.** Ni tapa un hueco ni recita respuestas: implementa
+la dependencia de verdad, por un camino más corto. Si la real consulta SQL Server,
 
-MOCK ──┬─ «te doy algo»
+```csharp
+public class SqlUserRepository : IUserRepository
+{
+    public User GetUser(int id)
+    {
+        // consulta SQL Server
+    }
+}
+```
+
+para las pruebas se puede construir otra que guarde en una lista y busque ahí:
+
+```csharp
+public class InMemoryUserRepository : IUserRepository
+{
+    private readonly List<User> _users =
+    [
+        new User { Id = 15, Name = "Fernando", IsActive = true }
+    ];
+
+    public User GetUser(int id)
+    {
+        return _users.FirstOrDefault(x => x.Id == id);
+    }
+}
+```
+
+Es la definición de Meszaros al pie de la letra: «actually have working implementations, but usually
+take some shortcut» **[B: 2]**. Pedirle el 15 devuelve el 15; pedirle el 99 devuelve `null`, igual
+que la base, sin que nadie lo haya programado caso por caso. **El atajo es también su riesgo:** la
+versión alternativa funciona, pero no necesariamente igual. El equipo de EF Core lo muestra con la
+base: SQLite compara cadenas distinguiendo mayúsculas y SQL Server no, así que una prueba puede pasar
+contra el fake y fallar contra la real **[B: 3]**. Por eso la §5.1 prefiere la base real, y por eso el
+`RepositorioEnMemoria` de [Pruebas-Unitarias-Y-Arquitectura.md](Pruebas-Unitarias-Y-Arquitectura.md#43-cómo-se-ve-un-stub-a-mano-de-un-repositorio)
+—que es un fake— se reserva para lo que la base no puede simular.
+
+Puestos uno al lado del otro:
+
+```
+STUB ──── «te doy algo»                               tapar la dependencia
+
+FAKE ──┬─ «te doy algo»                               una versión alternativa que funciona
+       └─ «funciono de verdad, por un atajo»
+
+MOCK ──┬─ «te doy algo»                               la ilusión de que existe o se la sustituye
        ├─ «me comporto de determinada manera»
        └─ «puedo decirte cómo me usaste»
 ```
@@ -133,9 +177,10 @@ against a stub» **[B: 5]**. La §7.4 lo muestra con el mismo objeto de Moq func
 En el uso corriente de .NET las palabras se mezclan: la guía de Microsoft advierte que «Testing
 literature and tools use the terms fake, stub, and mock inconsistently» y que en su propio uso «a
 fake can be a stub or a mock» **[B: 5]**. Esta guía usa las cinco de Meszaros, porque distinguen cosas
-que después importan en el diseño (§7.3). Y conviene no confundir el mock con el *fake*: el fake
-tiene una implementación que **funciona** —una base en memoria que guarda y devuelve lo guardado—;
-el mock no implementa nada, recita lo que se le programó.
+que después importan en el diseño (§7.3). El fake y el mock se confunden por la segunda línea del
+esquema, y se separan por la tercera y por el origen de las respuestas: el fake **calcula** lo que
+devuelve con su propia implementación; el mock **recita** lo que se le programó y además rinde cuentas
+de cómo se lo usó.
 
 **Nivel de prueba.** El tamaño del SUT y cuántas de sus dependencias son reales. Microsoft fija los
 tres que usa toda la industria: la unitaria «exercises individual software components or methods»
