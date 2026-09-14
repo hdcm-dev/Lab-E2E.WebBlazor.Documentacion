@@ -50,7 +50,9 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   y registra, y el que envuelve al objeto real y deja pasar (Mockito, `jest.spyOn`)—, un spy de
   ejemplo que envuelve al repositorio y la tabla de dos ejes con una fila para cada uno. La familia en una tabla de metáforas (tapón, actor, sustituto
   funcional, espía) y las cuatro frases en primera persona que separan a los que reemplazan del que
-  acompaña. La nueva §7.5 convierte la escalera en un criterio: cuánto
+  acompaña. Qué se busca al espiar —observar una interacción que ya ocurre, no
+  reemplazar— y el contraste con el mock: controlar la escena frente a observarla; las metáforas se
+  declaran criterio didáctico, sin afirmar el origen de los nombres. La nueva §7.5 convierte la escalera en un criterio: cuánto
   realismo pagar en cada dependencia, con las fuerzas que tiran en contra, el compromiso que tomó el
   laboratorio en las pruebas de los ViewModels, el caso del «12,5» que las unitarias no podían ver y
   cubrió el teléfono, y cuatro preguntas para decidir el peldaño; las viejas §7.5 y §7.6 pasan a §7.6 y §7.7. El §1 deja de despachar los

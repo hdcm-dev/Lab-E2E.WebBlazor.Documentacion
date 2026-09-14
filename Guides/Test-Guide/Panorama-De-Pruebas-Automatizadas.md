@@ -251,6 +251,32 @@ mostraba: stub, mock y fake **reemplazan**; el spy que envuelve **acompaña**. L
 corresponde a esa versión. El spy de Meszaros diría otra cosa —«No tengo la dependencia. Te doy algo y
 anoto cómo me lo pediste»—, que es un stub con memoria.
 
+**Qué se busca al espiar.** Conviene separar la metáfora cultural de *spy* de lo que el término hace
+en una prueba. La idea técnica es bastante literal: **poner algo que observa una interacción que ya
+está ocurriendo, para enterarse de qué hizo el objeto.** Al espiar no se busca principalmente
+reemplazar la dependencia; se busca **obtener información sobre su comportamiento**.
+
+Ahí está la sutileza con el mock, que también termina respondiendo «cómo se usó la dependencia»:
+
+> **Mock** — «Quiero controlar qué responde esta dependencia y verificar que mi código interactúe con ella como esperaba.»
+
+> **Spy** — «Quiero dejar que la dependencia haga lo suyo y después averiguar qué interacción ocurrió.»
+
+```
+MOCK  →  «voy a controlar la escena»
+
+SPY   →  «voy a observar la escena»
+```
+
+Los dos llegan a la misma pregunta —¿se llamó, con qué, cuántas veces?—, pero desde lados opuestos:
+el mock la **fija de antemano** y falla si la realidad no coincide; el spy la **reconstruye después**
+a partir de lo que pasó. El spy de Meszaros queda en el medio: controla lo que responde, porque es un
+stub, pero su propósito sigue siendo observar.
+
+Las metáforas de la tabla —tapón, actor, sustituto funcional, espía— son la imagen mental que esta guía
+propone para cada término **[C]**: resumen lo que hace cada doble según las definiciones citadas, no la
+historia de cómo se eligieron los nombres, que no se verificó.
+
 En una línea cada uno:
 
 > **Stub: reemplaza una ausencia. Mock: simula un comportamiento. Fake: implementa el comportamiento de otra manera. Spy: deja hacer y observa.**
