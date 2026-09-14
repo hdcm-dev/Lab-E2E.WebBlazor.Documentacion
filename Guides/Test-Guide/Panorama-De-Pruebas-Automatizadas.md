@@ -25,7 +25,7 @@ y de correr, así que no puede ser la única. Este documento ubica a la E2E entr
 - **[4. Qué prueba cada capa de Clean Architecture](#4-qué-prueba-cada-capa-de-clean-architecture)** — la regla de dependencia convertida en regla de prueba
 - **[5. La capa de datos](#5-la-capa-de-datos)** — base real, SQLite como doble, proveedor en memoria, repositorio simulado
 - **[6. Qué cambia según el tipo de aplicación](#6-qué-cambia-según-el-tipo-de-aplicación)** — web Blazor, API REST, app MAUI
-- **[7. Criterios de diseño](#7-criterios-de-diseño)** — las preguntas que deciden qué prueba escribir; cuándo un `Mock<T>` de Moq es un mock y cuándo un stub
+- **[7. Criterios de diseño](#7-criterios-de-diseño)** — las preguntas que deciden qué prueba escribir; cuándo un `Mock<T>` de Moq es un mock y cuándo un stub; cuánto realismo pagar en cada dependencia, y quién cubre el que se resigna
 - **[8. Mapa: estoy acá → aplico esto](#8-mapa-estoy-acá--aplico-esto)**
 - **[9. Lo que este documento no cubre](#9-lo-que-este-documento-no-cubre)**
 - **[10. Bibliografía](#10-bibliografía)** — con su grado de verificación
@@ -243,8 +243,8 @@ afirmación. Por eso conviene leerla como dos ejes:
 | **Real** | Total | No aplica |
 
 El primer eje decide **cuánto se puede confiar** en lo que la prueba verifica; el segundo decide
-**qué** verifica —el resultado o la interacción—. La §7.3 elige el doble por el segundo; la §5.1
-recuerda el costo del primero cuando la dependencia es la base.
+**qué** verifica —el resultado o la interacción—. La §7.3 elige el doble por el segundo; la §7.5 decide el peldaño del primero, dependencia por
+dependencia, y la §5.1 lo aplica a la base.
 
 En el uso corriente de .NET las palabras se mezclan: la guía de Microsoft advierte que «Testing
 literature and tools use the terms fake, stub, and mock inconsistently» y que en su propio uso «a
@@ -650,7 +650,7 @@ public class OrderService
 }
 ```
 
-La costura es `IUserService` recibida por constructor (§7.6). Sin ella no habría dónde poner ningún
+La costura es `IUserService` recibida por constructor (§7.7). Sin ella no habría dónde poner ningún
 doble.
 
 **Primera forma — el doble como stub.** La promesa que se verifica es «un usuario activo puede crear
@@ -708,7 +708,72 @@ La última fila es la razón por la que la tabla de la §7.3 pone al mock en la 
 nada más», y por la que el laboratorio no tiene ninguno: **en pantallas y casos de uso, lo que la
 persona observa es el estado; la llamada rara vez es la promesa.**
 
-### 7.5 ¿Cómo sé que la prueba prueba algo?
+### 7.5 ¿Cuánto realismo necesito en cada dependencia?
+
+**Respuesta: el que pida la pregunta de esa prueba, y ni un peldaño más; lo que no se paga en un nivel se paga en otro, pero se paga.**
+
+La escalera del §1 no dice qué doble es mejor. Dice cuánto cuesta cada grado de realismo, y eso
+convierte la elección en un **compromiso** que se resuelve **dependencia por dependencia**: una
+misma prueba puede tener la base real, la navegación con un fake y el reloj con un stub, porque cada
+dependencia le aporta a la pregunta algo distinto.
+
+Tres fuerzas empujan en sentidos opuestos:
+
+| Fuerza | Empuja hacia | Por qué |
+| --- | --- | --- |
+| **Lo que la pregunta necesita** | Arriba (más real) | Si la promesa depende de cómo se comporta la dependencia —una consulta que filtra por sesión—, un doble que no lo reproduce hace que la prueba pase por la razón equivocada |
+| **Costo y velocidad** | Abajo (más simple) | Cuanto más real, más lento de correr y más caro de preparar y aislar; la pirámide existe por esto **[B: 1]** |
+| **Control** | Abajo (más programable) | Una falla de red, un «cancelar» en un diálogo, el martes del ejemplo de Microsoft **[B: 5]**: lo real no se deja provocar a voluntad |
+
+Y una cuarta que se olvida: **el riesgo de divergencia.** Cuanto más elaborado el doble —un fake con
+estado, un mock con muchas expectativas—, más fácil que se aleje de la dependencia real sin que
+nadie lo note. El fake de base de datos que compara cadenas distinto que el motor real es el ejemplo
+de EF Core **[B: 3]**.
+
+#### El compromiso que tomó el laboratorio
+
+En las pruebas de los ViewModels de Android, cada dependencia está en un peldaño distinto, y cada
+uno tiene su razón:
+
+| Dependencia | Peldaño | Por qué ahí | Qué realismo se resignó, y quién lo cubre |
+| --- | --- | --- | --- |
+| Reglas de dominio | Real | No hay nada que doblar | — |
+| Servicios de aplicación | Real | Son la lógica que se quiere ver | — |
+| Repositorio y base SQLite | Real, un archivo por caso **[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:32]** | La promesa depende de la consulta y del filtro por sesión (§5.1) | — |
+| Navegación (`INavegador`) | Spy **[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:55-62]** | En un proceso de pruebas no hay Shell; la promesa es «vuelve», no cómo | La navegación real de Shell → las pruebas Appium en el teléfono |
+| Diálogos y avisos (`IAvisos`) | Stub **[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:64-71]** | Hay que poder responder «cancelar» a voluntad (fuerza *control*) | El diálogo y el Toast reales → el teléfono |
+| Teclado del sistema, enlaces XAML, estilos | Ausentes | No existen fuera del dispositivo | Todo → el teléfono |
+
+La última fila es la que muestra que el compromiso **tiene consecuencias**. Con el teclado ausente, un
+ViewModel que recibe «12,5» lo interpreta bien, y las 18 pruebas pasan. En el teléfono, el teclado
+numérico descartaba la coma y la distancia se registraba como «125» sin ningún error: lo encontró el
+recorrido en el dispositivo **[E: evidencia/2026-09-12-maui/README.md, capturas `24` → `35`]**, y
+desde entonces lo vigila una prueba Appium que escribe «12,5» y espera «12,5 km» en el resumen
+**[E: tests/MovilidadUrbana.MAUI.UITests/EncuestaTests.cs:31-45]**. El realismo que las unitarias no
+pagaron lo pagó otro nivel. **Si ningún nivel lo hubiera pagado, el defecto estaba en producción.**
+
+#### Las preguntas para decidir el peldaño
+
+Para cada dependencia de una prueba, en este orden:
+
+1. **¿La promesa depende de cómo se comporta esta dependencia?** Si sí, subir: real o fake fiel. Si
+   no, bajar: stub o dummy.
+2. **¿Necesito provocar algo que lo real no deja provocar?** Una falla, una respuesta rara, un
+   «cancelar». Si sí, un stub o un mock para ese caso —y el caso normal, más arriba—.
+3. **¿Lo que resigno acá lo cubre algún otro nivel?** Nombrarlo: «la navegación real la cubre la suite
+   Appium». Si no se puede nombrar, **o se sube el peldaño o se acepta el riesgo por escrito**.
+4. **¿Cuánto cuesta mantener este doble parecido a lo real?** Un fake con estado es una segunda
+   implementación que hay que mantener; si la dependencia real es barata de usar, suele salir más
+   caro el fake.
+
+| | |
+| --- | --- |
+| ✅ | «Base real porque la promesa es el filtro por sesión; navegación con spy porque la cubre Appium; diálogo con stub porque necesito el cancelar» |
+| ⚠️ | «Todo real, así es más confiable» — cierto para la confianza, pero la suite deja de ser rápida y el «cancelar» no se puede probar |
+| ❌ | «Todo con mocks, así es unitaria» — cada pieza verificada contra lo que se programó, y nada verificado contra lo que existe |
+| ❌ | «Doblamos el teclado… no, no se puede, lo dejamos» — el realismo resignado sin nombrar quién lo cubre es exactamente el hueco por donde pasó el «125» |
+
+### 7.6 ¿Cómo sé que la prueba prueba algo?
 
 **Respuesta: haciéndola fallar a propósito una vez. Una prueba que nunca se vio en rojo no demostró nada.**
 
@@ -718,7 +783,7 @@ En las unitarias, `[TestCase("Ab", ExpectedResult = false)]` hace el trabajo: si
 pasar «Ab», el caso falla. La versión de esta idea para pipelines está en
 [Beginner-Guide.md](../E2E-Guide/Beginner-Guide.md).
 
-### 7.6 ¿Qué tiene que hacer el código para poder probarse?
+### 7.7 ¿Qué tiene que hacer el código para poder probarse?
 
 **Respuesta: exponer costuras: interfaces en los bordes con la plataforma, identificadores en el marcado, reglas fuera de la vista.**
 
