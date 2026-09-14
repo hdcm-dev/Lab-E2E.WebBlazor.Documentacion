@@ -40,6 +40,18 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ### Cambiado
 
+- **`Panorama-De-Pruebas-Automatizadas.md` — stub y mock con cuerpo.** El §1 deja de despachar los
+  dobles solo con la tabla de Meszaros. **Stub: tapar la dependencia** —una implementación mínima que
+  deja seguir al código que depende de ella, con el origen del término— y **mock: la ilusión de que la
+  dependencia existe o se la sustituye**, junto a la clase real que el mock imita, más un esquema de
+  tres dimensiones («te doy algo», «me comporto de determinada manera», «puedo decirte cómo me
+  usaste») con su trampa: la segunda también la cumple un stub; lo que separa a los dos es si la
+  prueba afirma sobre el doble. La nueva §7.4 muestra el mismo `Mock<IUserService>` de Moq como stub
+  (`Setup`/`Returns` y `Assert` sobre el resultado) y como mock (`Verify(..., Times.Once())`), con
+  ejemplos contrastados; las viejas §7.4 y §7.5 pasan a §7.5 y §7.6. Tres fuentes nuevas: Wikipedia
+  *Method stub*, el readme de Moq y `src/Moq/Times.cs` (`Times.Once()` no figura en la documentación,
+  solo en el código).
+
 - **La ia-db pasa a versión 2.0**, regenerada completa contra `Lab-E2E.WebBlazor` en `10ce735`: las
   tres aplicaciones de Movilidad Urbana —web, API y Android— ya no comparten proyectos de capa sino
   que **repiten a propósito** `Dominio/`, `Aplicacion/` e `Infraestructura/`, y la ia-db lo registra

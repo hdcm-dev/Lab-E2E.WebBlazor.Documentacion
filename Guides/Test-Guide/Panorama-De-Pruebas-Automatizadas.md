@@ -19,13 +19,13 @@ y de correr, así que no puede ser la única. Este documento ubica a la E2E entr
 ## Índice
 
 - **[Marcas de evidencia](#marcas-de-evidencia)**
-- **[1. Definiciones](#1-definiciones)** — prueba automatizada, sistema bajo prueba, doble de prueba, nivel, aislamiento
+- **[1. Definiciones](#1-definiciones)** — prueba automatizada, sistema bajo prueba, doble de prueba (stub: tapar la dependencia; mock: la ilusión de que existe o se la sustituye), nivel, aislamiento
 - **[2. El marco de referencia](#2-el-marco-de-referencia)** — escenarios, contextos y actores que usan los tres documentos
 - **[3. La taxonomía de la industria](#3-la-taxonomía-de-la-industria)** — unitaria, integración, sistema/E2E, y las dos figuras (pirámide y trofeo) que discuten la proporción
 - **[4. Qué prueba cada capa de Clean Architecture](#4-qué-prueba-cada-capa-de-clean-architecture)** — la regla de dependencia convertida en regla de prueba
 - **[5. La capa de datos](#5-la-capa-de-datos)** — base real, SQLite como doble, proveedor en memoria, repositorio simulado
 - **[6. Qué cambia según el tipo de aplicación](#6-qué-cambia-según-el-tipo-de-aplicación)** — web Blazor, API REST, app MAUI
-- **[7. Criterios de diseño](#7-criterios-de-diseño)** — las preguntas que deciden qué prueba escribir
+- **[7. Criterios de diseño](#7-criterios-de-diseño)** — las preguntas que deciden qué prueba escribir; cuándo un `Mock<T>` de Moq es un mock y cuándo un stub
 - **[8. Mapa: estoy acá → aplico esto](#8-mapa-estoy-acá--aplico-esto)**
 - **[9. Lo que este documento no cubre](#9-lo-que-este-documento-no-cubre)**
 - **[10. Bibliografía](#10-bibliografía)** — con su grado de verificación
@@ -71,10 +71,71 @@ prueba. Meszaros distingue cinco, y Fowler los resume así **[B: 2]**:
 | *Spy* | «stubs that also record some information based on how they were called» | Después, preguntar qué se le pidió |
 | *Mock* | «objects pre-programmed with expectations» | Verificar la interacción, no el estado |
 
+La tabla alcanza para reconocerlos; no alcanza para distinguir los dos que más se confunden, el
+*stub* y el *mock*. Conviene verlos por lo que cada uno le promete a la prueba.
+
+**Stub: tapar la dependencia.** Es una implementación mínima que ocupa el lugar de una dependencia y
+no intenta reproducir su comportamiento real: solo tiene que dejar que el código que depende de ella
+siga funcionando. La palabra viene de ahí. Un *method stub* es «a short and simple placeholder for a
+method that is not yet written», y contiene «just enough code to allow it to be used – a declaration
+with any parameters, and if applicable, a return value» **[B: 15]**:
+
+```csharp
+// Stub: alcanza con que devuelva algo del tipo correcto.
+public User GetUser(int id)
+{
+    return new User();
+}
+```
+
+En una prueba el stub aparece aunque la dependencia real **sí** exista, y por otra razón: no para
+cubrir lo que falta, sino para controlar lo que responde. El `ReadThermometer` que devuelve siempre
+28 del ejemplo de la misma fuente **[B: 15]** es un buen caso: con el termómetro real la prueba
+dependería del clima.
+
+**Mock: la ilusión de que la dependencia existe, o de que se la sustituye.** El punto de partida es
+que sí hay una implementación real, con su lógica:
+
+```csharp
+// La dependencia real: consulta, reglas, lo que haga falta.
+public class UserService : IUserService
+{
+    public User GetUser(int id)
+    {
+        // Lógica real
+    }
+}
+```
+
+El mock no la tapa con cualquier cosa: la **sustituye** por algo que parece ser ella y se comporta de
+una manera determinada —«cuando me pidas el usuario 15, te respondo exactamente esto»—, y que además
+registra cómo se lo usó, para que la prueba pueda preguntarle después: «¿me llamaste exactamente una
+vez con el 15?». Es lo que dice la definición de Meszaros —«objects pre-programmed with
+expectations»— y lo que Fowler llama *behavior verification* **[B: 2]**. La diferencia con el stub se
+lee en las dos metáforas: el stub **tapa un hueco** para que el código siga andando; el mock
+**representa** a la dependencia, lo bastante bien como para interrogarlo después.
+
+```
+STUB ──── «te doy algo»
+
+MOCK ──┬─ «te doy algo»
+       ├─ «me comporto de determinada manera»
+       └─ «puedo decirte cómo me usaste»
+```
+
+El esquema tiene una trampa, y es la que más confunde en .NET: **la segunda línea del mock también
+la puede cumplir un stub.** Un stub que devuelve un usuario activo para el id 15 ya «se comporta de
+determinada manera». Lo que separa a los dos es solo la tercera línea, y no depende de cómo se
+construyó el doble sino de **si la prueba afirma sobre él**. Microsoft lo formula así: «mocks are just
+like stubs, except for the Assert process. You run Assert operations against a mock object, but not
+against a stub» **[B: 5]**. La §7.4 lo muestra con el mismo objeto de Moq funcionando de las dos formas.
+
 En el uso corriente de .NET las palabras se mezclan: la guía de Microsoft advierte que «Testing
 literature and tools use the terms fake, stub, and mock inconsistently» y que en su propio uso «a
 fake can be a stub or a mock» **[B: 5]**. Esta guía usa las cinco de Meszaros, porque distinguen cosas
-que después importan en el diseño (§7.3).
+que después importan en el diseño (§7.3). Y conviene no confundir el mock con el *fake*: el fake
+tiene una implementación que **funciona** —una base en memoria que guarda y devuelve lo guardado—;
+el mock no implementa nada, recita lo que se le programó.
 
 **Nivel de prueba.** El tamaño del SUT y cuántas de sus dependencias son reales. Microsoft fija los
 tres que usa toda la industria: la unitaria «exercises individual software components or methods»
@@ -444,7 +505,93 @@ Y lo que **no** se reemplaza: la base. `Entorno` compone `AgregarInfraestructura
 | ✅ | Doble de `IAvisos` que responde «cancelar»: es la única forma de ejercitar la rama sin diálogo |
 | ❌ | Doble de `IRepositorioDeLocalidades` en una prueba del ViewModel: se pierde la única verificación de que el filtro por sesión funciona, y no se gana velocidad apreciable |
 
-### 7.4 ¿Cómo sé que la prueba prueba algo?
+### 7.4 ¿Cuándo un `Mock<T>` de Moq es un mock, y cuándo es un stub?
+
+**Respuesta: lo decide la afirmación, no la biblioteca. Un `Mock<T>` sobre el que no se hace `Verify` es un stub con otro nombre.**
+
+El ejemplo es ilustrativo —**no está en el laboratorio**— y usa la API documentada de Moq: `Setup`,
+`Returns`, `Object` y `Verify` **[B: 16]**, y `Times.Once()` **[B: 17]**. El código bajo prueba decide
+si se puede crear un pedido según el usuario que le devuelve un servicio:
+
+```csharp
+public interface IUserService
+{
+    User GetUser(int id);
+}
+
+public class OrderService
+{
+    private readonly IUserService _userService;
+
+    public OrderService(IUserService userService) => _userService = userService;
+
+    public bool CanCreateOrder(int userId)
+    {
+        User user = _userService.GetUser(userId);
+        return user != null && user.IsActive;
+    }
+}
+```
+
+La costura es `IUserService` recibida por constructor (§7.6). Sin ella no habría dónde poner ningún
+doble.
+
+**Primera forma — el doble como stub.** La promesa que se verifica es «un usuario activo puede crear
+pedidos». El doble solo tiene que responder:
+
+```csharp
+[Test]
+public void UsuarioActivoPuedeCrearPedido()
+{
+    var userService = new Mock<IUserService>();
+    userService.Setup(x => x.GetUser(15))
+               .Returns(new User { Id = 15, IsActive = true });
+    var orderService = new OrderService(userService.Object);
+
+    bool resultado = orderService.CanCreateOrder(15);
+
+    Assert.That(resultado, Is.True);      // se afirma sobre el SUT
+}
+```
+
+El objeto se llama `Mock` porque así se llama la clase de Moq, pero funciona como **stub**: la
+afirmación va sobre `resultado`. Es la misma situación del ejemplo de Microsoft con
+`Mock<IDateTimeProvider>`, al que la guía nombra `dateTimeProviderStub` **[B: 5]**.
+
+**Segunda forma — el doble como mock.** La promesa es otra: «para decidir, `OrderService` consulta el
+servicio de usuarios una sola vez, con el id que recibió». Ahora la afirmación va sobre el doble:
+
+```csharp
+[Test]
+public void ConsultaAlServicioUnaSolaVezConElIdRecibido()
+{
+    var userService = new Mock<IUserService>();
+    userService.Setup(x => x.GetUser(15))
+               .Returns(new User { Id = 15, IsActive = true });
+    var orderService = new OrderService(userService.Object);
+
+    orderService.CanCreateOrder(15);
+
+    userService.Verify(x => x.GetUser(15), Times.Once());   // se afirma sobre el doble
+}
+```
+
+El mock mantiene la ilusión de que hay un `IUserService` real que responde a `GetUser(15)`, y además
+responde la pregunta que ningún stub puede responder: **¿el sistema llamó a la dependencia como se
+esperaba?**
+
+| | |
+| --- | --- |
+| ✅ | Stub con `Setup`/`Returns` y `Assert` sobre el resultado, cuando la promesa es la decisión |
+| ✅ | Mock con `Verify(..., Times.Once())`, cuando la promesa es la llamada: que se consulte una sola vez porque la consulta es cara, o que no se consulte cuando el id es inválido (`Times.Never()`) |
+| ⚠️ | Las dos cosas en la misma prueba —`Assert` sobre el resultado **y** `Verify`— cierto, pero son dos promesas: si falla, no se sabe cuál se rompió (§7.1) |
+| ❌ | `Verify` en todas las pruebas «por las dudas»: la prueba se ata a *cómo* está escrito `OrderService`, y cualquier refactor que cambie el número de llamadas la rompe sin que el comportamiento haya cambiado |
+
+La última fila es la razón por la que la tabla de la §7.3 pone al mock en la fila de «exactamente eso y
+nada más», y por la que el laboratorio no tiene ninguno: **en pantallas y casos de uso, lo que la
+persona observa es el estado; la llamada rara vez es la promesa.**
+
+### 7.5 ¿Cómo sé que la prueba prueba algo?
 
 **Respuesta: haciéndola fallar a propósito una vez. Una prueba que nunca se vio en rojo no demostró nada.**
 
@@ -454,7 +601,7 @@ En las unitarias, `[TestCase("Ab", ExpectedResult = false)]` hace el trabajo: si
 pasar «Ab», el caso falla. La versión de esta idea para pipelines está en
 [Beginner-Guide.md](../E2E-Guide/Beginner-Guide.md).
 
-### 7.5 ¿Qué tiene que hacer el código para poder probarse?
+### 7.6 ¿Qué tiene que hacer el código para poder probarse?
 
 **Respuesta: exponer costuras: interfaces en los bordes con la plataforma, identificadores en el marcado, reglas fuera de la vista.**
 
@@ -537,6 +684,9 @@ Todas consultadas el **2026-09-12**. La columna «Verificación» dice qué se c
 | 12 | Appium. *Introduction*. https://appium.io/docs/en/latest/intro/ | Qué es Appium; protocolo WebDriver; drivers que «implement connectivity to specific platforms» | Leída |
 | 13 | Android Developers. *Write automated tests with UI Automator*. https://developer.android.com/training/testing/other-components/ui-automator | Pruebas fuera del proceso de la app; localización por `viewIdResourceName`, texto, `contentDescription` | Leída; citas literales |
 | 14 | Android Developers. *Espresso*. https://developer.android.com/training/testing/espresso | Pruebas dentro del proceso; sincronización automática; `ViewMatchers`/`ViewActions`/`ViewAssertions` | Leída; citas literales |
+| 15 | Wikipedia. *Method stub*. https://en.wikipedia.org/wiki/Method_stub | El stub como «placeholder for a method that is not yet written» y el ejemplo del termómetro | Leída; citas literales. Fuente enciclopédica: se usa para el origen del término, no para la definición técnica, que viene de **[B: 2]** |
+| 16 | Moq. *readme.md* (devlooped/moq, rama `main`). https://github.com/devlooped/moq | `Setup(...)`, `Returns(...)`, `mock.Object`, `Verify(...)` | Leído en el repositorio |
+| 17 | Moq. `src/Moq/Times.cs` (devlooped/moq, commit `b5bd0cf`, 2026-06-22). https://github.com/devlooped/moq/blob/main/src/Moq/Times.cs | `public static Times Once()`, `Never()`, `AtMostOnce()` | Leído en el código fuente: `Times.Once()` no figura en el readme ni en el Quickstart de la wiki |
 
 **No consultadas, y por eso no citadas:** el syllabus de ISTQB (niveles de prueba), *xUnit Test
 Patterns* de Meszaros en su texto original (se cita a través de Fowler), *The Art of Unit Testing*
