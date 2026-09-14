@@ -19,7 +19,7 @@ y de correr, así que no puede ser la única. Este documento ubica a la E2E entr
 ## Índice
 
 - **[Marcas de evidencia](#marcas-de-evidencia)**
-- **[1. Definiciones](#1-definiciones)** — prueba automatizada, sistema bajo prueba, doble de prueba (stub: tapar la dependencia; fake: una versión alternativa que funciona; mock: la ilusión de que existe o se la sustituye), nivel, aislamiento
+- **[1. Definiciones](#1-definiciones)** — prueba automatizada, sistema bajo prueba, doble de prueba (stub: tapar la dependencia; fake: una versión alternativa que funciona; mock: la ilusión de que existe o se la sustituye; spy: te dejo hacer y te observo), nivel, aislamiento
 - **[2. El marco de referencia](#2-el-marco-de-referencia)** — escenarios, contextos y actores que usan los tres documentos
 - **[3. La taxonomía de la industria](#3-la-taxonomía-de-la-industria)** — unitaria, integración, sistema/E2E, y las dos figuras (pirámide y trofeo) que discuten la proporción
 - **[4. Qué prueba cada capa de Clean Architecture](#4-qué-prueba-cada-capa-de-clean-architecture)** — la regla de dependencia convertida en regla de prueba
@@ -170,9 +170,64 @@ contra el fake y fallar contra la real **[B: 3]**. Por eso la §5.1 prefiere la 
 `RepositorioEnMemoria` de [Pruebas-Unitarias-Y-Arquitectura.md](Pruebas-Unitarias-Y-Arquitectura.md#43-cómo-se-ve-un-stub-a-mano-de-un-repositorio)
 —que es un fake— se reserva para lo que la base no puede simular.
 
+**Spy: te dejo hacer y te observo.** Su pregunta no es qué responde la dependencia sino qué le pasó:
+¿se llamó a `GetUser`? ¿con qué id? ¿cuántas veces? ¿en qué orden? Hay dos maneras de construirlo, y
+la literatura usa la misma palabra para las dos.
+
+La de Meszaros: un spy es un stub que además anota —«Spies are stubs that also record some information
+based on how they were called» **[B: 2]**—. **Reemplaza** a la dependencia y registra. Es el
+`NavegadorFalso` del laboratorio: no navega, cuenta cuántas veces se le pidió volver
+**[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:55-62]**.
+
+La de las bibliotecas que espían objetos reales: el spy **envuelve** a la dependencia real, deja que la
+operación ocurra de verdad y registra lo que pasó. Mockito lo define así: «When you use the spy then
+the real methods are called (unless a method was stubbed)» **[B: 18]**; `jest.spyOn` «also calls the
+spied method» por defecto **[B: 19]**.
+
+```csharp
+// Ilustrativo: un spy que envuelve al repositorio real.
+public class SpyUserRepository(IUserRepository real) : IUserRepository
+{
+    public List<int> IdsConsultados { get; } = [];
+
+    public User GetUser(int id)
+    {
+        IdsConsultados.Add(id);          // observa
+        return real.GetUser(id);         // y deja pasar
+    }
+}
+
+var spy = new SpyUserRepository(new UserRepository());
+var user = spy.GetUser(15);              // la consulta ocurre de verdad
+// después: spy.IdsConsultados → [15]
+```
+
+```
+            OrderService
+                 │
+                 ▼
+          ┌─────────────┐
+          │     SPY     │  registra: GetUser(15), 1 vez
+          └──────┬──────┘
+                 │  «dejalo pasar»
+                 ▼
+          UserRepository
+                 │
+                 ▼
+            SQL Server
+```
+
+Las dos versiones responden las mismas preguntas; lo que cambia es **qué hay detrás**. El spy de
+Meszaros tiene detrás un stub, así que la prueba no toca la dependencia real. El spy que envuelve
+tiene detrás lo real, así que la prueba paga el costo y el realismo de lo real y además observa. La
+propia documentación de Jest advierte que ese comportamiento por defecto «is different behavior from
+most other test libraries» **[B: 19]**, y Mockito recomienda usar los spies reales «carefully and
+occasionally, for example when dealing with legacy code» **[B: 18]**: cuando hace falta espiar a un
+objeto real, suele ser porque no hay una costura para reemplazarlo.
+
 En una línea cada uno:
 
-> **Stub: reemplaza una ausencia. Mock: simula un comportamiento. Fake: implementa el comportamiento de otra manera.**
+> **Stub: reemplaza una ausencia. Mock: simula un comportamiento. Fake: implementa el comportamiento de otra manera. Spy: deja hacer y observa.**
 
 Puestos uno al lado del otro:
 
@@ -228,6 +283,9 @@ el *fake* calcula sus respuestas con una implementación propia; lo *real* es la
 producción. **Cuanto más arriba, más confianza en que la prueba dice algo sobre producción, y más
 costo** —de construirlo, de mantenerlo y, en el caso de lo real, de correrlo—.
 
+El spy no tiene peldaño propio en la escalera, y eso ya anticipa lo que sigue: se monta **sobre**
+un peldaño —sobre un stub en la versión de Meszaros, sobre lo real en la que envuelve—.
+
 La escalera mide una sola cosa, y hay otra que no entra en ella: **si la prueba interroga al doble
 después.** Esa dimensión es la que separa al mock del stub, y no tiene que ver con cuánto se parece a
 la dependencia —un mock y un stub pueden devolver exactamente lo mismo— sino con dónde va la
@@ -237,7 +295,8 @@ afirmación. Por eso conviene leerla como dos ejes:
 | --- | --- | --- |
 | **Dummy** | Ninguna: no se usa | No |
 | **Stub** | Presencia mínima o respuestas fijas | No: se afirma sobre el SUT |
-| **Spy** | La de un stub | Sí: registra y se le pregunta |
+| **Spy (Meszaros)** | La de un stub: reemplaza | Sí: registra y se le pregunta |
+| **Spy (envoltorio)** | La de lo real: deja pasar | Sí: registra y se le pregunta |
 | **Mock** | Comportamiento programado por llamada | Sí: sus expectativas son la afirmación |
 | **Fake** | Comportamiento simplificado, con estado | Normalmente no: se afirma sobre el SUT o sobre el estado del fake |
 | **Real** | Total | No aplica |
@@ -869,6 +928,8 @@ Todas consultadas el **2026-09-12**. La columna «Verificación» dice qué se c
 | 15 | Wikipedia. *Method stub*. https://en.wikipedia.org/wiki/Method_stub | El stub como «placeholder for a method that is not yet written» y el ejemplo del termómetro | Leída; citas literales. Fuente enciclopédica: se usa para el origen del término, no para la definición técnica, que viene de **[B: 2]** |
 | 16 | Moq. *readme.md* (devlooped/moq, rama `main`). https://github.com/devlooped/moq | `Setup(...)`, `Returns(...)`, `mock.Object`, `Verify(...)` | Leído en el repositorio |
 | 17 | Moq. `src/Moq/Times.cs` (devlooped/moq, commit `b5bd0cf`, 2026-06-22). https://github.com/devlooped/moq/blob/main/src/Moq/Times.cs | `public static Times Once()`, `Never()`, `AtMostOnce()` | Leído en el código fuente: `Times.Once()` no figura en el readme ni en el Quickstart de la wiki |
+| 18 | Mockito. *Mockito* (javadoc de la clase), §13 «Spying on real objects». https://site.mockito.org/javadoc/current/org/mockito/Mockito.html | El spy que llama a los métodos reales salvo los stubeados; usarlo «carefully and occasionally» | Leída; citas literales. La página servida en esa URL se identifica como Mockito 2.2.7 API |
+| 19 | Jest. *The Jest Object*, `jest.spyOn`. https://jestjs.io/docs/jest-object | `spyOn` rastrea llamadas y por defecto llama al método espiado, «different behavior from most other test libraries» | Leída; citas literales |
 
 **No consultadas, y por eso no citadas:** el syllabus de ISTQB (niveles de prueba), *xUnit Test
 Patterns* de Meszaros en su texto original (se cita a través de Fowler), *The Art of Unit Testing*

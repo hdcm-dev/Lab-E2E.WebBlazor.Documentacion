@@ -46,7 +46,9 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   «Stub: reemplaza una ausencia. Mock: simula un comportamiento. Fake: implementa el comportamiento de
   otra manera», el esquema pasa a tres dobles, y se suma la
   progresión por fidelidad al comportamiento real (dummy → stub → mock → fake → real) con un segundo
-  eje —si la prueba interroga al doble— que es el que separa al mock del stub. La nueva §7.5 convierte la escalera en un criterio: cuánto
+  eje —si la prueba interroga al doble— que es el que separa al mock del stub. Se suma el **spy: te dejo hacer y te observo**, con sus dos sentidos —el de Meszaros, que reemplaza
+  y registra, y el que envuelve al objeto real y deja pasar (Mockito, `jest.spyOn`)—, un spy de
+  ejemplo que envuelve al repositorio y la tabla de dos ejes con una fila para cada uno. La nueva §7.5 convierte la escalera en un criterio: cuánto
   realismo pagar en cada dependencia, con las fuerzas que tiran en contra, el compromiso que tomó el
   laboratorio en las pruebas de los ViewModels, el caso del «12,5» que las unitarias no podían ver y
   cubrió el teléfono, y cuatro preguntas para decidir el peldaño; las viejas §7.5 y §7.6 pasan a §7.6 y §7.7. El §1 deja de despachar los
