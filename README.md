@@ -58,7 +58,7 @@ industria. Su [README](Guides/Test-Guide/README.md) trae el mapa.
 | [Pruebas-Unitarias-Y-Arquitectura.md](Guides/Test-Guide/Pruebas-Unitarias-Y-Arquitectura.md) | Quien escribe la primera prueba que no abre un navegador | Qué es una unidad según dónde vive el código; cómo elegir el doble; cómo se prueban los ViewModels de MAUI sin el workload |
 | [Pruebas-De-Interfaz-Por-Pantalla.md](Guides/Test-Guide/Pruebas-De-Interfaz-Por-Pantalla.md) | Quien tiene que probar `MovilidadUrbana.MAUI` sin `GetByTestId` | Cuando no hay DOM: árbol de accesibilidad, niveles de localización, Appium y `AutomationId`, lo que se hizo con `adb` en un teléfono físico y la suite Appium que corre contra él |
 
-### [Guides/](Guides/) — ramas, integración y releases
+### [Guides/](Guides/) — ramas, integración, releases y nombres
 
 | Documento | Para quién | De qué va |
 | --- | --- | --- |
@@ -66,6 +66,7 @@ industria. Su [README](Guides/Test-Guide/README.md) trae el mapa.
 | [Guia-Practica-GitFlow.md](Guides/Guia-Practica-GitFlow.md) | Un equipo de tres que rota roles | Los ocho escenarios ejecutables del modelo adoptado |
 | [Guia-Practica-GitHubFlow.md](Guides/Guia-Practica-GitHubFlow.md) | Ídem | Los mismos ocho sobre el modelo que **no** se adoptó, como línea de base |
 | [GitHub-Action-Guide.md](Guides/GitHub-Action-Guide.md) | Quien nunca escribió un workflow | Vocabulario, sintaxis y escenarios completos, con ejemplos que corren en este workspace |
+| [Nomenclatura-Convensiones-Arquitecture-Dot-Net.md](Guides/Nomenclatura-Convensiones-Arquitecture-Dot-Net.md) | Quien nombra código o renombra una solución, persona o agente | La regla «arquitectura en inglés, dominio en español», la tabla de decisión, lo que no se traduce y el procedimiento de renombre con sus escollos |
 | [Anexos/workflows/](Guides/Anexos/workflows/README.md) | Quien monta la CI | Los tres workflows listos para copiar |
 
 Los documentos de `E2E-Guide/` citan el código del laboratorio por ruta relativa, así que se leen

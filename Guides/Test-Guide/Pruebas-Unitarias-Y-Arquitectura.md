@@ -204,15 +204,15 @@ Ejemplo ilustrativo —**no está en el laboratorio**, se muestra para fijar la 
 
 ```csharp
 // Ilustrativo: un fake de ILocalidadRepository con una lista en memoria.
-sealed class RepositorioEnMemoria : ILocalidadRepository
+sealed class InMemoryLocalidadRepository : ILocalidadRepository
 {
     public List<Localidad> Datos { get; } = [];
 
     public Task<IReadOnlyList<Localidad>> GetAllAsync(CancellationToken c = default) =>
         Task.FromResult<IReadOnlyList<Localidad>>(Datos);
 
-    public Task<bool> ExisteAsync(string nombre, string provincia, int? salvoId, CancellationToken c = default) =>
-        Task.FromResult(Datos.Any(l => l.Nombre == nombre && l.Provincia == provincia && l.Id != salvoId));
+    public Task<Localidad?> GetByIdAsync(int id, CancellationToken c = default) =>
+        Task.FromResult(Datos.FirstOrDefault(l => l.Id == id));
 
     // … el resto de la interfaz, con la misma idea
 }

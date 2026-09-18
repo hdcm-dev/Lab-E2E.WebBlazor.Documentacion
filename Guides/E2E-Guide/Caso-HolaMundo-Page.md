@@ -193,7 +193,7 @@ un bloque por estado. Excluyentes por construcción, y legibles los tres de un v
 | Estado | Qué se muestra | Línea |
 | --- | --- | --- |
 | `Enviando` | Un esqueleto | [90](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Pages/HolaMundo.razor#L90) |
-| `WithData` | La tarjeta con la frase | [94–103](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Pages/HolaMundo.razor#L94-L103) |
+| `ConDatos` | La tarjeta con la frase | [94–103](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Pages/HolaMundo.razor#L94-L103) |
 | `Vacio` | El estado vacío, con qué hacer para salir de él | [107–108](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Pages/HolaMundo.razor#L107-L108) |
 | `ErrorDeEntrada` | Una banda, **fuera del marco** porque interrumpe | [29–36](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Pages/HolaMundo.razor#L29-L36) |
 
@@ -232,7 +232,7 @@ aparece un estado que **nunca es consecuencia de una acción de la persona**.
 
 | Estado | ¿Caso propio? | Por qué |
 | --- | --- | --- |
-| `WithData` | **Sí** | Es la promesa central |
+| `ConDatos` | **Sí** | Es la promesa central |
 | `ErrorDeEntrada` | **Sí** | Es un flujo alterno con su propia promesa |
 | `Vacio` | No aparte | El `[SetUp]` ya pasa por él; verificarlo suma un caso que falla junto con el otro |
 | `Enviando` | No | Es un tránsito. Afirmarlo obliga a atrapar un instante, y ahí nacen las pruebas intermitentes |
@@ -331,9 +331,9 @@ nada a quien está probando suerte» es la mitad del adversario. Está tratado e
 | --- | --- |
 | ✅ | «La frase aparece» — se ve |
 | ❌ | «La frase queda guardada en el modelo» — no se ve |
-| ❌ | «El estado pasa a `WithData`» — no se ve |
+| ❌ | «El estado pasa a `ConDatos`» — no se ve |
 
-`WithData` es un nombre interno. Lo que la persona percibe es que *apareció una tarjeta
+`ConDatos` es un nombre interno. Lo que la persona percibe es que *apareció una tarjeta
 con la frase adentro*. Que eso se implemente con un `enum` de tres valores es una
 decisión reversible, y una prueba no debería atarse a decisiones reversibles.
 

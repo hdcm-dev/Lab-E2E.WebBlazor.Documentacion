@@ -6,6 +6,25 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Sin publicar] - 2026-09-18
 
+### Agregado
+
+- `Guides/Nomenclatura-Convensiones-Arquitecture-Dot-Net.md`: la convención de nombres del
+  laboratorio escrita para que una persona o un agente la aplique sin más contexto: la regla, la
+  tabla de decisión por categoría, los casos límite resueltos, lo que no se traduce nunca, el
+  procedimiento de renombre paso a paso con los doce escollos que aparecieron (síntoma, causa y
+  corrección) y el chequeo para código nuevo. Enlazada desde el índice del README.
+
+### Corregido
+
+- Segunda revisión de las guías contra el código renombrado: `Template-SDD-Aplicado.md` citaba los
+  archivos viejos del tema y del ingreso (`Iconos`, `RolesDeIcono`, `Tono`, `UbicacionDelSello`,
+  `EstadoDeSuperficie`, `IdentidadEndpoints`, `CatalogoDeResultados`); `Caso-HolaMundo-Page.md`
+  había quedado con `WithData` en vez de `ConDatos`; y el fake ilustrativo de
+  `Pruebas-Unitarias-Y-Arquitectura.md` pasa a llamarse `InMemoryLocalidadRepository` e implementa
+  `GetByIdAsync`, que sí existe en la interfaz, en lugar de un `ExisteAsync` que no. Verificado con un
+  chequeo automático: las 79 citas con rango de líneas apuntan a archivos existentes y ninguna cae en
+  código con nombres viejos.
+
 ### Cambiado
 
 - **Las guías siguen la nueva convención de nombres del laboratorio** —arquitectura en inglés,

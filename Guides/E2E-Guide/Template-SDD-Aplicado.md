@@ -50,9 +50,9 @@ visuales y el mismo reparto entre superficie, componente y servicio.
 
 ### 1.2 Tema
 
-`Theme/Iconos.cs` (trazos SVG de grilla 24 y trazo 1.75, heredando `currentColor`),
-`Theme/RolesDeIcono.cs` (24 navegación · 20 tarjeta · 16 inline · 15 fila),
-`Theme/Tono.cs`, `Theme/UbicacionDelSello.cs` y `Theme/EstadoDeSuperficie.cs` con el
+`Theme/Icons.cs` (trazos SVG de grilla 24 y trazo 1.75, heredando `currentColor`),
+`Theme/IconRoles.cs` (24 navegación · 20 tarjeta · 16 inline · 15 fila),
+`Theme/Tone.cs`, `Theme/StampPlacement.cs` y `Theme/SurfaceState.cs` con el
 vocabulario de estados, sin agregados ni recortes.
 
 ### 1.3 Componentes propios, uno por patrón
@@ -72,12 +72,12 @@ reimplementa uno de ellos en línea.
 
 - `Pages/Identidad/Ingreso.razor` **sin `@rendermode`**: SSR estático, campos
   nativos con `autocomplete`, token antifalsificación y `data-enhance="false"`.
-- `Endpoints/IdentidadEndpoints.cs` publica `POST /identidad/ingreso` y
+- `Endpoints/IdentityEndpoints.cs` publica `POST /identidad/ingreso` y
   `POST /identidad/salida`: la cookie se emite en el ciclo de request, fuera del
   circuito.
 - El cierre de sesión es un `form` POST con el botón adentro, al pie del chrome y a
   un clic desde cualquier superficie del shell de trabajo.
-- `Services/CatalogoDeResultados.cs` es el único origen de los textos de resultado;
+- `Services/SignInResults.cs` es el único origen de los textos de resultado;
   el rechazo de credenciales es indiferenciado y no expone parámetros de la política.
 - Guard en tres capas: ruteo (`AuthorizeRouteView` + `Redirect` con
   `replace: true`), superficie (`OnInitializedAsync`) y acción (el endpoint).
