@@ -573,7 +573,7 @@ completa en verde sobre `main`.
 #### 1. Un cambio plausible que rompe otra cosa (I1)
 
 El ejemplo sale del comportamiento real de la aplicación sembrada. El listado del ABM de
-localidades se ordena por antigüedad —`RepositorioDeLocalidades.ListarAsync` usa
+localidades se ordena por antigüedad —`LocalidadRepository.GetAllAsync` usa
 `.OrderBy(l => l.Id)`—, y el desplegable de localidades de la **encuesta** se alimenta de ese mismo
 listado. **[E]**
 
@@ -590,7 +590,7 @@ pasa a ser `"Resistencia (Chaco)"` y esa prueba —y solo esa— falla. **[E]**
 git checkout main
 git pull --ff-only
 git checkout -b feature/151-listado-mas-recientes-primero
-# src/MovilidadUrbana.Web/Infraestructura/Persistencia/RepositorioDeLocalidades.cs
+# src/MovilidadUrbana.Web/Infrastructure/Persistence/LocalidadRepository.cs
 #   .OrderBy(l => l.Id)  →  .OrderByDescending(l => l.Id)
 git push -u origin feature/151-listado-mas-recientes-primero
 ```

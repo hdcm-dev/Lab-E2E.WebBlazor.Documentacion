@@ -165,11 +165,11 @@ escribimos ejecuta exactamente dos veces el ingreso y compara los desenlaces:
 
 ```csharp
 await IngresarAsync(identificador: "nadie");
-var conIdentificadorInexistente = await Page.GetByTestId("mensaje-resultado").TextContentAsync();
+var conIdentificadorInexistente = await Page.GetByTestId("mensaje-result").TextContentAsync();
 
 await Page.GotoAsync("/login");
 await IngresarAsync(secreto: "lo-que-no-es");
-var conSecretoIncorrecto = await Page.GetByTestId("mensaje-resultado").TextContentAsync();
+var conSecretoIncorrecto = await Page.GetByTestId("mensaje-result").TextContentAsync();
 
 Assert.That(conSecretoIncorrecto, Is.EqualTo(conIdentificadorInexistente));
 ```
@@ -241,11 +241,11 @@ diseñador es contemplarlos todos y decidir cómo la pantalla se mueve entre ell
 
 **Qué se le cambió acá.** Tres cosas, y las tres apuntan a la verificabilidad:
 
-1. **Son un `enum` compartido, no una guía de estilo.** [`EstadoDeSuperficie.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Theme/EstadoDeSuperficie.cs)
+1. **Son un `enum` compartido, no una guía de estilo.** [`SurfaceState.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Theme/SurfaceState.cs)
    tiene diez estados con nombre, y cada superficie **elige de esa lista** en vez de
    inventar los suyos.
 2. **Son excluyentes por construcción.** El `@if / else if / else` de
-   [`HolaMundo.razor` 87–110](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor#L87-L110)
+   [`HolaMundo.razor` 87–110](../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Pages/HolaMundo.razor#L87-L110)
    es el marco que los ordena.
 3. **La ausencia se declara.** Que `Indisponible` no aplique se escribe **en el marcado**,
    con su motivo.

@@ -155,7 +155,7 @@ no dice qué componente se rompió, solo que el recorrido dejó de funcionar.
 
 | No es | Por qué |
 | --- | --- |
-| Una prueba unitaria con navegador | Una unitaria verifica una regla aislada. `ReglasDeLocalidad` **[E: src/MovilidadUrbana.Web/Dominio/Reglas/ReglasDeLocalidad.cs]** merece unitarias; el recorrido de alta merece una E2E |
+| Una prueba unitaria con navegador | Una unitaria verifica una regla aislada. `LocalidadRules` **[E: src/MovilidadUrbana.Web/Domain/Rules/LocalidadRules.cs]** merece unitarias; el recorrido de alta merece una E2E |
 | Una prueba de integración de API | La de API llama al endpoint sin navegador. La E2E pasa por el DOM, el CSS y el JavaScript reales |
 | Una prueba de carga | Verifica comportamiento funcional, no cuántos usuarios soporta |
 | Un reemplazo del testeo manual exploratorio | Automatiza lo conocido y repetitivo; descubrir lo desconocido sigue siendo trabajo humano |
@@ -303,9 +303,9 @@ Tablas de entrada: se busca la situación en la primera columna y se lee lo que 
 | Artefacto | Responsabilidad única | Archivo del laboratorio |
 | --- | --- | --- |
 | Proyecto de pruebas | Contener los casos y su infraestructura | [tests/MovilidadUrbana.E2ETests/](../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/) |
-| Ciclo de vida del servidor | Levantar y bajar la aplicación bajo prueba | `Infraestructura/ServidorDeLaAplicacion.cs` |
-| Clase base | Sesión por prueba, espera de interactividad, navegación por menú | `Infraestructura/PruebaE2E.cs` |
-| Paralelismo | Cuántas clases corren a la vez | `Infraestructura/ParalelismoDelEnsamblado.cs` |
+| Ciclo de vida del servidor | Levantar y bajar la aplicación bajo prueba | `Infrastructure/ServidorDeLaAplicacion.cs` |
+| Clase base | Sesión por prueba, espera de interactividad, navegación por menú | `Infrastructure/PruebaE2E.cs` |
+| Paralelismo | Cuántas clases corren a la vez | `Infrastructure/ParalelismoDelEnsamblado.cs` |
 | Configuración de corrida | Navegador, timeouts, workers, carpeta de resultados | `pruebas.runsettings` |
 | Definición de las pruebas en CI | Cómo se corren, una sola vez para todo el repositorio | `.github/workflows/e2e.yml` |
 | Política de integración | Cuándo se corren y qué bloquea el merge | `.github/workflows/ci.yml` |
@@ -376,11 +376,11 @@ La jerarquía de clases base que ofrece el paquete, de menos a más servicio
 
 ```
 tests/MovilidadUrbana.E2ETests/
-  Infraestructura/
-    ServidorDeLaAplicacion.cs    Ciclo de vida de la aplicación bajo prueba
-    PruebaE2E.cs                 Clase base de todos los casos
-    ParalelismoDelEnsamblado.cs  Atributos de ensamblado: cuánto paraleliza NUnit
-  NavegacionTests.cs             Portada, menú y ruta inexistente        (4 casos)
+  Infrastructure/
+    TestAppServer.cs    Ciclo de vida de la aplicación bajo prueba
+    E2ETestBase.cs                 Clase base de todos los casos
+    AssemblyParallelism.cs  Atributos de ensamblado: cuánto paraleliza NUnit
+  NavigationTests.cs             Portada, menú y ruta inexistente        (4 casos)
   LocalidadesTests.cs            ABM completo y aislamiento de sesiones   (9 casos)
   EncuestaTests.cs               Asistente de tres pasos                  (9 casos)
 pruebas.runsettings              Navegador, timeouts, workers, resultados
@@ -390,7 +390,7 @@ Tres convenciones sostienen esa estructura, y son las que conviene copiar **[C]*
 
 - **Una clase por pantalla o por recorrido**, nombrada `<Pantalla>Tests`. Es también la unidad de
   paralelismo, así que la división por pantalla es la que mejor reparte el trabajo.
-- **`Infraestructura/` separada de los casos**. Todo lo que no es una prueba —arranque, base,
+- **`Infrastructure/` separada de los casos**. Todo lo que no es una prueba —arranque, base,
   helpers— vive ahí. Un archivo de casos que empieza con 80 líneas de andamiaje es un archivo que
   nadie va a leer.
 - **Nombres de método que son la frase del caso**: `DaDeAltaUnaLocalidadYLaPersisteTrasRecargar`
@@ -403,18 +403,18 @@ El arranque de la aplicación es un `[SetUpFixture]` de NUnit: un tipo cuyo `[On
 antes de la primera prueba de su namespace y cuyo `[OneTimeTearDown]` corre después de la última.
 
 ```csharp
-// tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs, líneas 4-19
+// tests/MovilidadUrbana.E2ETests/Infrastructure/TestAppServer.cs, líneas 4-19
 namespace MovilidadUrbana.E2ETests;   // ← el namespace de las pruebas, no uno anidado
 
 [SetUpFixture]
-public class ServidorDeLaAplicacion
+public class TestAppServer
 ```
 
-El archivo está en la carpeta `Infraestructura/` pero **declara el namespace de las pruebas**. Un
+El archivo está en la carpeta `Infrastructure/` pero **declara el namespace de las pruebas**. Un
 `[SetUpFixture]` cubre su propio namespace y los que cuelgan de él, nunca el de arriba: puesto en
 `MovilidadUrbana.E2ETests.Infraestructura` no se ejecutaría para las pruebas de
 `MovilidadUrbana.E2ETests`, y el síntoma es desconcertante —la URL base llega vacía y Playwright se
-queja de la cookie— **[E: tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs]**.
+queja de la cookie— **[E: tests/MovilidadUrbana.E2ETests/Infrastructure/TestAppServer.cs]**.
 
 ## 4.5. El archivo de configuración de corrida
 
@@ -460,9 +460,9 @@ Ese mecanismo es el que usa CI para recorrer la matriz de navegadores sin tocar 
 ```mermaid
 sequenceDiagram
     participant T as dotnet test
-    participant F as ServidorDeLaAplicacion<br/>[SetUpFixture]
+    participant F as TestAppServer<br/>[SetUpFixture]
     participant A as publicacion/MovilidadUrbana.Web
-    participant B as PruebaE2E<br/>(PageTest)
+    participant B as E2ETestBase<br/>(PageTest)
     participant N as Navegador
 
     T->>F: OneTimeSetUp
@@ -508,7 +508,7 @@ Los 22 casos **[V]** se reparten así:
 
 | Clase | Casos | Qué verifica | Qué filtro justifica |
 | --- | --- | --- | --- |
-| `NavegacionTests` | 4 | Portada con acceso a las dos pantallas, marca de página activa en el menú, navegación sin recarga dentro del circuito, ruta inexistente | Riesgo de integración: el enrutado y el layout son transversales |
+| `NavigationTests` | 4 | Portada con acceso a las dos pantallas, marca de página activa en el menú, navegación sin recarga dentro del circuito, ruta inexistente | Riesgo de integración: el enrutado y el layout son transversales |
 | `LocalidadesTests` | 9 | Listado sembrado, rechazo de alta inválida, alta con persistencia tras recargar, duplicado dentro de la provincia, edición, baja cancelada, baja confirmada, tabla vacía, aislamiento entre sesiones | Valor de negocio: es el ABM completo |
 | `EncuestaTests` | 9 | Estado inicial, desplegable alimentado por el ABM, validación de cada paso, ida y vuelta conservando datos, barra de progreso, resumen final, contador persistido, reinicio | Valor + integración: el asistente atraviesa toda la pila |
 
@@ -516,7 +516,7 @@ Antes de copiar el reparto conviene una advertencia sobre el ejemplo mismo: el l
 ninguna prueba unitaria, así que no ilustra la pirámide que esta guía predica
 ([§1.3](#13-dónde-se-ubica)). Sus E2E cargan hoy con verificaciones de reglas —un caso por regla de
 validación— que estarían mejor cubiertas más abajo y más barato. Es una deuda del laboratorio, no un
-modelo a imitar: en un proyecto real las reglas de `ReglasDeLocalidad` y `ReglasDeEncuesta` se
+modelo a imitar: en un proyecto real las reglas de `LocalidadRules` y `EncuestaRules` se
 verifican con unitarias y las E2E se quedan con un caso de validación por pantalla. **[C]**
 
 Tres decisiones de cobertura merecen mirarse de cerca, porque son las que se copian mal:
@@ -530,7 +530,7 @@ nunca llegó a la base. Es la diferencia entre verificar la pantalla y verificar
 **[E: LocalidadesTests.cs, línea 54]** verifica que el número se formatee con la cultura `es-AR`, que
 es una decisión explícita de la aplicación **[E: src/MovilidadUrbana.Web/Program.cs, líneas 12-16]**.
 El contexto del navegador fija `Locale = "es-AR"` para que la prueba no dependa de la máquina
-**[E: tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs, línea 46]**.
+**[E: tests/MovilidadUrbana.E2ETests/Infrastructure/E2ETestBase.cs, línea 46]**.
 
 **Dejar en unitarias lo que es de unitarias.** Los bordes de cada validación —nombre de dos
 caracteres, código postal de cinco dígitos, edad de 15 años— viven en
@@ -595,22 +595,22 @@ negociación con otro archivo y otra persona.
 >    ([§5.4](#54-antipatrones)). En el laboratorio la respuesta es casi cero por la regla de
 >    [§5.3](#53-el-contrato-de-selección) —el `data-testid` se escribe junto con la vista—, con una
 >    sola excepción declarada: `Page.Locator(".navbar-toggler")`
->    **[E: PruebaE2E.cs, línea 94]**, y está justificada porque ese marcado es de un tercero.
+>    **[E: E2ETestBase.cs, línea 94]**, y está justificada porque ese marcado es de un tercero.
 >    **Reparo:** cero no es la meta, y el número puede engañar. `data-testid` mueve el acoplamiento,
 >    no lo elimina: la suite se rompe igual si alguien renombra `fila` o `campo-nombre`, solo que
 >    ese renombre es deliberado y el retoque de CSS no. Y una suite que no se inmuta ante ningún
->    cambio de interfaz probablemente esté verificando poco: `NavegacionTests` depende del título de
+>    cambio de interfaz probablemente esté verificando poco: `NavigationTests` depende del título de
 >    la página y del atributo `aria-current`
->    **[E: tests/MovilidadUrbana.E2ETests/NavegacionTests.cs]**, que también son contrato de
+>    **[E: tests/MovilidadUrbana.E2ETests/NavigationTests.cs]**, que también son contrato de
 >    interfaz —y está bien que lo sean—.
 > 3. *Qué supuesto de la infraestructura no está verificado.* Generaliza el caso del andamiaje de
 >    [§5.2](#52-qué-cubre-el-laboratorio-y-por-qué). El laboratorio verifica dos supuestos por
 >    caminos distintos: el aislamiento tiene su propia prueba, y la emulación móvil no tiene prueba
 >    sino una falla explícita al armar el contexto si falta el descriptor
->    **[E: PruebaE2E.cs, líneas 31-35]**. **Reparo:** no todo supuesto merece un caso, y la pregunta
+>    **[E: E2ETestBase.cs, líneas 31-35]**. **Reparo:** no todo supuesto merece un caso, y la pregunta
 >    no lo dice. Hay uno que no cubre ninguno de los dos caminos: que el binario que se prueba sea
 >    el de esta corrida. El fixture publica antes de arrancar
->    **[E: ServidorDeLaAplicacion.cs, líneas 121-162]**, pero en CI corre con
+>    **[E: TestAppServer.cs, líneas 121-162]**, pero en CI corre con
 >    `PUBLICAR_ANTES_DE_PROBAR=false` sobre el artefacto que descargó
 >    **[E: .github/workflows/e2e.yml, línea 226]**, y nada dentro de la suite comprueba esa
 >    correspondencia. La pregunta rinde cuando se acepta que la respuesta puede ser «ninguna prueba,
@@ -629,7 +629,7 @@ abierta y un método `[Test]` con las dos partes restantes.
 ```csharp
 // tests/MovilidadUrbana.E2ETests/LocalidadesTests.cs, líneas 5-35 (extracto)
 [TestFixture]
-public class LocalidadesTests : PruebaE2E
+public class LocalidadesTests : E2ETestBase
 {
     [SetUp]
     public async Task AbrirElAbmAsync() => await IrAAsync("/localidades");
@@ -642,7 +642,7 @@ public class LocalidadesTests : PruebaE2E
         await Page.GetByTestId("campo-codigo-postal").FillAsync("34");
         await Page.GetByTestId("boton-guardar").ClickAsync();
 
-        await Expect(Page.GetByTestId("aviso")).ToHaveTextAsync("Revise los campos marcados en rojo.");
+        await Expect(Page.GetByTestId("notice")).ToHaveTextAsync("Revise los campos marcados en rojo.");
         await Expect(Page.GetByTestId("error-nombre")).ToHaveTextAsync(new Regex("al menos 3 caracteres"));
         await Expect(Page.GetByTestId("fila")).ToHaveCountAsync(2);
     }
@@ -670,7 +670,7 @@ detalle.
 | Filtrado por contenido | `Page.GetByTestId("fila").Filter(new() { HasText = "Resistencia" })` **[E: LocalidadesTests.cs, línea 84]** | Elegir una fila de una tabla por lo que muestra |
 | Encadenado | `fila.GetByTestId("boton-editar")` **[E: LocalidadesTests.cs, línea 85]** | Acotar la búsqueda al ámbito de un elemento |
 | Por posición | `opciones.Nth(1)` **[E: EncuestaTests.cs, línea 54]** | Listas donde el orden es parte del contrato |
-| Por CSS | `Page.Locator(".navbar-toggler")` **[E: PruebaE2E.cs, línea 94]** | Elementos de una biblioteca de terceros que no controlamos |
+| Por CSS | `Page.Locator(".navbar-toggler")` **[E: E2ETestBase.cs, línea 94]** | Elementos de una biblioteca de terceros que no controlamos |
 
 El encadenado es la técnica que más rinde. `fila.GetByTestId("boton-editar")` dice «el botón editar
 **de esta fila**», y evita el problema clásico de una tabla: diez botones idénticos y un selector
@@ -716,10 +716,10 @@ como hace el caso de la baja confirmada, que verifica el aviso, el conteo **y** 
 
 Cada caso del laboratorio arranca con las mismas dos localidades —Corrientes y Resistencia— porque la
 aplicación siembra ese juego la primera vez que la sesión pide o toca localidades
-**[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/SembradorDeSesion.cs, líneas 13-17]**. El
+**[E: src/MovilidadUrbana.Web/Infrastructure/Persistence/SessionSeeder.cs, líneas 13-17]**. El
 disparo no está en un middleware ni en el arranque: cada operación del repositorio de localidades
-empieza llamando a `AsegurarAsync`, y es esa llamada la que crea la marca de sesión y las dos filas
-**[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/RepositorioDeLocalidades.cs, líneas 20-22]**.
+empieza llamando a `EnsureSeededAsync`, y es esa llamada la que crea la marca de sesión y las dos filas
+**[E: src/MovilidadUrbana.Web/Infrastructure/Persistence/LocalidadRepository.cs, líneas 20-22]**.
 La prueba no crea los datos ni los borra al terminar: recibe un espacio limpio por construcción.
 
 Es una de las tres estrategias posibles, y conviene conocerlas:
@@ -773,9 +773,9 @@ real solo debería correr un subconjunto de solo lectura. **[C]**
 > 3. *De dónde salen los datos de cada caso.* Ubica tu proyecto en la tabla de
 >    [§6.4](#64-datos-sembrar-no-depender). La respuesta del laboratorio es «los siembra la
 >    aplicación», pero la parte interesante es *cuándo*: no hay middleware ni siembra al arrancar,
->    cada operación del repositorio empieza llamando a `AsegurarAsync` y es esa llamada la que crea
+>    cada operación del repositorio empieza llamando a `EnsureSeededAsync` y es esa llamada la que crea
 >    la marca de sesión y las dos filas
->    **[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/RepositorioDeLocalidades.cs, líneas 20-22]**.
+>    **[E: src/MovilidadUrbana.Web/Infrastructure/Persistence/LocalidadRepository.cs, líneas 20-22]**.
 >    **Reparo:** las tres opciones que ofrece la pregunta no son excluyentes ni valen lo mismo según
 >    dónde corras. Contra un entorno ya desplegado (**CTX-03**) la restricción es otra —no destruir
 >    estado ajeno— y «los siembra la aplicación» recién es una respuesta aceptable porque el
@@ -817,14 +817,14 @@ La solución tiene dos mitades. La vista publica un testigo:
 Y la clase base lo espera antes de tocar nada:
 
 ```csharp
-// tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs, líneas 72-87
+// tests/MovilidadUrbana.E2ETests/Infrastructure/E2ETestBase.cs, líneas 72-87
 protected async Task IrAAsync(string ruta)
 {
     await Page.GotoAsync(ruta);
-    await EsperarInteractivoAsync();
+    await WaitForInteractiveAsync();
 }
 
-protected async Task EsperarInteractivoAsync() =>
+protected async Task WaitForInteractiveAsync() =>
     await Expect(Page.GetByTestId("estado-app")).ToHaveAttributeAsync("data-interactivo", "true");
 ```
 
@@ -840,13 +840,13 @@ compartida, dos pruebas que corren a la vez se pisan.
 
 El laboratorio resuelve el problema en la aplicación, no en las pruebas: un middleware emite una
 cookie de sesión y todos los repositorios filtran por ella
-**[E: src/MovilidadUrbana.Web/Sesiones/MiddlewareDeSesion.cs]**. La prueba solo tiene
+**[E: src/MovilidadUrbana.Web/Sessions/SessionMiddleware.cs]**. La prueba solo tiene
 que estrenar la cookie antes de navegar:
 
 ```csharp
-// tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs, líneas 57-69
+// tests/MovilidadUrbana.E2ETests/Infrastructure/E2ETestBase.cs, líneas 57-69
 [SetUp]
-public async Task EstrenarSesionAsync()
+public async Task StartFreshSessionAsync()
 {
     await Context.AddCookiesAsync(
     [
@@ -854,7 +854,7 @@ public async Task EstrenarSesionAsync()
         {
             Name = CookieDeSesion,
             Value = Guid.NewGuid().ToString("n"),
-            Url = ServidorDeLaAplicacion.UrlBase
+            Url = TestAppServer.UrlBase
         }
     ]);
 }
@@ -865,7 +865,7 @@ flowchart LR
     P1["Prueba A<br/>cookie a1b2…"] --> S["Una instancia<br/>de la aplicación"]
     P2["Prueba B<br/>cookie c3d4…"] --> S
     P3["Prueba C<br/>cookie e5f6…"] --> S
-    S --> DB[("movilidad.db<br/>filas filtradas por SesionId")]
+    S --> DB[("movilidad.db<br/>filas filtradas por SessionId")]
     DB -.-> R1["A ve solo lo suyo"]
     DB -.-> R2["B ve solo lo suyo"]
     DB -.-> R3["C ve solo lo suyo"]
@@ -874,7 +874,7 @@ flowchart LR
 Dos detalles de implementación explican por qué esto funciona y no es tan simple como parece.
 
 La cookie **se emite solo al pedir un documento**, nunca en las peticiones de CSS o JavaScript
-**[E: MiddlewareDeSesion.cs, líneas 17-20]**. El navegador lanza esas peticiones en paralelo: si
+**[E: SessionMiddleware.cs, líneas 17-20]**. El navegador lanza esas peticiones en paralelo: si
 cada una generara un identificador, la primera visita terminaría con varios y se quedaría con el
 último en llegar.
 
@@ -887,8 +887,8 @@ El aislamiento por sesión es lógico —cada prueba ve solo sus filas—, pero 
 la vez sobre el único archivo SQLite hay que habilitar además la concurrencia física: la aplicación
 pone la base en `journal_mode=WAL` al preparar el esquema y el fixture le pasa `Default Timeout=30`
 en la cadena de conexión
-**[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/PreparadorDeBaseDeDatos.cs, línea 29;
-tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs, línea 68]**.
+**[E: src/MovilidadUrbana.Web/Infrastructure/Persistence/DatabaseInitializer.cs, línea 29;
+tests/MovilidadUrbana.E2ETests/Infrastructure/TestAppServer.cs, línea 68]**.
 
 Esta es la técnica que hace que la corrida de chromium termine en 7 segundos con 22 casos **[V]**.
 Sin aislamiento, la única alternativa es correr en serie.
@@ -898,20 +898,20 @@ Sin aislamiento, la única alternativa es correr en serie.
 Las pruebas ejercitan el binario publicado, no `dotnet run`. Publicar no es un paso previo que haya
 que acordarse de correr: el fixture publica `src/MovilidadUrbana.Web` al arrancar la corrida, y
 `dotnet publish` es incremental, así que cuando no cambió nada tarda un par de segundos
-**[E: ServidorDeLaAplicacion.cs, líneas 121-162]**. Los navegadores corren la misma suerte: en lugar
+**[E: TestAppServer.cs, líneas 121-162]**. Los navegadores corren la misma suerte: en lugar
 de exigir `pwsh playwright.ps1 install`, el fixture llama al instalador que trae el paquete
 `Microsoft.Playwright`, que es idempotente y baja solo el navegador de esta corrida
-**[E: ServidorDeLaAplicacion.cs, líneas 86-119]**.
+**[E: TestAppServer.cs, líneas 86-119]**.
 
 Hay dos artefactos posibles y conviene no confundirlos. El fixture publica **dependiente del
 framework**, sin `--runtime` ni `--self-contained`, para no tener que elegir un identificador de
-plataforma en la máquina de quien desarrolla **[E: ServidorDeLaAplicacion.cs, líneas 150-162]**. CI y
+plataforma en la máquina de quien desarrolla **[E: TestAppServer.cs, líneas 150-162]**. CI y
 `scripts/publicar.sh` publican **autocontenido para `linux-x64`**, que es lo que hace falta para
 correr dentro del contenedor de Playwright, sin runtime de .NET instalado; en CI se publica una sola
 vez y toda la matriz de navegadores reutiliza el mismo artefacto
 **[E: scripts/publicar.sh; .github/workflows/e2e.yml, jobs `publicar` y `pruebas`]**. El fixture
 acepta los dos: si encuentra el apphost lo ejecuta directo, y si no, arranca con
-`dotnet MovilidadUrbana.Web.dll` **[E: ServidorDeLaAplicacion.cs, líneas 198-220]**. Ojo con
+`dotnet MovilidadUrbana.Web.dll` **[E: TestAppServer.cs, líneas 198-220]**. Ojo con
 `scripts/publicar.sh`: no usa el SDK de la máquina sino `scripts/dotnet.sh`, que es un `docker run`
 sobre la imagen oficial del SDK **[E: scripts/dotnet.sh, líneas 11-19]**.
 
@@ -919,7 +919,7 @@ El fixture lo levanta con `Process.Start`, fijando variables de entorno y —est
 directorio de trabajo:
 
 ```csharp
-// tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs, líneas 57-65
+// tests/MovilidadUrbana.E2ETests/Infrastructure/TestAppServer.cs, líneas 57-65
 var arranque = new ProcessStartInfo(ejecutable)
 {
     // ASP.NET Core toma el directorio actual como raíz de contenido: si se lo lanza desde
@@ -937,18 +937,18 @@ blanco, y en la consola del navegador no hay ningún error rojo que lo delate
 **[E: ../../../Lab-E2E.WebBlazor/README.md]**.
 
 Después de arrancar, el fixture sondea el puerto hasta 90 segundos y aborta con un mensaje claro si
-el proceso muere antes de escuchar **[E: ServidorDeLaAplicacion.cs, líneas 240-264]**. Un servidor
+el proceso muere antes de escuchar **[E: TestAppServer.cs, líneas 240-264]**. Un servidor
 que no arranca tiene que fallar como «la aplicación terminó sola con código 134», no como 22 pruebas
 en rojo por timeout.
 
 Y si `URL_BASE` está definida, no se levanta nada: se prueba contra ese entorno
-**[E: ServidorDeLaAplicacion.cs, líneas 42-48]**. Un solo `if` convierte la misma suite en prueba de
+**[E: TestAppServer.cs, líneas 42-48]**. Un solo `if` convierte la misma suite en prueba de
 humo de un despliegue (**ESC-04**).
 
 La base que ejercitan las pruebas es un único archivo SQLite, `datos-e2e/movilidad.db` en la raíz del
 repositorio, y el fixture no la deja librada a la configuración de la aplicación: se la impone por
 entorno con `ConnectionStrings__BaseDeDatos` al lanzar el proceso
-**[E: ServidorDeLaAplicacion.cs, líneas 67-68, 182-184]**. Es una de las siete variables con las que
+**[E: TestAppServer.cs, líneas 67-68, 182-184]**. Es una de las siete variables con las que
 se gobierna el fixture sin tocar código:
 
 | Variable | Por defecto | Efecto |
@@ -961,7 +961,7 @@ se gobierna el fixture sin tocar código:
 | `BASE_DE_DATOS` | `datos-e2e/movilidad.db` | Archivo SQLite que el fixture le impone a la aplicación |
 | `EMULAR_MOVIL` | `false` | Chromium con el descriptor de un Pixel 7 |
 
-**[E: ServidorDeLaAplicacion.cs, líneas 42, 50, 99, 135, 183-184, 192-195; PruebaE2E.cs, línea 22;
+**[E: TestAppServer.cs, líneas 42, 50, 99, 135, 183-184, 192-195; E2ETestBase.cs, línea 22;
 .github/workflows/e2e.yml, línea 226]**
 
 ## 7.5. El enlace de datos tiene que escuchar el evento correcto
@@ -973,9 +973,9 @@ rechaza.
 
 ```razor
 @* src/MovilidadUrbana.Web/Components/Pages/Localidades.razor, líneas 54-56 *@
-<input type="number" class="form-control @Marca("habitantes")" id="habitantes"
+<input type="number" class="form-control @Brand("habitantes")" id="habitantes"
        data-testid="campo-habitantes" min="1" step="1"
-       @bind="_modelo.Habitantes" @bind:event="oninput" />
+       @bind="_model.Habitantes" @bind:event="oninput" />
 ```
 
 Vale la pena leer esto en su forma general, porque reaparece con otros frameworks: **la prueba
@@ -994,22 +994,22 @@ prueba que falla siempre: entrena al equipo a reintentar la corrida en lugar de 
 | Estado compartido entre pruebas | Falla solo cuando corren en paralelo | Aislamiento por sesión ([§7.3](#73-aislar-el-estado-cuando-vive-en-el-servidor)) |
 | Espera fija demasiado corta | Falla en máquinas cargadas | Aserción con reintento ([§6.3](#63-aserciones-que-esperan)) |
 | Click durante una animación | Falla al azar en modales y desplegables | Estado del componente en vez de JavaScript de terceros ([§7.8](#78-menos-javascript-menos-intermitencia)) |
-| Cultura o zona horaria de la máquina | Falla en un runner y pasa en otro | Fijar `Locale` y `TimezoneId` en el contexto **[E: PruebaE2E.cs, líneas 46-47]** |
-| Emulación móvil que cae en silencio a escritorio | La prueba pasa, pero no probó lo que decía | Fallar explícitamente si falta el descriptor **[E: PruebaE2E.cs, líneas 31-35]** |
+| Cultura o zona horaria de la máquina | Falla en un runner y pasa en otro | Fijar `Locale` y `TimezoneId` en el contexto **[E: E2ETestBase.cs, líneas 46-47]** |
+| Emulación móvil que cae en silencio a escritorio | La prueba pasa, pero no probó lo que decía | Fallar explícitamente si falta el descriptor **[E: E2ETestBase.cs, líneas 31-35]** |
 | Causa desconocida, y solo ocurre en CI | Falla una vez cada tantas corridas, nunca en la máquina propia | Abrir la traza del caso fallido ([§7.11](#711-la-traza-y-por-qué-hay-que-escribirla-a-mano)) |
 | `/dev/shm` chico dentro de un contenedor | Chromium muere a mitad de la corrida | `--disable-dev-shm-usage` o más `--shm-size`; medido innecesario a esta escala **[E: ../../../Lab-E2E.WebBlazor/README.md]** |
 
 El caso de la emulación móvil es instructivo porque el error es del tipo peor: la prueba en verde
 que no probó nada. Si el descriptor `Pixel 7` no estuviera disponible, la configuración caería a
 escritorio sin avisar, y la corrida *mobile-chrome* estaría reportando éxito sobre un viewport de
-escritorio. El laboratorio prefiere que reviente **[E: PruebaE2E.cs, líneas 31-35]** **[C]**.
+escritorio. El laboratorio prefiere que reviente **[E: E2ETestBase.cs, líneas 31-35]** **[C]**.
 
 ## 7.7. Paralelismo: hasta dónde llega
 
 NUnit no paraleliza por defecto; hay que pedirlo con atributos de ensamblado:
 
 ```csharp
-// tests/MovilidadUrbana.E2ETests/Infraestructura/ParalelismoDelEnsamblado.cs, línea 12
+// tests/MovilidadUrbana.E2ETests/Infrastructure/AssemblyParallelism.cs, línea 12
 [assembly: Parallelizable(ParallelScope.Fixtures)]
 ```
 
@@ -1023,7 +1023,7 @@ pueden divergir sin que nada avise. **[C]**
 Subirlo a `ParallelScope.Children` rompe la integración de Playwright con NUnit, que lleva un
 registro de servicios por worker: la corrida falla con `The given key 'Browser' was not present in
 the dictionary` y `Collection was modified; enumeration operation may not execute`
-**[E: ParalelismoDelEnsamblado.cs; ../../../Lab-E2E.WebBlazor/README.md]**.
+**[E: AssemblyParallelism.cs; ../../../Lab-E2E.WebBlazor/README.md]**.
 
 Es una diferencia real con `fullyParallel: true` del runner de JavaScript, que reparte caso por caso.
 Con tres clases de prueba, el límite práctico es que la corrida dura lo que dura la clase más lenta.
@@ -1041,14 +1041,14 @@ estática del laboratorio hubo que corregir **[E: ../../../Lab-E2E.WebBlazor/REA
 
 Aparece a cambio otra obligación, y es la que resuelve `IrPorMenuAsync`: en viewport chico el menú
 viene colapsado, así que hay que desplegarlo antes de navegar
-**[E: PruebaE2E.cs, líneas 93-103]**. Sin eso, la misma prueba pasa en escritorio y falla en móvil
+**[E: E2ETestBase.cs, líneas 93-103]**. Sin eso, la misma prueba pasa en escritorio y falla en móvil
 (**CTX-04**).
 
 ## 7.9. Cómo se corren, en los cuatro contextos
 
 | Contexto | Comando | Requisitos |
 | --- | --- | --- |
-| **CTX-01** Visual Studio | *Test > Explorador de pruebas*, sin pasos previos | SDK y Visual Studio; el fixture publica e instala el navegador, que sale del `.runsettings` **[E: ServidorDeLaAplicacion.cs, líneas 37-54]** |
+| **CTX-01** Visual Studio | *Test > Explorador de pruebas*, sin pasos previos | SDK y Visual Studio; el fixture publica e instala el navegador, que sale del `.runsettings` **[E: TestAppServer.cs, líneas 37-54]** |
 | **CTX-01** Línea de comandos | `dotnet test tests/MovilidadUrbana.E2ETests --settings pruebas.runsettings` | Solo el SDK de .NET: publicar e instalar el navegador los hace el fixture ([§7.4](#74-la-aplicación-hay-que-compilarla-antes-de-probarla)) |
 | **CTX-01** Unitarias | `dotnet test tests/MovilidadUrbana.UnitTests` | Solo el SDK: ni navegador ni aplicación, 49 casos en milisegundos |
 | **CTX-01** Sin nada instalado | `scripts/pruebas.sh firefox` | Solo Docker: la imagen oficial de Playwright trae las librerías del sistema y el script instala el SDK en `.dotnet/` **[E: scripts/pruebas.sh]** |
@@ -1089,9 +1089,9 @@ El ciclo de vida de la traza queda entonces en la clase base, igual que el del s
 ([§7.4](#74-la-aplicación-hay-que-compilarla-antes-de-probarla)).
 
 ```csharp
-// tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs, líneas 95-118 (extracto)
+// tests/MovilidadUrbana.E2ETests/Infrastructure/E2ETestBase.cs, líneas 95-118 (extracto)
 [TearDown]
-public async Task GuardarLaTrazaSiFalloAsync()
+public async Task SaveTraceOnFailureAsync()
 {
     if (!_trazando) return;
     _trazando = false;
@@ -1111,7 +1111,7 @@ La grabación arranca en el `[SetUp]`, después de la cookie de sesión, y **se 
 casos**. No hay alternativa: sin reintentos no existe el `on-first-retry`, y una traza que empieza
 cuando el caso ya falló llega tarde. Lo que se decide al final es si se conserva. En el laboratorio
 esa grabación permanente cuesta unos 2 segundos sobre los 22 casos de chromium **[V]**, y se apaga
-con `TRAZAR=false` **[E: PruebaE2E.cs, líneas 24-29]**.
+con `TRAZAR=false` **[E: E2ETestBase.cs, líneas 24-29]**.
 
 El archivo queda en `resultados/trazas/<nombre completo del caso>.zip`, la misma carpeta donde el
 `.runsettings` deja los TRX, para que CI suba todo con un único paso
@@ -1139,25 +1139,25 @@ antes obligaba a agregar capturas de pantalla a mano y adivinar el resto.
 >    ([§7.2](#72-esperar-a-que-la-página-sea-interactiva)). **Reparo:** el testigo es la mitad menos
 >    importante de la solución, y es la única que la pregunta pide. Publicarlo y que cada caso se
 >    acuerde de esperarlo no resuelve nada: lo que lo vuelve difícil de olvidar es que la espera
->    viva dentro del helper de navegación **[E: PruebaE2E.cs, líneas 72-87]**, de modo que quien
+>    viva dentro del helper de navegación **[E: E2ETestBase.cs, líneas 72-87]**, de modo que quien
 >    escribe una prueba nueva la hereda sin saber que existe. La pregunta completa es: cuál es tu
 >    testigo, y qué hace que nadie pueda escribir un caso sin esperarlo.
 > 2. *Dónde vive el estado que dos pruebas se podrían pisar.* En el laboratorio vive en un único
 >    archivo SQLite y lo particiona una cookie que emite un middleware y por la que filtran todos
->    los repositorios **[E: src/MovilidadUrbana.Web/Sesiones/MiddlewareDeSesion.cs]**:
+>    los repositorios **[E: src/MovilidadUrbana.Web/Sessions/SessionMiddleware.cs]**:
 >    la partición está en la aplicación, no en las pruebas
 >    ([§7.3](#73-aislar-el-estado-cuando-vive-en-el-servidor)). **Reparo:** la partición lógica no
 >    alcanza, y contestar solo eso deja pasar el fallo. Que cada prueba vea únicamente sus filas no
 >    habilita que varias escriban a la vez sobre el mismo archivo: hizo falta además `journal_mode=WAL`
 >    y `Default Timeout=30` en la cadena de conexión
->    **[E: PreparadorDeBaseDeDatos.cs, línea 29; ServidorDeLaAplicacion.cs, línea 68]**. La pregunta
+>    **[E: DatabaseInitializer.cs, línea 29; TestAppServer.cs, línea 68]**. La pregunta
 >    tiene dos respuestas —qué particiona los datos y qué tolera la concurrencia física— y todavía un
 >    techo que ninguna de las dos mueve: `ParallelScope.Fixtures` paraleliza clases, no casos
 >    ([§7.7](#77-paralelismo-hasta-dónde-llega)).
 > 3. *Un mensaje o veinte timeouts.* No pregunta por corrección sino por diagnóstico: las dos suites
 >    detectan que el servidor no arrancó, pero una cuesta un minuto de lectura y la otra una tarde.
 >    Por eso el fixture sondea el puerto y aborta con un mensaje explícito si el proceso muere antes
->    de escuchar **[E: ServidorDeLaAplicacion.cs, líneas 240-264]**. **Reparo:** un arranque
+>    de escuchar **[E: TestAppServer.cs, líneas 240-264]**. **Reparo:** un arranque
 >    verificado no es un arranque correcto, y el mensaje claro no cubre la falla vecina. Si el
 >    binario se lanza desde otra carpeta, el servidor arranca, escucha y responde `200`: lo que sale
 >    vacío son los recursos estáticos, sin `404` y sin error rojo en la consola
@@ -1609,7 +1609,7 @@ prometía ([§7.11](#711-la-traza-y-por-qué-hay-que-escribirla-a-mano))—. La 
 error es documentación, y envejece igual que el resto**.
 
 **El mismo parámetro declarado en dos lugares.** Convivían `<NumberOfTestWorkers>4</NumberOfTestWorkers>`
-en `pruebas.runsettings` y `[assembly: LevelOfParallelism(3)]` en `ParalelismoDelEnsamblado.cs`. Con
+en `pruebas.runsettings` y `[assembly: LevelOfParallelism(3)]` en `AssemblyParallelism.cs`. Con
 tres clases de prueba ninguno de los dos limitaba nada, así que la divergencia no tenía efecto
 observable —y cuál de los dos gana nunca se verificó—. Habría empezado a importar con la cuarta
 clase, en el peor momento: cuando alguien estuviera buscando por qué la suite tarda de más. La
@@ -1623,8 +1623,8 @@ Fuera del alcance de esta guía **[C]**:
 1. Publicar el TRX como *check* del pull request, para ver el caso fallido sin bajar artefactos.
 2. Subir la traza como artefacto **separado**, para poder descargarla sin traerse los TRX de todas
    las configuraciones.
-3. Cubrir con unitarias también los servicios de aplicación (`ServicioDeLocalidades`,
-   `ServicioDeEncuestas`), hoy alcanzados solo por las E2E.
+3. Cubrir con unitarias también los servicios de aplicación (`LocalidadService`,
+   `EncuestaService`), hoy alcanzados solo por las E2E.
 
 ---
 
@@ -1643,17 +1643,17 @@ using Microsoft.Playwright.NUnit;
 
 namespace MiApp.E2ETests;   // ¿Es el mismo namespace donde viven los casos y el [SetUpFixture]?
 
-public abstract class PruebaE2E : PageTest
+public abstract class E2ETestBase : PageTest
 {
     // ¿Cómo se aísla el estado de cada prueba en TU aplicación?
     // Cookie de sesión, cabecera, usuario dedicado, esquema de base…
-    private const string CookieDeSesion = "sesion-miapp";
+    private const string CookieDeSesion = "session-miapp";
 
     public override BrowserNewContextOptions ContextOptions()
     {
         var opciones = new BrowserNewContextOptions
         {
-            BaseURL = ServidorDeLaAplicacion.UrlBase,   // ¿De dónde sale la URL: fixture o variable?
+            BaseURL = TestAppServer.UrlBase,   // ¿De dónde sale la URL: fixture o variable?
             Locale = "es-AR",                            // ¿El formato de números o fechas es parte de lo que verificás?
             TimezoneId = "America/Argentina/Buenos_Aires"
         };
@@ -1661,14 +1661,14 @@ public abstract class PruebaE2E : PageTest
     }
 
     [SetUp]
-    public async Task EstrenarSesionAsync()
+    public async Task StartFreshSessionAsync()
     {
-        // Corre DESPUÉS del [SetUp] de PageTest, que es el que crea el contexto.
+        // Corre DESPUÉS del [SetUp] de PageTest, que es el que crea el context.
         await Context.AddCookiesAsync([new Cookie
         {
             Name = CookieDeSesion,
             Value = Guid.NewGuid().ToString("n"),
-            Url = ServidorDeLaAplicacion.UrlBase
+            Url = TestAppServer.UrlBase
         }]);
 
         // Se graba en todos los casos; abajo se decide cuáles se conservan.
@@ -1676,7 +1676,7 @@ public abstract class PruebaE2E : PageTest
     }
 
     [TearDown]
-    public async Task GuardarLaTrazaSiFalloAsync()
+    public async Task SaveTraceOnFailureAsync()
     {
         var fallo = TestContext.CurrentContext.Result.Outcome.Status
                     == NUnit.Framework.Interfaces.TestStatus.Failed;
@@ -1693,13 +1693,13 @@ public abstract class PruebaE2E : PageTest
     protected async Task IrAAsync(string ruta)
     {
         await Page.GotoAsync(ruta);
-        await EsperarInteractivoAsync();
+        await WaitForInteractiveAsync();
     }
 
     // ¿Qué señal observable dice que TU pantalla ya responde a la interacción?
     // Blazor interactive server: RendererInfo.IsInteractive publicado como atributo.
     // SPA: un atributo que el framework marca al hidratar. Server-side puro: no hace falta.
-    protected async Task EsperarInteractivoAsync() =>
+    protected async Task WaitForInteractiveAsync() =>
         await Expect(Page.GetByTestId("estado-app")).ToHaveAttributeAsync("data-interactivo", "true");
 }
 ```
@@ -1708,7 +1708,7 @@ public abstract class PruebaE2E : PageTest
 
 ```csharp
 [TestFixture]                       // Unidad de paralelismo: una clase por pantalla o recorrido.
-public class MiPantallaTests : PruebaE2E
+public class MiPantallaTests : E2ETestBase
 {
     [SetUp]                         // Llegar al estado inicial. No verifica nada.
     public async Task AbrirAsync() => await IrAAsync("/mi-pantalla");
@@ -1722,7 +1722,7 @@ public class MiPantallaTests : PruebaE2E
         await Page.GetByTestId("boton-guardar").ClickAsync();
 
         // Verificar lo que la persona vería, con Expect (nunca Assert sobre un valor leído).
-        await Expect(Page.GetByTestId("aviso")).ToHaveTextAsync("Se guardó.");
+        await Expect(Page.GetByTestId("notice")).ToHaveTextAsync("Se guardó.");
 
         // Verificar también lo que NO tenía que pasar.
         await Expect(Page.GetByTestId("error-x")).ToBeHiddenAsync();

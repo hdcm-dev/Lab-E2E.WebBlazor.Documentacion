@@ -452,7 +452,7 @@ obligar a saberlo de memoria se abre un buscador —el mismo listado que en otro
 > **La superficie no es el marcado: es el marcado más la promesa.**
 
 El mismo listado, puesto a servir otro acto, **es otro acto**, y no arrastra consigo la superficie del
-ABM. Lo que se reutiliza es el **componente**, no la superficie — igual que el `Asistente`, que se
+ABM. Lo que se reutiliza es el **componente**, no la superficie — igual que el `Wizard`, que se
 comparte y no es superficie de nadie ([Caso-Encuesta §1.1](Caso-Encuesta-Page.md)). Y encaja sin
 forzar nada: es un **acto anidado**, que es la definición de modal de §5.
 
@@ -622,7 +622,7 @@ método que todavía no se ejercitó.
 | --- | --- |
 | La superficie se define antes que la ventana, y los casos de uso esenciales son abstractos | **[F]** *usage-centered design*, Constantine y Lockwood (1999), verificado el 2026-09-04 y citado en [Marco §4.1](Marco-La-Superficie-Verificable.md) |
 | Dos estados son distintos cuando la salida ofrecida es distinta | **[E]** el `<remarks>` del catálogo de estados, citado en [Marco §4.2](Marco-La-Superficie-Verificable.md) |
-| Un acto divisible es una superficie con estados, no varias superficies | **[E: ../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Componentes/Asistente.razor]** lo declara en su primera línea, y [Caso-Encuesta §3](Caso-Encuesta-Page.md) lo desarrolla |
+| Un acto divisible es una superficie con estados, no varias superficies | **[E: ../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Shared/Wizard.razor]** lo declara en su primera línea, y [Caso-Encuesta §3](Caso-Encuesta-Page.md) lo desarrolla |
 | La promesa de conservación existe y se prueba yendo y volviendo | **[E: ../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/EncuestaTests.cs]** el caso `PermiteVolverAtrasConservandoLoCargado` |
 | Reiniciar el acto no borra lo registrado | **[E: ../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/EncuestaTests.cs]** el caso `NuevaEncuestaDevuelveElAsistenteAlPaso1` |
 | Un caso, un motivo de falla | **[E: ../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/EncuestaTests.cs]** las tres validaciones, una por tramo |
@@ -635,10 +635,10 @@ Las filas de [§5](#5-qué-recurso-representa-el-acto) y [§6](#6-qué-promesas-
 
 | Recurso | ¿Existe en un laboratorio? | Dónde |
 | --- | --- | --- |
-| **Formulario simple** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Paginas/HolaMundo.razor]** y la superficie de ingreso |
+| **Formulario simple** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/WebBlazor.HolaMundo/Components/Pages/HolaMundo.razor]** y la superficie de ingreso |
 | **Asistente** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Pages/Encuesta.razor]** |
 | **Listado + ficha (ABM)** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Pages/Localidades.razor]** |
-| **Modal** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Servicios/ServicioDeDialogos.cs]**, con los dos casos de baja de `LocalidadesTests.cs` |
+| **Modal** | **Sí** | **[E: ../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Services/DialogService.cs]**, con los dos casos de baja de `LocalidadesTests.cs` |
 
 ## 10.3. Los tres recursos que **ningún** laboratorio tiene
 

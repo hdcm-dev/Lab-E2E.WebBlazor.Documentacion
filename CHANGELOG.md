@@ -4,6 +4,19 @@ Todos los cambios relevantes de este repositorio de documentación se registran 
 
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [Sin publicar] - 2026-09-18
+
+### Cambiado
+
+- **Las guías siguen la nueva convención de nombres del laboratorio** —arquitectura en inglés,
+  dominio en español—. Se actualizaron las rutas y los nombres de clase y de método citados en
+  `E2E-Guide/`, `Test-Guide/` y las guías de ramas: `Dominio/` → `Domain/`, `ServicioDeLocalidades` →
+  `LocalidadService`, `ReglasDeLocalidad` → `LocalidadRules`, `Grilla` → `Grid`, `Asistente` → `Wizard`,
+  `Entorno` → `TestEnvironment`, y así con el resto. Los números de línea no cambian: el renombre no
+  agregó ni quitó líneas. El vocabulario de estados (`Vacio`, `Indisponible`, `FiltradoSinResultados`)
+  sigue en español porque es dominio de las guías. Las 244 citas y enlaces al código resuelven. La
+  ia-db no se toca en este cambio.
+
 ## [Sin publicar] - 2026-09-12
 
 ### Añadido

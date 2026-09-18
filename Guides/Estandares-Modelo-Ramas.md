@@ -1441,7 +1441,7 @@ antes del merge y que el merge esté bloqueado si el pipeline no está en verde*
 4. Se marca como listo para revisión.
 5. Revisión: una aprobación para cambios normales; dos cuando el pull request toca alguna de las
    rutas sensibles declaradas en `CODEOWNERS` —hoy `.github/workflows/**` y
-   `src/**/Persistencia/**`—. El criterio es la ruta tocada, no una apreciación sobre el cambio, y
+   `src/**/Persistence/**`—. El criterio es la ruta tocada, no una apreciación sobre el cambio, y
    se configura como regla del repositorio, no como acuerdo verbal. **[C]** Con un equipo de tres
    personas y el autor excluido, «dos aprobaciones» significa unanimidad de los otros dos: es una
    consecuencia operativa deliberada, no un descuido.
@@ -1547,7 +1547,7 @@ La configuración es lo que convierte al procedimiento en un control efectivo:
 | Verificaciones obligatorias | `main`, `release/*` | Sin pipeline en verde no hay merge |
 | Aprobaciones mínimas | `main`, `release/*` | 1 aprobación **[C]** |
 | Revisión obligatoria de propietarios | `main`, `release/*` | *Require review from Code Owners*: sin la aprobación del dueño de la ruta no hay merge |
-| Segunda aprobación por ruta sensible | `.github/workflows/**`, `src/**/Persistencia/**` | La categoría «infraestructura, seguridad o migraciones» se define por **ruta**, no por juicio: son exactamente las rutas de `CODEOWNERS`. Se instrumenta con una regla adicional (*ruleset*) que exige 2 aprobaciones sobre ese patrón **[C]** |
+| Segunda aprobación por ruta sensible | `.github/workflows/**`, `src/**/Persistence/**` | La categoría «infraestructura, seguridad o migraciones» se define por **ruta**, no por juicio: son exactamente las rutas de `CODEOWNERS`. Se instrumenta con una regla adicional (*ruleset*) que exige 2 aprobaciones sobre ese patrón **[C]** |
 | Borrado automático de rama | todas | Higiene, y evidencia de convergencia |
 
 Conviene exigir **un único check** en la regla de protección —un job final que resuma a los demás— en

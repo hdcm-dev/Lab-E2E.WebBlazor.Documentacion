@@ -5,7 +5,7 @@ entre los demás tipos de prueba que una solución .NET necesita, desde una regl
 app Android en un teléfono. Comparten un marco de referencia (escenarios, contextos, actores) que se
 define una sola vez, en el primero, y las marcas de evidencia del conjunto E2E.
 
-Todo lo que afirman está anclado: a un archivo de `Lab-E2E.WebBlazor` en el commit `10ce735`
+Todo lo que afirman está anclado: a un archivo de `Lab-E2E.WebBlazor` en el commit `946d023`
 (**[E:]**), a una corrida observada (**[V]**), a una fuente de la industria consultada el 2026-09-12
 (**[B: n]**), o declarado como criterio propio (**[C]**).
 

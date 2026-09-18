@@ -57,34 +57,34 @@ vocabulario de estados, sin agregados ni recortes.
 
 ### 1.3 Componentes propios, uno por patrón
 
-`Icono`, `Insignia`, `Banda`, `EstadoVacio`, `EstadoIndisponible`, `Esqueleto`,
-`SelloDeVersion` y —sólo en el proyecto con acceso— `Redireccion`. Ninguna superficie
+`Icon`, `Badge`, `Band`, `EmptyState`, `UnavailableState`, `Skeleton`,
+`VersionStamp` y —sólo en el proyecto con acceso— `Redirect`. Ninguna superficie
 reimplementa uno de ellos en línea.
 
 ### 1.4 Shells
 
-- **Trabajo:** `MainLayout` + `BarraLateral` + `main#mq-main` + sello al pie.
-- **Acceso:** `AccesoLayout`, lienzo con tarjeta angosta y sello, sin navegación.
+- **Trabajo:** `MainLayout` + `Sidebar` + `main#mq-main` + sello al pie.
+- **Acceso:** `AuthLayout`, lienzo con tarjeta angosta y sello, sin navegación.
 - La transición entre shells es una navegación completa a otra ruta, no un
   condicional adentro del layout de trabajo.
 
 ### 1.5 Identidad, en el proyecto Login
 
-- `Paginas/Identidad/Ingreso.razor` **sin `@rendermode`**: SSR estático, campos
+- `Pages/Identidad/Ingreso.razor` **sin `@rendermode`**: SSR estático, campos
   nativos con `autocomplete`, token antifalsificación y `data-enhance="false"`.
 - `Endpoints/IdentidadEndpoints.cs` publica `POST /identidad/ingreso` y
   `POST /identidad/salida`: la cookie se emite en el ciclo de request, fuera del
   circuito.
 - El cierre de sesión es un `form` POST con el botón adentro, al pie del chrome y a
   un clic desde cualquier superficie del shell de trabajo.
-- `Servicios/CatalogoDeResultados.cs` es el único origen de los textos de resultado;
+- `Services/CatalogoDeResultados.cs` es el único origen de los textos de resultado;
   el rechazo de credenciales es indiferenciado y no expone parámetros de la política.
-- Guard en tres capas: ruteo (`AuthorizeRouteView` + `Redireccion` con
+- Guard en tres capas: ruteo (`AuthorizeRouteView` + `Redirect` con
   `replace: true`), superficie (`OnInitializedAsync`) y acción (el endpoint).
 
 ### 1.6 Identidad de versión
 
-`Servicios/IIdentidadDeVersion.cs` + `IdentidadDeVersion.cs`, registrado como
+`Services/IIdentidadDeVersion.cs` + `VersionIdentity.cs`, registrado como
 `Singleton` en `Program.cs` —el único archivo donde se registran servicios—. El sello
 se exhibe en las dos ubicaciones obligatorias: el pie del shell de trabajo y el
 lienzo de acceso.
@@ -95,8 +95,8 @@ lienzo de acceso.
 
 | Bifurcación | Qué se resolvió | Por qué |
 | --- | --- | --- |
-| Estructura de carpetas | Se adoptó la del documento Blazor (`Theme/`, `Servicios/`, `Endpoints/`, `Componentes/`, `Paginas/`) conservando la raíz `Components/` que el andamiaje de .NET referencia desde `Program.cs` | Mover la raíz no aporta nada y rompe la convención del SDK |
-| Enumerados de vocabulario (`Tono`, `EstadoDeSuperficie`, `UbicacionDelSello`) | Viven en `Theme/` | Es la carpeta que ya se importa globalmente; separarlos obligaría a un segundo `using` en cada superficie |
+| Estructura de carpetas | Se adoptó la del documento Blazor (`Theme/`, `Services/`, `Endpoints/`, `Shared/`, `Pages/`) conservando la raíz `Components/` que el andamiaje de .NET referencia desde `Program.cs` | Mover la raíz no aporta nada y rompe la convención del SDK |
+| Enumerados de vocabulario (`Tone`, `SurfaceState`, `StampPlacement`) | Viven en `Theme/` | Es la carpeta que ya se importa globalmente; separarlos obligaría a un segundo `using` en cada superficie |
 | UI de reconexión | Se conserva el elemento `<dialog id="components-reconnect-modal">`, su módulo JavaScript y el contrato de clases de estado del circuito; se reemplaza el marcado de adentro por bandas `mq-banda--atencion` / `--error` en una región activa | El esqueleto del documento muestra un `div` suelto, pero el circuito conmuta clases sobre ese elemento y su módulo llama `showModal()`: un `div` dejaría la reconexión muda |
 | Aviso de error no manejado (`#blazor-error-ui`) | Se estiliza con la banda de error y queda oculto en reposo | El circuito le escribe el `display` en línea; la hoja sólo define el reposo |
 | Foco del contenido principal | `#mq-main:focus-visible { outline: none; }` | Recibe el foco por programa al navegar y no se alcanza con el tabulador: no es un control, y el anillo ahí es ruido. El foco visible **no** se suprime en ningún control |
@@ -123,22 +123,22 @@ leyendo los dos lados y mirando las capturas de `evidencia/2026-09-01-aplicacion
 | `Tokens.css` es el bloque `:root` del catálogo, sin agregados ni quitados | cumple | Comparación contra `Design-Rules-Web-Generico.md` §2 |
 | Sin literales de color, tipografía ni espaciado fuera de `:root` | cumple | `grep` de hexadecimales y de `font-size`/`margin`/`padding`/`gap` sin `var(--…)` devuelve cero |
 | Ningún `style=` en línea | cumple | `grep -rn "style=" --include=*.razor` devuelve cero |
-| Ninguna superficie de identidad declara `@rendermode` | cumple | `Ingreso.razor` no lo declara |
-| Identidad y cierre de sesión por `form method="post"` con antifalsificación y navegación mejorada desactivada | cumple | `Ingreso.razor` y `BarraLateral.razor` |
+| Ninguna superficie de identidad declara `@rendermode` | cumple | `Login.razor` no lo declara |
+| Identidad y cierre de sesión por `form method="post"` con antifalsificación y navegación mejorada desactivada | cumple | `Login.razor` y `Sidebar.razor` |
 | Ningún componente usa `localStorage` ni `sessionStorage` | cumple | `grep` devuelve cero |
 | Todo servicio se registra en `Program.cs` y en ningún otro archivo | cumple | Los dos `Program.cs` |
 | Bandera de proceso antes del `await`, liberada en `finally` | cumple | `HolaMundo.razor` |
-| Todo componente que suscribe libera sus recursos | cumple | `BarraLateral` implementa `IDisposable` y desuscribe `LocationChanged` |
+| Todo componente que suscribe libera sus recursos | cumple | `Sidebar` implementa `IDisposable` y desuscribe `LocationChanged` |
 | Sello de versión en las dos ubicaciones obligatorias | cumple | Capturas `login-01` (lienzo) y `login-03` / `holamundo-03` (pie) |
-| Un componente propio por patrón, ninguna página lo reimplementa en línea | cumple | `Components/Componentes/` |
-| Los mensajes salen de un catálogo de códigos, sin traza ni detalle técnico | cumple | `CatalogoDeResultados`; la superficie de error sólo expone el identificador de pedido |
-| Cada superficie declara vacío, cargando, con datos y error, o declara «no aplica» con su motivo | cumple | `HolaMundo.razor`; `Inicio.razor` declara la ausencia de colección |
+| Un componente propio por patrón, ninguna página lo reimplementa en línea | cumple | `Components/Shared/` |
+| Los mensajes salen de un catálogo de códigos, sin traza ni detalle técnico | cumple | `SignInResults`; la superficie de error sólo expone el identificador de pedido |
+| Cada superficie declara vacío, cargando, con datos y error, o declara «no aplica» con su motivo | cumple | `HolaMundo.razor`; `Home.razor` declara la ausencia de colección |
 | `filtrado-sin-resultados` separado de `vacio` | no aplica | Ninguna superficie presenta colección filtrable; el enumerado lo conserva |
 | Todo control tiene `label for` visible | cumple | Capturas `holamundo-03` y `login-01` |
 | El foco visible no se suprime en ningún control | cumple | Sólo se suprime en el contenedor `#mq-main`, que no es un control |
 | Sin scroll horizontal a 320px | cumple | Medición en el navegador, `verificacion.log` |
 | UI de reconexión estilizada y anunciada en región activa | cumple | `ReconnectModal.razor` |
-| El guard existe en las tres capas y ninguna expone el motivo | cumple | `Routes.razor`, `Inicio`/`HolaMundo`, endpoints |
+| El guard existe en las tres capas y ninguna expone el motivo | cumple | `Routes.razor`, `Home`/`HolaMundo`, endpoints |
 
 **Pendiente declarado.** `tests/WebBlazor.Login.E2ETests` sigue sin casos: el
 recorrido de ingreso, rechazo y cierre de sesión hoy está cubierto por el guion de

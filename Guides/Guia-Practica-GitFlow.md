@@ -204,7 +204,7 @@ ls scripts/                  # esperado: dotnet.sh  pruebas.sh  publicar.sh
 scripts/pruebas.sh chromium  # publica la aplicación y corre tests/MovilidadUrbana.E2ETests
 ```
 
-**No hay que anteponer `scripts/publicar.sh`.** El fixture `ServidorDeLaAplicacion` publica por su
+**No hay que anteponer `scripts/publicar.sh`.** El fixture `TestAppServer` publica por su
 cuenta antes de la primera prueba, sin identificador de plataforma y dependiente del framework. Si
 `publicacion/` ya trae el binario **autocontenido** que deja `publicar.sh`, esa segunda publicación
 se superpone: reescribe `runtimeconfig.json` dejando las bibliotecas del runtime autocontenido en la
@@ -272,7 +272,7 @@ En *Settings → Branches* del repositorio, sobre `main` y sobre el patrón `rel
 | Automatically delete head branches | sí (*Settings → General*) |
 
 Y una regla adicional (*ruleset*) que exige **2 aprobaciones** sobre los patrones
-`.github/workflows/**` y `src/**/Persistencia/**`, que es como se instrumenta la regla de
+`.github/workflows/**` y `src/**/Persistence/**`, que es como se instrumenta la regla de
 [08](Estandares-Modelo-Ramas.md#8-pull-requests-y-pruebas-automatizadas): la categoría «infraestructura, seguridad o migraciones» se
 decide por ruta tocada, no por juicio.
 
@@ -314,7 +314,7 @@ git checkout -b chore/3-codeowners
 mkdir -p .github
 cat > .github/CODEOWNERS <<'EOF'
 .github/workflows/   @equipo/devops
-src/**/Persistencia/ @equipo/datos
+src/**/Persistence/ @equipo/datos
 EOF
 git add .github/CODEOWNERS
 git commit -m "chore: declarar dueños de los archivos sensibles"
@@ -752,7 +752,7 @@ la práctica, y el único que se hace rompiendo algo a propósito.
 
 [Escenario 01](#3-escenario-01--funcionalidad-nueva-e-01) terminado. La aplicación sembrada ya trae
 las pruebas de extremo a extremo que cubren el listado de localidades (`LocalidadesTests`), el
-asistente de encuesta (`EncuestaTests`) y la navegación (`NavegacionTests`); son las que este
+asistente de encuesta (`EncuestaTests`) y la navegación (`NavigationTests`); son las que este
 escenario va a poner a trabajar.
 
 ### Pasos
@@ -762,7 +762,7 @@ escenario va a poner a trabajar.
 La clave es que el cambio **parezca razonable** y que la prueba que rompe sea de **otra pantalla**.
 El ejemplo se elige a partir del comportamiento real de la aplicación sembrada, no de una regla
 inventada: el listado del ABM de localidades se ordena por antigüedad
-(`RepositorioDeLocalidades.ListarAsync` usa `.OrderBy(l => l.Id)`), y el desplegable de localidades
+(`LocalidadRepository.GetAllAsync` usa `.OrderBy(l => l.Id)`), y el desplegable de localidades
 de la **encuesta** se alimenta de ese mismo listado.
 
 El cambio: *mostrar primero las altas más recientes en el ABM*, es decir `.OrderByDescending(l =>
@@ -778,7 +778,7 @@ afirma que la primera opción real del desplegable es `"Corrientes (Corrientes)"
 git checkout main
 git pull --ff-only
 git checkout -b feature/151-listado-mas-recientes-primero
-# src/MovilidadUrbana.Web/Infraestructura/Persistencia/RepositorioDeLocalidades.cs
+# src/MovilidadUrbana.Web/Infrastructure/Persistence/LocalidadRepository.cs
 #   .OrderBy(l => l.Id)  →  .OrderByDescending(l => l.Id)
 # ... más la prueba propia del ABM, en verde ...
 git push -u origin feature/151-listado-mas-recientes-primero

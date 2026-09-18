@@ -5,9 +5,9 @@
 > **Qué deja** — La promesa negativa y por qué se verifica comparando dos observaciones en vez de mirar una, y por qué una superficie SSR no necesita testigo de hidratación.
 
 **Repositorio:** `Lab-E2E.WebBlazor`
-**Superficie:** `src/WebBlazor.Login/Components/Paginas/Identidad/Ingreso.razor`
+**Superficie:** `src/WebBlazor.Login/Components/Pages/Account/Login.razor`
 **Pruebas:** `tests/WebBlazor.Login.E2ETests/LoginE2ETests.cs`
-**Base común:** `tests/WebBlazor.Login.E2ETests/PruebaDeSuperficie.cs`
+**Base común:** `tests/WebBlazor.Login.E2ETests/SurfaceTestBase.cs`
 **Qué tipo de superficie es:** SSR estático (**sin** `@rendermode`)
 
 ## Índice
@@ -137,9 +137,9 @@ Dónde aparece esa segunda promesa, hecha código:
 
 | Pieza | Cómo la sostiene |
 | --- | --- |
-| [`ServicioDeIdentidad.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.Login/Servicios/ServicioDeIdentidad.cs) | Un solo desenlace de rechazo, para todas las formas de fallar |
-| [`CatalogoDeResultados.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.Login/Servicios/CatalogoDeResultados.cs) | Un código sin entrada cae en el mensaje genérico, **nunca en el código crudo ni en la traza** |
-| [`IdentidadEndpoints.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.Login/Endpoints/IdentidadEndpoints.cs) | Solo se admiten rutas locales: un destino externo sería una redirección abierta |
+| [`IdentityService.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.Login/Services/IdentityService.cs) | Un solo desenlace de rechazo, para todas las formas de fallar |
+| [`SignInResults.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.Login/Services/SignInResults.cs) | Un código sin entrada cae en el mensaje genérico, **nunca en el código crudo ni en la traza** |
+| [`IdentityEndpoints.cs`](../../../Lab-E2E.WebBlazor/src/WebBlazor.Login/Endpoints/IdentityEndpoints.cs) | Solo se admiten rutas locales: un destino externo sería una redirección abierta |
 
 Las tres son la misma promesa, sostenida en tres lugares distintos.
 
@@ -228,7 +228,7 @@ cubren por sí solas—.
 ```csharp
 // Así:
 await Expect(Page).ToHaveURLAsync($"{UrlBase}/");
-await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Inicio" })).ToBeVisibleAsync();
+await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Home" })).ToBeVisibleAsync();
 ```
 
 Si mañana la sesión pasara a un token en otro lado, la promesa seguiría siendo la
@@ -251,7 +251,7 @@ circuito de ingreso habría quedado sin probar.
 ```csharp
 protected async Task IngresarAsync(string? identificador = null, string? secreto = null)
 {
-    await Page.GetByTestId("campo-usuario").FillAsync(identificador ?? Identificador);
+    await Page.GetByTestId("campo-usuario").FillAsync(identificador ?? Identifier);
     await Page.GetByTestId("campo-clave").FillAsync(secreto ?? Secreto);
     await Page.GetByTestId("boton-ingresar").ClickAsync();
 }
@@ -273,7 +273,7 @@ Por eso el `[SetUp]` casi no hace nada:
 
 ```csharp
 // El estado conocido del que parten estos casos es *sin sesión*, que es con lo
-// que arranca todo contexto nuevo de Playwright. El [SetUp] solo abre la pantalla.
+// que arranca todo context nuevo de Playwright. El [SetUp] solo abre la pantalla.
 [SetUp]
 public Task Setup() => Page.GotoAsync("/login");
 ```
@@ -304,11 +304,11 @@ mensajes sea ese—. Solo la segunda puede detectar la fuga.
 public async Task ElRechazoNoDistingueQueCampoFallo()
 {
     await IngresarAsync(identificador: "nadie");
-    var conIdentificadorInexistente = await Page.GetByTestId("mensaje-resultado").TextContentAsync();
+    var conIdentificadorInexistente = await Page.GetByTestId("mensaje-result").TextContentAsync();
 
     await Page.GotoAsync("/login");
     await IngresarAsync(secreto: "lo-que-no-es");
-    var conSecretoIncorrecto = await Page.GetByTestId("mensaje-resultado").TextContentAsync();
+    var conSecretoIncorrecto = await Page.GetByTestId("mensaje-result").TextContentAsync();
 
     Assert.That(conSecretoIncorrecto, Is.EqualTo(conIdentificadorInexistente));
 }
@@ -328,7 +328,7 @@ mirar, solo algo que comparar. El porqué está en §2.4.
 
 ```csharp
 [Test]
-[Description("Un destino externo no se honra: el ingreso no es una redirección abierta")]
+[Description("Un navTarget externo no se honra: el ingreso no es una redirección abierta")]
 public async Task UnDestinoExternoNoSeHonra()
 {
     await Page.GotoAsync("/login?returnurl=https://ejemplo.invalido/");
@@ -385,8 +385,8 @@ Diez casos, y cada uno cubre un tramo distinto del circuito.
 
 Cada caso sale de **una frase que la superficie promete**, y el conjunto se cierra
 cuando ninguna promesa queda sin caso. Las promesas están en
-el marcado y en los comentarios de diseño del `src`: `Ingreso.razor` dice que el
-rechazo es indiferenciado, `IdentidadEndpoints.cs` dice que solo se admiten rutas
+el marcado y en los comentarios de diseño del `src`: `Login.razor` dice que el
+rechazo es indiferenciado, `IdentityEndpoints.cs` dice que solo se admiten rutas
 locales. **Cada una de esas afirmaciones es un caso esperando a ser escrito.**
 
 ---

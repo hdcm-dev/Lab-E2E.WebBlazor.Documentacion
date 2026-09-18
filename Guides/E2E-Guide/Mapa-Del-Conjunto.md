@@ -96,7 +96,7 @@ el artefacto de prueba en el que termina cada uno.
 **Las tres cosas que la tabla deja ver:**
 
 - **El recurso no tiene fila de prueba propia.** Se prueba por sus consecuencias —la fila 6—, nunca
-  en sí mismo. Por eso un `SiguienteAsync()` es un helper y no un caso
+  en sí mismo. Por eso un `NextAsync()` es un helper y no un caso
   ([Caso-Encuesta §4.3](Caso-Encuesta-Page.md)).
 - **Los estados no llevan caso.** Son los extremos de la flecha; la promesa es la flecha. Un `[Test]`
   llamado «MuestraElPaso2» es la señal de que algo se clasificó mal.
@@ -120,9 +120,9 @@ dice con un sustantivo; una promesa con un verbo en primera persona. Y la relaci
 | **Método** | **Un caso, un motivo de falla.** Si puede fallar por dos razones, el reporte no dirá cuál |
 
 La prueba práctica de la clase es escribir el `[SetUp]`: si sale uno solo y natural, es una clase. En
-el laboratorio `NavegacionTests` **no tiene ninguno**, y esa ausencia es la señal en el código de que
+el laboratorio `NavigationTests` **no tiene ninguno**, y esa ausencia es la señal en el código de que
 ahí no hay una superficie sino un recorrido entre varias
-**[E: ../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/NavegacionTests.cs]**.
+**[E: ../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/NavigationTests.cs]**.
 
 ## 2.3 Los dos ejes del conjunto, y cómo se cruzan
 

@@ -19,7 +19,7 @@ traces: [E2E-00, E2E-01]
 
 **Superficie:** [`Components/Pages/Encuesta.razor`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Pages/Encuesta.razor)
 · [`Encuesta.razor.cs`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Pages/Encuesta.razor.cs)
-**Componente que la estructura:** [`Componentes/Asistente.razor`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Componentes/Asistente.razor)
+**Componente que la estructura:** [`Shared/Asistente.razor`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Shared/Wizard.razor)
 **Pruebas:** [`tests/MovilidadUrbana.E2ETests/EncuestaTests.cs`](../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/EncuestaTests.cs)
 **Qué tipo de superficie es:** interactiva (`InteractiveServer`), con estado direccionable
 
@@ -66,12 +66,12 @@ verificable de punta a punta**.
 
 | No es superficie | Qué es | Por qué |
 | --- | --- | --- |
-| `Asistente` | **Componente** | Estructura pasos, cuenta y dibuja botones. No promete nada por sí solo: no sabe qué se está cargando |
-| `PasoDeAsistente` | **Componente** | Muestra su contenido cuando le toca. Es un `@if` con semántica |
-| `Campo`, `Banda`, `Insignia` | **Componentes** | Reutilizables en todo el proyecto |
+| `Wizard` | **Componente** | Estructura pasos, cuenta y dibuja botones. No promete nada por sí solo: no sabe qué se está cargando |
+| `WizardStep` | **Componente** | Muestra su contenido cuando le toca. Es un `@if` con semántica |
+| `FormField`, `Band`, `Badge` | **Componentes** | Reutilizables en todo el proyecto |
 | Cada uno de los tres pasos | **Un estado** de la superficie | §3 |
 
-> **El `Asistente` es el ejemplo más limpio de la distinción.** Es un archivo de 109 líneas, con
+> **El `Wizard` es el ejemplo más limpio de la distinción.** Es un archivo de 109 líneas, con
 > lógica propia, tres estados de botón y navegación entre pasos — y aun así **no es una
 > superficie**, porque no hay ninguna frase de la forma «hago X y pasa Y» que se pueda afirmar de
 > él sin saber qué encuesta está estructurando. Tamaño y complejidad no hacen una superficie: la
@@ -86,7 +86,7 @@ El propio componente declara su ámbito de uso en su primera línea:
 
 > *«Asistente de varios niveles. **Solo para actos divisibles**: el paso es un estado direccionable
 > de la superficie.»*
-> — [`Asistente.razor` 1–2](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Componentes/Asistente.razor#L1-L2)
+> — [`Wizard.razor` 1–2](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Shared/Wizard.razor#L1-L2)
 
 **La prueba para reconocer uno:** ¿el tramo intermedio le entrega algo a la persona? Si al terminar
 el paso 2 no pasó nada que ella pueda usar, no era una operación: era un tramo.
@@ -95,7 +95,7 @@ el paso 2 no pasó nada que ella pueda usar, no era una operación: era un tramo
 
 **Uno de los tramos del acto divisible, y a la vez un estado de la superficie.** Acá son tres, y su
 cantidad es una constante del dominio:
-[`ReglasDeEncuesta.TotalDePasos`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Dominio/Reglas/ReglasDeEncuesta.cs#L6).
+[`EncuestaRules.TotalDePasos`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Domain/Rules/EncuestaRules.cs#L6).
 
 ### 1.4 Estado direccionable
 
@@ -183,7 +183,7 @@ prometiendo algo*.
 distintas. Si al abandonar en el medio **no queda nada**, era una sola.
 
 Acá no queda nada: la respuesta se registra recién en
-[`FinalizarAsync`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Pages/Encuesta.razor.cs#L105-L127).
+[`FinishAsync`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Pages/Encuesta.razor.cs#L105-L127).
 
 ### 3.3 ¿Y entonces qué gana el diseño de las pruebas?
 
@@ -209,7 +209,7 @@ recarga.**
 | ✅ | `Expect(Page.GetByTestId("resumen-persona")).ToHaveTextAsync("Ana Pérez (34 años)")` |
 | ✅ | Recargar y volver a leer el contador — [líneas 173–174](../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/EncuestaTests.cs#L173-L174) |
 | ❌ | Consultar la base de datos desde la prueba |
-| ❌ | Inspeccionar `_modelo` o `_pasoMaximoAlcanzado` |
+| ❌ | Inspeccionar `_model` o `_pasoMaximoAlcanzado` |
 
 **La recarga es el detalle fino.** Que el contador diga «Registradas: 1» podría ser estado en
 memoria del circuito. Recargar tira el circuito y lo vuelve a pedir: **eso** demuestra que la
@@ -238,15 +238,15 @@ distintos*.
 
 | Identificador | Vive en | Quién lo garantiza |
 | --- | --- | --- |
-| `boton-siguiente`, `boton-anterior`, `boton-finalizar`, `etiqueta-paso`, `data-paso` | El **componente** `Asistente` | Todo asistente del proyecto, no esta encuesta |
+| `boton-siguiente`, `boton-anterior`, `boton-finalizar`, `etiqueta-paso`, `data-paso` | El **componente** `Wizard` | Todo asistente del proyecto, no esta encuesta |
 | `campo-nombre`, `medio-colectivo`, `resumen-motivo` | La **superficie** `Encuesta` | Solo esta encuesta |
 
 **Por qué importa:** los del componente son un **contrato reutilizable**. Si mañana otra superficie
-usa el `Asistente`, sus pruebas van a poder decir `boton-siguiente` sin coordinar con nadie. Y si
+usa el `Wizard`, sus pruebas van a poder decir `boton-siguiente` sin coordinar con nadie. Y si
 alguien los cambia, rompe **todas** las superficies que lo usan a la vez — que es exactamente lo
 que debe pasar.
 
-**El corolario práctico:** un helper como `SiguienteAsync()` en la clase de prueba
+**El corolario práctico:** un helper como `NextAsync()` en la clase de prueba
 ([línea 33](../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/EncuestaTests.cs#L33)) pertenece al componente, no
 al caso. Cuando aparezca la segunda superficie con asistente, sube a la base.
 
@@ -287,7 +287,7 @@ superficie es navegable con lector de pantalla.
 | `NoFinalizaConElPaso3Incompleto` | 3 | Distancia fuera de rango + minutos faltantes |
 
 **No es repetición.** Son tres promesas distintas de
-[`ServicioDeEncuestas.ValidarPaso`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Aplicacion/Encuestas/ServicioDeEncuestas.cs#L16),
+[`EncuestaService.ValidarPaso`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Application/Encuestas/EncuestaService.cs#L16),
 y cada una falla por su cuenta. Un solo caso que recorriera los tres con datos malos fallaría por
 tres motivos y el reporte no diría cuál.
 
@@ -302,7 +302,7 @@ La prueba lo respeta afirmando `error-medios`, uno solo, y no un error por casil
 
 Esta superficie es `InteractiveServer`, así que tiene la ventana entre el HTML pintado y el
 circuito abierto. Pero
-[`PruebaE2E`](../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs) ya declara que
+[`E2ETestBase`](../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/Infrastructure/E2ETestBase.cs) ya declara que
 aporta *«la espera a que el circuito de Blazor esté conectado antes de tocar nada»*, y lo hace en
 `IrAAsync`.
 
@@ -367,9 +367,9 @@ Faltarían dos casos: que `/encuesta/3` sin haber pasado por 1 y 2 caiga en el p
 
 ### 6.2 El fallo al registrar no se ejercita
 
-[`FinalizarAsync`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Pages/Encuesta.razor.cs#L105-L127) tiene
+[`FinishAsync`](../../../Lab-E2E.WebBlazor/src/MovilidadUrbana.Web/Components/Pages/Encuesta.razor.cs#L105-L127) tiene
 un `catch` que registra el error y muestra un aviso —*«No pudimos registrar la encuesta. Volvé a
-intentar en unos segundos.»*—, y el `Asistente` tiene un estado de botón entero para el envío en
+intentar en unos segundos.»*—, y el `Wizard` tiene un estado de botón entero para el envío en
 curso (`boton-procesando`).
 
 **Verificado el 2026-09-04:** ninguna prueba menciona `boton-procesando` ni ese aviso.
@@ -384,12 +384,12 @@ error de una operación es de los que más se rompen y menos se miran.
 
 | No se prueba | Tipo | Por qué |
 | --- | --- | --- |
-| Las **reglas de rango** una por una | Otra herramienta | Están cubiertas en [`ReglasDeEncuestaTests`](../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.UnitTests/ReglasDeEncuestaTests.cs), donde son baratas. La E2E verifica que la superficie **las use**, no que sean correctas |
+| Las **reglas de rango** una por una | Otra herramienta | Están cubiertas en [`EncuestaRulesTests`](../../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.UnitTests/EncuestaRulesTests.cs), donde son baratas. La E2E verifica que la superficie **las use**, no que sean correctas |
 | El **paso direccionable** | **Pendiente** | §6.1 |
 | El **fallo al registrar** | **Pendiente, con motivo** | §6.2 — falta el punto de inyección |
 | El **estado de envío en curso** | Otra clase de verificación | Es un tránsito: afirmarlo obliga a atrapar un instante, y ahí nacen las pruebas intermitentes |
 | La **accesibilidad** completa | Otra herramienta | El `aria-current` entra de rebote en el caso 6; el resto tiene su propio cuerpo normativo |
-| El **aislamiento entre sesiones** | Ya está | Lo garantiza `PruebaE2E` dándole una sesión propia a cada caso |
+| El **aislamiento entre sesiones** | Ya está | Lo garantiza `E2ETestBase` dándole una sesión propia a cada caso |
 
 La primera fila es la más importante de todas, y es un criterio general: **la E2E no verifica que la
 regla de negocio sea correcta; verifica que la superficie la aplique.** Que la edad mínima sea 16 lo

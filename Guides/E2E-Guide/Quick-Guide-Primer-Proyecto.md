@@ -191,20 +191,20 @@ eso su presencia no es una promesa sino una prueba.
 En el marcado:
 
 ```razor
-<span class="mq-sr-only" data-testid="estado-app" data-interactivo="@_interactivo"></span>
+<span class="mq-sr-only" data-testid="estado-app" data-interactivo="@_interactive"></span>
 
 @code {
     // Arranca en `false` y así viaja en el HTML del servidor: el testigo dice que no
     // hay circuito hasta que lo haya.
-    private string _interactivo = "false";
+    private string _interactive = "false";
 
     // `OnAfterRender` solo corre del lado del circuito: si esto se ejecutó, la
     // superficie ya responde. Es lo que hace del testigo una prueba y no una promesa.
     protected override void OnAfterRender(bool primeraVez)
     {
-        if (!primeraVez || _interactivo == "true") { return; }
+        if (!primeraVez || _interactive == "true") { return; }
 
-        _interactivo = "true";
+        _interactive = "true";
         StateHasChanged();
     }
 }

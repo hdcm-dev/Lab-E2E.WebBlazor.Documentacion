@@ -61,7 +61,7 @@ responsabilidad del fixture y qué de cada prueba.
 
 ```mermaid
 flowchart TD
-    A["OneTimeSetUp del ensamblado<br/>ServidorDeLaAplicacion"] --> B["Instala el navegador de esta corrida"]
+    A["OneTimeSetUp del ensamblado<br/>TestAppServer"] --> B["Instala el navegador de esta corrida"]
     B --> C["Publica la aplicación en publicacion/"]
     C --> D["Lanza el binario y espera el puerto"]
     D --> E{"Por cada prueba"}
@@ -74,7 +74,7 @@ flowchart TD
 ```
 
 Las tres primeras cajas no dependen del entorno: corren igual en la consola, en Visual Studio y en
-CI. **[E: tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs:37-55]**
+CI. **[E: tests/MovilidadUrbana.E2ETests/Infrastructure/TestAppServer.cs:37-55]**
 
 ---
 
@@ -111,40 +111,40 @@ dotnet sln add tests/<Proyecto>.E2ETests
 nunca el de arriba. Puesto en `...E2ETests.Infraestructura` no corre para las pruebas de
 `...E2ETests`, y el síntoma es desconcertante —la URL base llega vacía—. Va en el namespace raíz de
 las pruebas, aunque el archivo viva en una subcarpeta.
-**[E: tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs:5]** El porqué está en
+**[E: tests/MovilidadUrbana.E2ETests/Infrastructure/TestAppServer.cs:5]** El porqué está en
 [§4.4 de la guía de estudio](Beginner-Guide.md#44-el-detalle-de-namespace-que-cuesta-una-tarde).
 
 ## 2.3. Copiar la infraestructura
 
-`Infraestructura/` tiene tres archivos que se llevan de un proyecto al siguiente. Uno solo se copia
-tal cual —`ParalelismoDelEnsamblado.cs`, una línea de atributo, que se explica en
+`Infrastructure/` tiene tres archivos que se llevan de un proyecto al siguiente. Uno solo se copia
+tal cual —`AssemblyParallelism.cs`, una línea de atributo, que se explica en
 [§2.6](#26-configurar-la-corrida)—; los otros dos traen cableado lo que es propio del laboratorio.
 
-`ServidorDeLaAplicacion` levanta y baja la aplicación bajo prueba. Concentra tres responsabilidades
+`TestAppServer` levanta y baja la aplicación bajo prueba. Concentra tres responsabilidades
 que **no** conviene dejar en el build **[C]**: instalar el navegador, publicar la aplicación y
 lanzarla. Atadas al build quedan a merced de que el entorno decida compilar —Visual Studio evalúa
 por su cuenta si el proyecto está al día—, y cuando esa decisión no sale como se espera, todas las
 pruebas mueren juntas en `OneTimeSetUp`.
-**[E: tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs:97, :137, :207]**
+**[E: tests/MovilidadUrbana.E2ETests/Infrastructure/TestAppServer.cs:97, :137, :207]**
 
-`PruebaE2E : PageTest` es la clase base de todos los casos. Aporta el aislamiento por sesión, la
+`E2ETestBase : PageTest` es la clase base de todos los casos. Aporta el aislamiento por sesión, la
 espera de interactividad, la navegación por el menú y la traza de los casos que fallan —se graba
 siempre y se conserva solo si el caso terminó en rojo, porque sin reintentos no existe el
 `on-first-retry` del runner de JavaScript—.
-**[E: tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs:14]** El detalle está en
+**[E: tests/MovilidadUrbana.E2ETests/Infrastructure/E2ETestBase.cs:14]** El detalle está en
 [§7.11 de la guía de estudio](Beginner-Guide.md#711-la-traza-y-por-qué-hay-que-escribirla-a-mano).
 
 Lo que hay que adaptar, en el proyecto de pruebas:
 
-- `ServidorDeLaAplicacion`: nombre del ensamblado, ruta del `.csproj` a publicar, carpeta de salida
+- `TestAppServer`: nombre del ensamblado, ruta del `.csproj` a publicar, carpeta de salida
   (`publicacion/`), ruta de la base (`datos-e2e/movilidad.db`), puerto (`4173`), la clave
   `ConnectionStrings__BaseDeDatos` con la que se le impone la base a la aplicación y la detección de
   la raíz del repositorio por `*.sln`.
-  **[E: tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs:22, :50, :67, :140, :184, :194, :231]**
-- `PruebaE2E`: nombre de la cookie de sesión, el testid del testigo de interactividad (`estado-app`),
+  **[E: tests/MovilidadUrbana.E2ETests/Infrastructure/TestAppServer.cs:22, :50, :67, :140, :184, :194, :231]**
+- `E2ETestBase`: nombre de la cookie de sesión, el testid del testigo de interactividad (`estado-app`),
   los selectores del menú (`.navbar-toggler`, `#menu`), el dispositivo emulado (`Pixel 7`) y la
   carpeta donde caen las trazas.
-  **[E: tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs:16, :18, :87, :95, :99]**
+  **[E: tests/MovilidadUrbana.E2ETests/Infrastructure/E2ETestBase.cs:16, :18, :87, :95, :99]**
 
 Y lo que hay que agregar en la aplicación, porque los dos archivos lo dan por hecho: el testigo
 `estado-app` en el layout, el middleware de la cookie y una cadena de conexión que salga de la
@@ -156,9 +156,9 @@ Con el estado en el servidor, todas las pruebas comparten la base. La salida es 
 reparta un espacio de datos por sesión y que cada prueba estrene el suyo:
 
 ```csharp
-// PruebaE2E.cs:58 — corre después del [SetUp] de PageTest, que es el que crea el contexto
+// E2ETestBase.cs:58 — corre después del [SetUp] de PageTest, que es el que crea el context
 [SetUp]
-public async Task EstrenarSesionAsync()
+public async Task StartFreshSessionAsync()
 {
     await Context.AddCookiesAsync(
     [
@@ -166,27 +166,27 @@ public async Task EstrenarSesionAsync()
         {
             Name = CookieDeSesion,
             Value = Guid.NewGuid().ToString("n"),
-            Url = ServidorDeLaAplicacion.UrlBase
+            Url = TestAppServer.UrlBase
         }
     ]);
 }
 ```
 
 Del lado de la aplicación hace falta un middleware que emita la cookie, repositorios que filtren por
-ella y una marca durable de que esa sesión ya recibió su siembra —acá, la entidad `Sesion`—: sin la
+ella y una marca durable de que esa sesión ya recibió su siembra —acá, la entidad `Session`—: sin la
 marca, el caso que borra todo vuelve a sembrar y el estado vacío nunca aparece.
-**[E: src/MovilidadUrbana.Web/Dominio/Entidades/Sesion.cs:7]**
-**[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/SembradorDeSesion.cs:27]**
+**[E: src/MovilidadUrbana.Web/Domain/Entities/Session.cs:7]**
+**[E: src/MovilidadUrbana.Web/Infrastructure/Persistence/SessionSeeder.cs:27]**
 El desarrollo está en [§7.3 de la guía de estudio](Beginner-Guide.md#73-aislar-el-estado-cuando-vive-en-el-servidor).
 
 El aislamiento lógico no alcanza: sobre un único archivo SQLite hay que habilitar además la
 concurrencia física, con `PRAGMA journal_mode=WAL` al arrancar y un `Default Timeout` en la cadena
 de conexión.
-**[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/PreparadorDeBaseDeDatos.cs:29]**
+**[E: src/MovilidadUrbana.Web/Infrastructure/Persistence/DatabaseInitializer.cs:29]**
 
 La base de las pruebas no la elige la aplicación: vive en `datos-e2e/` en la raíz del repositorio y
 el fixture se la impone al lanzarla, por `ConnectionStrings__BaseDeDatos`.
-**[E: tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs:67, :184]**
+**[E: tests/MovilidadUrbana.E2ETests/Infrastructure/TestAppServer.cs:67, :184]**
 
 Sin esto no hay paralelismo posible y las pruebas se pisan entre sí.
 
@@ -225,7 +225,7 @@ await Page.GetByTestId("campo-provincia").SelectOptionAsync("Corrientes");
 // … el caso llena también campo-codigo-postal y campo-habitantes: si no, la validación rechaza
 await Page.GetByTestId("boton-guardar").ClickAsync();
 
-await Expect(Page.GetByTestId("aviso")).ToHaveTextAsync("Se agregó la localidad Goya.");
+await Expect(Page.GetByTestId("notice")).ToHaveTextAsync("Se agregó la localidad Goya.");
 await Expect(Page.GetByTestId("fila")).ToHaveCountAsync(3);
 
 await Page.ReloadAsync();                                    // acá se prueba la base
@@ -258,7 +258,7 @@ límite de aserción y cantidad de workers; el navegador se pisa por línea de c
 El paralelismo tiene un techo que conviene conocer antes de chocarlo:
 
 ```csharp
-// ParalelismoDelEnsamblado.cs — clases en paralelo, casos de cada clase en secuencia
+// AssemblyParallelism.cs — clases en paralelo, casos de cada clase en secuencia
 [assembly: Parallelizable(ParallelScope.Fixtures)]
 ```
 
@@ -298,13 +298,13 @@ Ordenadas por lo que tardan en aparecer. El catálogo con las causas desarrollad
 
 | Síntoma | Causa | Salida |
 | --- | --- | --- |
-| El click no hace nada, de forma intermitente | La página está prerenderizada pero el circuito no conectó | Esperar un testigo de interactividad antes del primer click **[E: tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs:86]** |
+| El click no hace nada, de forma intermitente | La página está prerenderizada pero el circuito no conectó | Esperar un testigo de interactividad antes del primer click **[E: tests/MovilidadUrbana.E2ETests/Infrastructure/E2ETestBase.cs:86]** |
 | La validación rechaza un formulario que se ve completo | `FillAsync` dispara `input`, y `@bind` escucha `change` | `@bind:event="oninput"` en los campos **[E: src/MovilidadUrbana.Web/Components/Pages/Localidades.razor:56]** |
-| Las pruebas se pisan entre sí | Estado compartido en el servidor | Cookie de sesión por prueba **[E: tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs:58]** |
+| Las pruebas se pisan entre sí | Estado compartido en el servidor | Cookie de sesión por prueba **[E: tests/MovilidadUrbana.E2ETests/Infrastructure/E2ETestBase.cs:58]** |
 | `The given key 'Browser' was not present` | `ParallelScope.Children` | Bajar a `ParallelScope.Fixtures` **[V]** |
 | La URL base llega vacía | El `[SetUpFixture]` está en un namespace hijo | Moverlo al namespace de las pruebas |
 | Recursos estáticos vacíos, con `200` y `Content-Length: 0` | La aplicación se lanzó desde otra carpeta y no encuentra `wwwroot` | Fijar `WorkingDirectory` en la carpeta de la publicación |
-| `No se encontró MovilidadUrbana.Web` en Windows | El apphost lleva `.exe` en Windows | Resolver el nombre según el sistema operativo **[E: tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs:207]** |
+| `No se encontró MovilidadUrbana.Web` en Windows | El apphost lleva `.exe` en Windows | Resolver el nombre según el sistema operativo **[E: tests/MovilidadUrbana.E2ETests/Infrastructure/TestAppServer.cs:207]** |
 
 ---
 

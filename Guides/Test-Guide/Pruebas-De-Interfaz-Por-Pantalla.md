@@ -77,7 +77,7 @@ Por eso el escenario S6 —regresión de plataforma— existe aparte de S4.
 
 | Costo | En la web | En el teléfono |
 | --- | --- | --- |
-| Levantar el SUT | `dotnet publish` + proceso en un puerto libre **[E: tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs]** | Compilar el APK, instalarlo por `adb install`, abrirlo; con el keystore de Debug estable o desinstalar antes **[E: .devcontainer/dev.sh]** |
+| Levantar el SUT | `dotnet publish` + proceso en un puerto libre **[E: tests/MovilidadUrbana.E2ETests/Infrastructure/TestAppServer.cs]** | Compilar el APK, instalarlo por `adb install`, abrirlo; con el keystore de Debug estable o desinstalar antes **[E: .devcontainer/dev.sh]** |
 | Entrar | Un navegador que Playwright descarga | Un driver que habla con el dispositivo por USB o red |
 | Correr en CI | Sí, en `ubuntu-latest` con los navegadores de Playwright **[E: .github/workflows/e2e.yml]** | No sin emulador o granja de dispositivos: `android.yml` compila el APK y **no lo ejecuta** **[E: .github/workflows/android.yml]** |
 | Paralelizar | Un contexto de navegador por prueba | Un dispositivo es una sola pantalla: las pruebas van en serie, o hay N dispositivos |
@@ -245,7 +245,7 @@ lo tenía y `devolver` lo restituye **[E: .devcontainer/dev.sh, encabezado]**.
 
 El editor de localidad declara `AutomationId="nombre"`, `"provincia"`, `"codigo-postal"`,
 `"habitantes"`, `"guardar"`, `"eliminar"`, `"aviso"`
-**[E: src/MovilidadUrbana.MAUI/Paginas/LocalidadEditorPage.xaml:15,21,31,40,50,58,64]**. Un volcado
+**[E: src/MovilidadUrbana.MAUI/Pages/LocalidadEditorPage.xaml:15,21,31,40,50,58,64]**. Un volcado
 con la pantalla abierta, filtrado a texto y `resource-id`, devolvió **[V 2026-09-12]**:
 
 ```
@@ -309,9 +309,9 @@ indexada **[E: evidencia/2026-09-12-maui/README.md]**.
 | Los selectores parecían texto fijo: sin indicador de despliegue | Solo la pantalla | Un `▾` al lado del `Picker` |
 | El subrayado nativo de Android dentro de la caja del campo | Solo la pantalla | Mapper del handler que lo vuelve transparente |
 | El error de un grupo de opciones aparecía debajo de la tarjeta, lejos del rótulo | Solo la pantalla | Mover el `Label` de error junto al rótulo (capturas `21` → `32`) |
-| El teclado numérico en es-AR descartaba la coma: «12,5» llegaba como «125» y **se registraba sin error** | Solo la plataforma: el ViewModel recibió «125» y lo validó bien | `EntradaDecimal` con `DigitsKeyListener("0123456789,.")` (capturas `24` → `35`) |
+| El teclado numérico en es-AR descartaba la coma: «12,5» llegaba como «125» y **se registraba sin error** | Solo la plataforma: el ViewModel recibió «125» y lo validó bien | `DecimalEntry` con `DigitsKeyListener("0123456789,.")` (capturas `24` → `35`) |
 | El aviso breve (Toast) dura menos que un ciclo de captura | La pantalla, y `logcat` | Se documentó con la línea de `logcat` **[E: evidencia/2026-09-12-maui/toast-logcat.txt]** |
-| En la página apilada el teclado tapaba «Guardar»; `SafeAreaEdges` dejaba un hueco al cerrarlo | Solo la plataforma, y solo en esa página | `TecladoEnPantalla`: medir la barra contra `GetWindowVisibleDisplayFrame` y corregir el margen **[E: src/MovilidadUrbana.MAUI/Servicios/TecladoEnPantalla.cs:27-33]** |
+| En la página apilada el teclado tapaba «Guardar»; `SafeAreaEdges` dejaba un hueco al cerrarlo | Solo la plataforma, y solo en esa página | `OnScreenKeyboard`: medir la barra contra `GetWindowVisibleDisplayFrame` y corregir el margen **[E: src/MovilidadUrbana.MAUI/Services/OnScreenKeyboard.cs:27-33]** |
 
 La cuarta fila es la que justifica todo el documento: **un dato mal capturado por el teclado del
 sistema pasó la validación de dominio, la de aplicación y las 18 pruebas del ViewModel**, porque
@@ -327,14 +327,14 @@ con tres diferencias que salieron de la §5.3 y de la §7:
 
 | Decisión | Dónde | Por qué |
 | --- | --- | --- |
-| Esperas por condición, hasta 60 s, nunca `Task.Delay` fijo | `PruebaDePantalla.Esperar` **[E: tests/MovilidadUrbana.MAUI.UITests/Infraestructura/PruebaDePantalla.cs]** | La primera corrida falló con 30 s: guardar y volver a la lista puede pasarlos en el moto e6 play |
-| Cerrar el teclado y **esperar a que se cierre** antes de tocar | `CerrarTeclado` | Un toque durante la animación aterriza en otro lugar |
-| `UiScrollable.scrollIntoView` para lo que queda debajo del pliegue | `Ver`, `VerTexto` | «Eliminar localidad» no está en pantalla al abrir el editor; la segunda corrida falló ahí |
-| `[SetUp]` que vuelve atrás hasta ver la barra de pestañas | `IrAPestaña` | Una prueba que falla en el editor lo deja abierto sin pestañas y tumbaría a las siguientes |
+| Esperas por condición, hasta 60 s, nunca `Task.Delay` fijo | `ScreenTestBase.Esperar` **[E: tests/MovilidadUrbana.MAUI.UITests/Infrastructure/ScreenTestBase.cs]** | La primera corrida falló con 30 s: guardar y volver a la lista puede pasarlos en el moto e6 play |
+| Cerrar el teclado y **esperar a que se cierre** antes de tocar | `HideKeyboard` | Un toque durante la animación aterriza en otro lugar |
+| `UiScrollable.scrollIntoView` para lo que queda debajo del pliegue | `ScrollIntoView`, `ScrollToText` | «Eliminar localidad» no está en pantalla al abrir el editor; la segunda corrida falló ahí |
+| `[SetUp]` que vuelve atrás hasta ver la barra de pestañas | `GoToTab` | Una prueba que falla en el editor lo deja abierto sin pestañas y tumbaría a las siguientes |
 | Nombre único por corrida en el alta | `LocalidadesTests.AltaEdicionYBaja` | El dispositivo conserva los datos: un resto de una corrida a medias no puede chocar |
-| `ActivateApp` al abrir la sesión y esperar la primera pantalla | `SesionDeAppium.Abrir` **[E: tests/MovilidadUrbana.MAUI.UITests/Infraestructura/SesionDeAppium.cs]** | Con `NoReset`, si el proceso quedó vivo en segundo plano el driver no lo trae al frente: el log de Appium dice «already running and noReset is enabled» y las cinco pruebas fallaron buscando la pestaña |
-| `[SetUpFixture]` en el namespace raíz del proyecto | `SesionDeAppium.cs` | NUnit lo aplica solo a su namespace y a los de abajo; en `…Infraestructura` no alcanzaba a las pruebas |
-| `[assembly: NonParallelizable]` | `ParalelismoDelEnsamblado.cs` | Una pantalla |
+| `ActivateApp` al abrir la sesión y esperar la primera pantalla | `AppiumSession.Abrir` **[E: tests/MovilidadUrbana.MAUI.UITests/Infrastructure/AppiumSession.cs]** | Con `NoReset`, si el proceso quedó vivo en segundo plano el driver no lo trae al frente: el log de Appium dice «already running and noReset is enabled» y las cinco pruebas fallaron buscando la pestaña |
+| `[SetUpFixture]` en el namespace raíz del proyecto | `AppiumSession.cs` | NUnit lo aplica solo a su namespace y a los de abajo; en `…Infraestructura` no alcanzaba a las pruebas |
+| `[assembly: NonParallelizable]` | `AssemblyParallelism.cs` | Una pantalla |
 | `[Register("ar.lab.movilidadurbana.MainActivity")]` | `MainActivity.cs` | Sin él, la activity se llama `crc…MainActivity` y Appium no la puede lanzar por nombre **[B: 7]** |
 
 Los cinco casos: filtro sin coincidencias y «Limpiar filtro»; alta inválida con `aviso`; alta,
@@ -365,7 +365,7 @@ ejecutarlo.
 | El testigo de hidratación | No hay hidratación; el testigo es que el elemento **exista en el árbol** y, si aplica, que el teclado esté cerrado |
 | Estado por prueba (cookie de sesión) | Un dispositivo, una sesión: el aislamiento es **desinstalar** o **borrar los datos de la app** entre suites (`adb shell pm clear <paquete>`) |
 | La prueba que falla a propósito | Igual: cambiar un `AutomationId` y ver la suite en rojo antes de confiar en ella |
-| Estados excluyentes con su testigo | `estado-vacio`, `estado-sin-resultados`, `encuesta-completada` como `AutomationId` de los contenedores **[E: src/MovilidadUrbana.MAUI/Paginas/LocalidadesPage.xaml, EncuestaPage.xaml]** |
+| Estados excluyentes con su testigo | `estado-vacio`, `estado-sin-resultados`, `encuesta-completada` como `AutomationId` de los contenedores **[E: src/MovilidadUrbana.MAUI/Pages/LocalidadesPage.xaml, EncuestaPage.xaml]** |
 
 ### 6.2 ¿Qué no se traslada?
 
@@ -391,7 +391,7 @@ ejecutarlo.
 | ¿Con nombre «Go» aparece error en nombre? | ViewModel **[E: tests/MovilidadUrbana.MAUI.Tests/LocalidadEditorViewModelTests.cs:11-28]** | Es lógica; 2 s para 18 casos |
 | ¿El error se **ve** junto al campo, en rojo, y el campo tiene borde? | Dispositivo | Es enlace y estilo; el ViewModel no lo sabe |
 | ¿«12,5» llega como 12,5? | Dispositivo | Es el teclado del sistema |
-| ¿Cancelar la confirmación no borra? | ViewModel (con `AvisosFalsos`) | Es lógica; el diálogo real es de la plataforma |
+| ¿Cancelar la confirmación no borra? | ViewModel (con `FakeAlertService`) | Es lógica; el diálogo real es de la plataforma |
 | ¿El diálogo dice «¿Eliminar Goya?» y tiene los dos botones? | Dispositivo | Es la plataforma |
 | ¿«Guardar» queda visible con el teclado abierto? | Dispositivo | Es la plataforma, y además cambia por página (§5.4) |
 
@@ -431,7 +431,7 @@ en mostrar la primera pantalla en frío **[V 2026-09-12, `ActivityManager: Displ
 **Respuesta: el dispositivo es una sola sesión, así que el aislamiento es de datos: borrar los de la app antes de la suite, y que cada prueba deje lo que encontró.**
 
 `MovilidadUrbana.MAUI` guarda su base y su sesión en el almacenamiento privado de la app
-**[E: src/MovilidadUrbana.MAUI/MauiProgram.cs; Servicios/SesionDelDispositivo.cs]**. `adb shell pm
+**[E: src/MovilidadUrbana.MAUI/MauiProgram.cs; Services/SesionDelDispositivo.cs]**. `adb shell pm
 clear ar.lab.movilidadurbana` los borra y la siguiente apertura vuelve a sembrar. Dentro de la suite,
 la alternativa barata es la que usó el recorrido: cada flujo deshace lo que hizo (la baja de Goya
 después del alta de Goya), así la lista vuelve a las dos sembradas

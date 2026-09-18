@@ -71,9 +71,9 @@ de método correctas» **[B: 2]**. La primera afirma sobre el SUT; la segunda, s
 | Propiedad | Definición **[B: 5]** | En el laboratorio | Verificación |
 | --- | --- | --- | --- |
 | **Fast** | «Unit tests should take little time to run. Milliseconds» | 49 casos de reglas en 25 ms | **[V 2026-09-12]** `dotnet test tests/MovilidadUrbana.UnitTests` |
-| **Isolated** | «have no dependencies on any outside factors, such as a file system or database» | Las reglas no reciben nada: `ReglasDeLocalidad.NombreValido(nombre)` | **[E: src/MovilidadUrbana.Web/Dominio/Reglas/ReglasDeLocalidad.cs:18-19]** |
+| **Isolated** | «have no dependencies on any outside factors, such as a file system or database» | Las reglas no reciben nada: `LocalidadRules.NombreValido(nombre)` | **[E: src/MovilidadUrbana.Web/Domain/Rules/LocalidadRules.cs:18-19]** |
 | **Repeatable** | «always returns the same result if you don't change anything» | Sin reloj, sin azar, sin red | Las 49 pasaron en cada corrida de CI observada **[E: .github/workflows/ci.yml]** |
-| **Self-Checking** | «automatically detect if it passed or failed» | `ExpectedResult = false` decide solo | **[E: tests/MovilidadUrbana.UnitTests/ReglasDeLocalidadTests.cs:15]** |
+| **Self-Checking** | «automatically detect if it passed or failed» | `ExpectedResult = false` decide solo | **[E: tests/MovilidadUrbana.UnitTests/LocalidadRulesTests.cs:15]** |
 | **Timely** | «shouldn't take a disproportionately long time to write compared to the code being tested» | Un `[TestCase]` por valor límite: una línea por caso | Ídem, líneas 13-19 |
 
 ### 2.2 ¿Qué se pierde cuando falta una?
@@ -99,8 +99,8 @@ código, no de la prueba.**
 
 **Respuesta: los bordes. Un valor de cada lado de cada límite, y los valores que no son valores: vacío, blancos, nulo.**
 
-`ReglasDeLocalidad.NombreValido` exige al menos 3 caracteres después de recortar espacios
-**[E: src/MovilidadUrbana.Web/Dominio/Reglas/ReglasDeLocalidad.cs:11,18-19]**. Su prueba:
+`LocalidadRules.NombreValido` exige al menos 3 caracteres después de recortar espacios
+**[E: src/MovilidadUrbana.Web/Domain/Rules/LocalidadRules.cs:11,18-19]**. Su prueba:
 
 ```csharp
 [TestCase("Goya", ExpectedResult = true)]
@@ -109,14 +109,14 @@ código, no de la prueba.**
 [TestCase("  A  ", ExpectedResult = false)]
 [TestCase("", ExpectedResult = false)]
 [TestCase(null, ExpectedResult = false)]
-public bool NombreValido(string? nombre) => ReglasDeLocalidad.NombreValido(nombre);
+public bool NombreValido(string? nombre) => LocalidadRules.NombreValido(nombre);
 ```
-**[E: tests/MovilidadUrbana.UnitTests/ReglasDeLocalidadTests.cs:13-19]**
+**[E: tests/MovilidadUrbana.UnitTests/LocalidadRulesTests.cs:13-19]**
 
 Seis casos, y cada uno tiene un motivo: el válido, el válido que parece inválido (espacios), el corto,
 el corto disfrazado de largo (espacios), el vacío y el nulo. El comentario de la otra fixture explica
 por qué acá y no en el navegador: «son los valores que una prueba por navegador tardaría minutos en
-recorrer y acá cuestan milisegundos» **[E: tests/MovilidadUrbana.UnitTests/ReglasDeEncuestaTests.cs:5-8]**.
+recorrer y acá cuestan milisegundos» **[E: tests/MovilidadUrbana.UnitTests/EncuestaRulesTests.cs:5-8]**.
 
 | | |
 | --- | --- |
@@ -130,7 +130,7 @@ recorrer y acá cuestan milisegundos» **[E: tests/MovilidadUrbana.UnitTests/Reg
 
 Es la consecuencia directa de Clean Architecture: «The business rules can be tested without the UI,
 Database, Web Server, or any other external element» **[B: 8]**. En el laboratorio se cumple al pie:
-`Dominio/` no referencia paquetes ni proyectos —es la primera carpeta de cada aplicación y no depende
+`Domain/` no referencia paquetes ni proyectos —es la primera carpeta de cada aplicación y no depende
 de nada **[E: README.md, «Estructura»]**—. Por eso sus pruebas no necesitan dobles: no hay a quién
 reemplazar.
 
@@ -142,7 +142,7 @@ o un `ViewModel`, la regla no está en el dominio. Está en otra capa disfrazada
 **Respuesta: se prueban si tienen comportamiento; si son datos, la prueba es el compilador.**
 
 `Catalogos.Provincias` es una lista. Probar que tiene siete elementos es probar que nadie editó el
-archivo, y eso lo hace el control de versiones. `ModeloDeEncuesta.AlternarMedio` sí tiene
+archivo, y eso lo hace el control de versiones. `EncuestaModel.AlternarMedio` sí tiene
 comportamiento —agrega o quita del conjunto— y se ejercita indirectamente desde los ViewModels: el
 `EncuestaViewModel` lo llama al armar el modelo con los medios marcados, y la prueba afirma sobre el
 conjunto resultante **[E: tests/MovilidadUrbana.MAUI.Tests/EncuestaViewModelTests.cs:72-87]**.
@@ -160,15 +160,15 @@ conjunto resultante **[E: tests/MovilidadUrbana.MAUI.Tests/EncuestaViewModelTest
 
 **Respuesta: aparece una decisión que el dominio no tenía: para cada colaborador, ¿real o doble?**
 
-`ServicioDeLocalidades` recibe un `IRepositorioDeLocalidades` por constructor
-**[E: src/MovilidadUrbana.Web/Aplicacion/Localidades/ServicioDeLocalidades.cs:8]** y su lógica
-propia es: validar con las reglas, consultar duplicados, devolver un `Resultado` con errores por
+`LocalidadService` recibe un `ILocalidadRepository` por constructor
+**[E: src/MovilidadUrbana.Web/Application/Localidades/LocalidadService.cs:8]** y su lógica
+propia es: validar con las reglas, consultar duplicados, devolver un `Result` con errores por
 campo **[E: ídem, 13-25]**. Hay dos formas de probarlo, y las dos son correctas para preguntas
 distintas:
 
 | Forma | Colaborador | Responde | Cuesta |
 | --- | --- | --- | --- |
-| Unitaria con stub | `IRepositorioDeLocalidades` devuelve lo que el caso necesita («ya existe Goya en Corrientes») | ¿El servicio traduce bien la situación a un `Resultado`? | Escribir el stub; no verifica el filtro por sesión ni la consulta real |
+| Unitaria con stub | `ILocalidadRepository` devuelve lo que el caso necesita («ya existe Goya en Corrientes») | ¿El servicio traduce bien la situación a un `Result`? | Escribir el stub; no verifica el filtro por sesión ni la consulta real |
 | Integración con repositorio real | EF Core sobre SQLite aislado | ¿El servicio *y su repositorio* producen el resultado correcto? | Milisegundos más; verifica también la persistencia |
 
 ### 4.2 ¿Cuál eligió el laboratorio, y por qué se llama «unitaria» igual?
@@ -192,7 +192,7 @@ verificaría lo mismo con menos realismo.
 
 | | |
 | --- | --- |
-| ✅ | Stub del repositorio que lanza `DbUpdateException` para probar que el servicio devuelve un `Resultado` y no propaga |
+| ✅ | Stub del repositorio que lanza `DbUpdateException` para probar que el servicio devuelve un `Result` y no propaga |
 | ⚠️ | Stub del repositorio que devuelve «existe Goya» para probar el duplicado — cierto, pero la API ya lo prueba con base real en `LocalidadesTests` |
 | ❌ | Stub del repositorio en *todas* las pruebas del servicio «para que sean unitarias» — se pierde la única verificación de las consultas |
 
@@ -203,12 +203,12 @@ verificaría lo mismo con menos realismo.
 Ejemplo ilustrativo —**no está en el laboratorio**, se muestra para fijar la forma—:
 
 ```csharp
-// Ilustrativo: un fake de IRepositorioDeLocalidades con una lista en memoria.
-sealed class RepositorioEnMemoria : IRepositorioDeLocalidades
+// Ilustrativo: un fake de ILocalidadRepository con una lista en memoria.
+sealed class RepositorioEnMemoria : ILocalidadRepository
 {
     public List<Localidad> Datos { get; } = [];
 
-    public Task<IReadOnlyList<Localidad>> ListarAsync(CancellationToken c = default) =>
+    public Task<IReadOnlyList<Localidad>> GetAllAsync(CancellationToken c = default) =>
         Task.FromResult<IReadOnlyList<Localidad>>(Datos);
 
     public Task<bool> ExisteAsync(string nombre, string provincia, int? salvoId, CancellationToken c = default) =>
@@ -218,7 +218,7 @@ sealed class RepositorioEnMemoria : IRepositorioDeLocalidades
 }
 ```
 
-La firma exacta de la interfaz está en `Aplicacion/Abstracciones/IRepositorioDeLocalidades.cs` de
+La firma exacta de la interfaz está en `Application/Abstractions/ILocalidadRepository.cs` de
 cada aplicación; el ejemplo la simplifica. Lo que importa es la forma: **una implementación que
 funciona pero atajando** —«usually take some shortcut» **[B: 2]**—, sin base.
 
@@ -231,39 +231,39 @@ funciona pero atajando** —«usually take some shortcut» **[B: 2]**—, sin ba
 **Respuesta: a mano mientras el doble sea chico y se lea; con biblioteca cuando haya que configurar respuestas por llamada o verificar interacciones.**
 
 El laboratorio no usa ninguna biblioteca de mocks: sus dos dobles son clases de diez líneas
-**[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:55-71]**. Las bibliotecas —Moq, NSubstitute,
+**[E: tests/MovilidadUrbana.MAUI.Tests/TestEnvironment.cs:55-71]**. Las bibliotecas —Moq, NSubstitute,
 FakeItEasy son las más usadas en .NET; Microsoft ejemplifica con `Mock<IDateTimeProvider>` **[B: 5]**—
 sirven cuando el doble tiene que responder distinto según los argumentos, o cuando la afirmación es
 «se llamó a X con Y».
 
 | | |
 | --- | --- |
-| ✅ | `NavegadorFalso` a mano: dos métodos, una lista y un contador; se lee entero en la prueba |
+| ✅ | `FakeNavigationService` a mano: dos métodos, una lista y un contador; se lee entero en la prueba |
 | ✅ | `Mock<IReloj>` de biblioteca cuando cinco pruebas necesitan cinco fechas distintas |
-| ❌ | Una biblioteca de mocks para reemplazar `INavegador`: configurar `Setup(...)` para dos métodos que no devuelven nada es más texto que el fake |
+| ❌ | Una biblioteca de mocks para reemplazar `INavigationService`: configurar `Setup(...)` para dos métodos que no devuelven nada es más texto que el fake |
 | ❌ | Un fake a mano de veinte métodos para una interfaz de la que la prueba usa uno: ahí la biblioteca genera lo que sobra |
 
 ### 5.2 ¿Cómo se elige la clase de doble?
 
 **Respuesta: por lo que se va a afirmar. Si se afirma sobre el SUT, alcanza un stub o un fake; si se afirma sobre el doble, es un spy o un mock.**
 
-`NavegadorFalso` es las dos cosas a la vez, y conviene verlo:
+`FakeNavigationService` es las dos cosas a la vez, y conviene verlo:
 
 ```csharp
-public sealed class NavegadorFalso : INavegador
+public sealed class FakeNavigationService : INavigationService
 {
-    public List<LocalidadItem?> EditoresAbiertos { get; } = [];
-    public int Vueltas { get; private set; }
+    public List<LocalidadItem?> OpenedEditors { get; } = [];
+    public int GoBackCount { get; private set; }
 
-    public Task IrAlEditorDeLocalidadAsync(LocalidadItem? localidad) { EditoresAbiertos.Add(localidad); return Task.CompletedTask; }
-    public Task VolverAsync() { Vueltas++; return Task.CompletedTask; }
+    public Task NavigateToLocalidadEditorAsync(LocalidadItem? localidad) { OpenedEditors.Add(localidad); return Task.CompletedTask; }
+    public Task GoBackAsync() { GoBackCount++; return Task.CompletedTask; }
 }
 ```
-**[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:55-62]**
+**[E: tests/MovilidadUrbana.MAUI.Tests/TestEnvironment.cs:55-62]**
 
 Cuando una prueba afirma `Assert.That(_entorno.Navegador.Vueltas, Is.Zero)`
 **[E: tests/MovilidadUrbana.MAUI.Tests/LocalidadEditorViewModelTests.cs:27]**, el doble está
-funcionando como **spy**: registró y después se le pregunta. Cuando `AvisosFalsos.RespuestaAConfirmar
+funcionando como **spy**: registró y después se le pregunta. Cuando `FakeAlertService.ConfirmResult
 = false` hace que el ViewModel no borre, está funcionando como **stub**: devolvió lo que el caso
 necesitaba, y la afirmación va sobre la base **[E: ídem, 76-90]**.
 
@@ -279,10 +279,10 @@ necesitaba, y la afirmación va sobre la base **[E: ídem, 76-90]**.
 
 | | |
 | --- | --- |
-| ❌ | Doblar `ServicioDeLocalidades` en una prueba del ViewModel: el ViewModel casi no tiene lógica propia; sin el servicio real la prueba verifica el fake |
+| ❌ | Doblar `LocalidadService` en una prueba del ViewModel: el ViewModel casi no tiene lógica propia; sin el servicio real la prueba verifica el fake |
 | ❌ | Doblar `DbSet` para consultas: «properly mocking DbSet query functionality is not possible» **[B: 3]** |
 | ❌ | Doblar `Catalogos`: son datos estáticos, no un colaborador |
-| ✅ | Doblar `INavegador`, `IAvisos`, un reloj, un servicio externo, una falla |
+| ✅ | Doblar `INavigationService`, `IAlertService`, un reloj, un servicio externo, una falla |
 
 ---
 
@@ -295,22 +295,22 @@ necesitaba, y la afirmación va sobre la base **[E: ídem, 76-90]**.
 MVVM existe, entre otras cosas, para esto. El ViewModel tiene el estado de la pantalla —campos,
 errores, `Paso`, `Completada`— y los comandos; la vista solo enlaza. Lo que el ViewModel necesita de
 la plataforma entra por dos interfaces
-**[E: src/MovilidadUrbana.MAUI/Presentacion/Abstracciones/INavegador.cs, IAvisos.cs]**, y eso es lo
+**[E: src/MovilidadUrbana.MAUI/Presentation/Abstractions/INavigationService.cs, IAlertService.cs]**, y eso es lo
 que permite construirlo en un proceso sin MAUI:
 
 ```csharp
 public LocalidadEditorViewModel Editor() => new(Localidades, Navegador, Avisos);
 ```
-**[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:43]**
+**[E: tests/MovilidadUrbana.MAUI.Tests/TestEnvironment.cs:43]**
 
 ```mermaid
 flowchart LR
     T["Prueba NUnit<br/>(net10.0, sin MAUI)"] --> VM["LocalidadEditorViewModel"]
-    VM --> S["ServicioDeLocalidades (real)"]
-    S --> R["RepositorioDeLocalidades (real)"]
+    VM --> S["LocalidadService (real)"]
+    S --> R["LocalidadRepository (real)"]
     R --> DB[("SQLite<br/>un archivo por caso")]
-    VM --> N["INavegador → NavegadorFalso (spy)"]
-    VM --> A["IAvisos → AvisosFalsos (stub)"]
+    VM --> N["INavigationService → FakeNavigationService (spy)"]
+    VM --> A["IAlertService → FakeAlertService (stub)"]
     X["LocalidadEditorPage.xaml"] -. "no participa" .-> VM
 ```
 
@@ -324,18 +324,18 @@ flowchart LR
 public async Task GuardarInvalidoMuestraErrores()
 {
     var vm = _entorno.Editor();
-    vm.Preparar(null);
+    vm.Initialize(null);
     vm.Nombre = "Go";
     vm.CodigoPostal = "12";
 
-    await vm.GuardarCommand.ExecuteAsync(null);
+    await vm.SaveCommand.ExecuteAsync(null);
 
-    Assert.That(vm.ErrorNombre, Is.Not.Null);
-    Assert.That(vm.ErrorProvincia, Is.Not.Null);
-    Assert.That(vm.ErrorCodigoPostal, Is.Not.Null);
-    Assert.That(vm.ErrorHabitantes, Is.Not.Null);
-    Assert.That(vm.Aviso, Is.Not.Null);
-    Assert.That(_entorno.Navegador.Vueltas, Is.Zero);
+    Assert.That(vm.NombreError, Is.Not.Null);
+    Assert.That(vm.ProvinciaError, Is.Not.Null);
+    Assert.That(vm.CodigoPostalError, Is.Not.Null);
+    Assert.That(vm.HabitantesError, Is.Not.Null);
+    Assert.That(vm.Notice, Is.Not.Null);
+    Assert.That(_entorno.Navegador.GoBackCount, Is.Zero);
 }
 ```
 **[E: tests/MovilidadUrbana.MAUI.Tests/LocalidadEditorViewModelTests.cs:11-28]**
@@ -346,16 +346,16 @@ validación».
 
 | | |
 | --- | --- |
-| ✅ | `Assert.That(vm.ErrorNombre, Is.Not.Null)` — la vista enlaza esa propiedad; si es null, no hay error visible |
+| ✅ | `Assert.That(vm.NombreError, Is.Not.Null)` — la vista enlaza esa propiedad; si es null, no hay error visible |
 | ✅ | `Assert.That(_entorno.Navegador.Vueltas, Is.EqualTo(1))` tras un alta válida — la promesa es «vuelve» |
-| ❌ | Afirmar que `AplicarErrores` se llamó con cuatro claves — es un método privado; es *cómo* |
+| ❌ | Afirmar que `ApplyErrors` se llamó con cuatro claves — es un método privado; es *cómo* |
 | ❌ | Afirmar sobre `PropertyChanged` disparado N veces — es el mecanismo de enlace, no la promesa |
 
 ### 6.3 ¿Qué queda sin probar acá, y dónde se prueba?
 
 **Respuesta: el enlace, el diseño y la plataforma; y se prueban en el dispositivo.**
 
-Un ViewModel perfecto con un `{Binding ErrorNombre}` mal escrito en el XAML muestra nada y pasa las
+Un ViewModel perfecto con un `{Binding NombreError}` mal escrito en el XAML muestra nada y pasa las
 18 pruebas. Eso no lo ve ninguna unitaria; lo vieron las capturas del teléfono, y de hecho la
 iteración que llevó los errores «junto al rótulo» salió de mirar la pantalla, no de una prueba
 **[E: evidencia/2026-09-12-maui/README.md, capturas 21 → 32]**. Ese tramo es el tema de
@@ -376,10 +376,10 @@ referencia al proyecto y el código se compila dos veces.
 
 El laboratorio eligió una tercera **[C]**, por la restricción de que `MovilidadUrbana.MAUI` sea un
 proyecto autocontenido sin referencias: **archivos enlazados**. El proyecto de pruebas compila las
-carpetas `Dominio/`, `Aplicacion/`, `Infraestructura/` y `Presentacion/` de la app como fuentes
+carpetas `Domain/`, `Application/`, `Infrastructure/` y `Presentation/` de la app como fuentes
 propias, con `<Compile Include="..\..\src\MovilidadUrbana.MAUI\Dominio\**\*.cs" LinkBase="MAUI\Dominio" />`
 **[E: tests/MovilidadUrbana.MAUI.Tests/MovilidadUrbana.MAUI.Tests.csproj:24-27]**. Lo que queda
-afuera es justo lo que toca la plataforma: `Paginas/`, `Servicios/`, `Controles/` y `MauiProgram`.
+afuera es justo lo que toca la plataforma: `Pages/`, `Services/`, `Controls/` y `MauiProgram`.
 
 | Opción | Compila la app | Requiere workload en CI | Costo |
 | --- | --- | --- | --- |
@@ -391,12 +391,12 @@ afuera es justo lo que toca la plataforma: `Paginas/`, `Servicios/`, `Controles/
 
 **Respuesta: la prueba deja de compilar, y eso es la costura avisando.**
 
-`SesionDelDispositivo` usa `Preferences.Default` y vive en `Servicios/`, fuera de las carpetas
-enlazadas **[E: src/MovilidadUrbana.MAUI/Servicios/SesionDelDispositivo.cs:22-27]**. Si alguien
-moviera esa lectura a `Infraestructura/`, `MAUI.Tests` fallaría al compilar: `Preferences` no existe
+`DeviceSession` usa `Preferences.Default` y vive en `Services/`, fuera de las carpetas
+enlazadas **[E: src/MovilidadUrbana.MAUI/Services/DeviceSession.cs:22-27]**. Si alguien
+moviera esa lectura a `Infrastructure/`, `MAUI.Tests` fallaría al compilar: `Preferences` no existe
 en `net10.0`. **El error de compilación es la regla de dependencia haciéndose cumplir.** La
 respuesta correcta no es agregar el paquete de MAUI a las pruebas; es devolver la lectura a
-`Servicios/` detrás de una interfaz.
+`Services/` detrás de una interfaz.
 
 ---
 
@@ -449,7 +449,7 @@ es `[TestCase]` —la forma de las 49 del dominio— y en xUnit `[Theory]`/`[Inl
 **Respuesta: cuando lo que prepara es el mismo entorno para todos los casos —una base limpia— sí; cuando cada caso necesita algo distinto, un método auxiliar.**
 
 Microsoft prefiere métodos auxiliares a `Setup`/`Teardown` **[B: 5]**. El laboratorio usa `[SetUp]`
-para crear el `Entorno` y `[TearDown]` para borrar su archivo
+para crear el `TestEnvironment` y `[TearDown]` para borrar su archivo
 **[E: tests/MovilidadUrbana.MAUI.Tests/LocalidadEditorViewModelTests.cs:8-9]**, y métodos auxiliares
 —`Editor()`, `Lista()`, `CompletarPaso1(vm)`— para lo que varía. Es la combinación que la guía admite:
 el `[SetUp]` hace una sola cosa igual para todos, y lo que cambia se ve dentro de cada prueba.

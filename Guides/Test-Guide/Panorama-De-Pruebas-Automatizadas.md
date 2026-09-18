@@ -39,7 +39,7 @@ Las mismas del conjunto E2E ([Mapa-Del-Conjunto.md](../E2E-Guide/Mapa-Del-Conjun
 
 | Marca | Significado |
 | --- | --- |
-| **[E: ruta]** | *Evidencia en el repositorio* `Lab-E2E.WebBlazor`, commit `10ce735` (2026-09-12): se comprueba abriendo ese archivo |
+| **[E: ruta]** | *Evidencia en el repositorio* `Lab-E2E.WebBlazor`, commit `946d023` (2026-09-18): se comprueba abriendo ese archivo |
 | **[V]** | *Verificado por ejecución*: se corrió y se observó el resultado, en la fecha indicada |
 | **[B: n]** | *Bibliografía*: la afirmación viene de la fuente `n` de la §10, consultada el 2026-09-12 |
 | **[C]** | *Criterio*: decisión de esta guía, defendible y discutible |
@@ -211,8 +211,8 @@ la literatura usa la misma palabra para las dos.
 
 La de Meszaros: un spy es un stub que además anota —«Spies are stubs that also record some information
 based on how they were called» **[B: 2]**—. **Reemplaza** a la dependencia y registra. Es el
-`NavegadorFalso` del laboratorio: no navega, cuenta cuántas veces se le pidió volver
-**[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:55-62]**.
+`FakeNavigationService` del laboratorio: no navega, cuenta cuántas veces se le pidió volver
+**[E: tests/MovilidadUrbana.MAUI.Tests/TestEnvironment.cs:55-62]**.
 
 La de las bibliotecas que espían objetos reales: el spy **envuelve** a la dependencia real, deja que la
 operación ocurra de verdad y registra lo que pasó. Mockito lo define así: «When you use the spy then
@@ -220,7 +220,7 @@ the real methods are called (unless a method was stubbed)» **[B: 18]**; `jest.s
 spied method» por defecto **[B: 19]**.
 
 ```csharp
-// Ilustrativo: un spy que envuelve al repositorio real.
+// Ilustrativo: un spy que envuelve al repository real.
 public class SpyUserRepository(IUserRepository real) : IUserRepository
 {
     public List<int> IdsConsultados { get; } = [];
@@ -428,11 +428,11 @@ definen una sola vez, acá.
 
 | Escenario | La pregunta que responde la prueba | Ejemplo en el laboratorio |
 | --- | --- | --- |
-| **S1 · Regla** | ¿Esta regla de negocio decide bien, para cada entrada? | «Goya» es un nombre válido; «Ab» no **[E: tests/MovilidadUrbana.UnitTests/ReglasDeLocalidadTests.cs:13-19]** |
-| **S2 · Caso de uso** | ¿Este servicio, con sus colaboradores, produce el resultado y los errores por campo correctos? | `ServicioDeLocalidades.GuardarAsync` con nombre duplicado devuelve el error en `nombre` |
+| **S1 · Regla** | ¿Esta regla de negocio decide bien, para cada entrada? | «Goya» es un nombre válido; «Ab» no **[E: tests/MovilidadUrbana.UnitTests/LocalidadRulesTests.cs:13-19]** |
+| **S2 · Caso de uso** | ¿Este servicio, con sus colaboradores, produce el resultado y los errores por campo correctos? | `LocalidadService.SaveAsync` con nombre duplicado devuelve el error en `nombre` |
 | **S3 · Contrato** | ¿Este proceso, visto desde afuera por su protocolo, cumple lo que promete? | `POST /api/v1/localidades` devuelve `201` con `Location` **[E: tests/MovilidadUrbana.ApiWeb.Tests/LocalidadesTests.cs:43-57]** |
 | **S4 · Superficie** | ¿Esta pantalla, usada como la usaría una persona, cumple su promesa en cada estado? | El asistente no avanza del paso 1 con datos inválidos; las 22 E2E de la web |
-| **S5 · Persistencia** | ¿Lo que se guarda se recupera igual, con las reglas del motor real? | La siembra por sesión y el filtro por `SesionId` sobre SQLite |
+| **S5 · Persistencia** | ¿Lo que se guarda se recupera igual, con las reglas del motor real? | La siembra por sesión y el filtro por `SessionId` sobre SQLite |
 | **S6 · Regresión visual y de plataforma** | ¿La pantalla se ve y se comporta bien en este dispositivo, tamaño y sistema? | Las 27 capturas del moto e6 play **[E: evidencia/2026-09-12-maui/README.md]** |
 
 ### 2.2 Contextos — dónde cambian las respuestas
@@ -472,7 +472,7 @@ Esa es la prueba de pertinencia que se aplicó al escribirla.
 | **E2E / sistema** | El proceso entero, usado desde afuera | Todas | Decenas de segundos a minutos | Que la promesa hecha a la persona se cumple, o no |
 
 La tabla no es una escalera de calidad. Cada fila ve algo que las otras no ven, y cada fila deja de
-ver algo. Una unitaria de `ReglasDeLocalidad` no sabe si el formulario muestra el error; una E2E que
+ver algo. Una unitaria de `LocalidadRules` no sabe si el formulario muestra el error; una E2E que
 ve el error no sabe cuál de las cuatro reglas lo produjo.
 
 ### 3.2 ¿Cuántas de cada una?
@@ -514,12 +514,12 @@ distribución no se eligió por la figura sino por lo que había que verificar e
 **Respuesta: desde dónde se entra. La integración entra por el código; la E2E entra por donde entra la persona.**
 
 `MovilidadUrbana.ApiWeb.Tests` levanta la API entera —controllers, servicios, EF Core, SQLite— pero
-en proceso, con `WebApplicationFactory` **[E: tests/MovilidadUrbana.ApiWeb.Tests/FabricaDeApi.cs:10-18]**.
-No hay Kestrel ni red: `_fabrica.CreateClient()` habla con el servidor de pruebas por memoria. Es una
+en proceso, con `WebApplicationFactory` **[E: tests/MovilidadUrbana.ApiWeb.Tests/ApiWebApplicationFactory.cs:10-18]**.
+No hay Kestrel ni red: `_factory.CreateClient()` habla con el servidor de pruebas por memoria. Es una
 integración completa que **no** es E2E, porque nadie la usa como la usaría un cliente real por la red.
 
 `MovilidadUrbana.E2ETests` publica el binario y lo arranca como proceso aparte
-**[E: tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs:155-162]**, y el
+**[E: tests/MovilidadUrbana.E2ETests/Infrastructure/TestAppServer.cs:155-162]**, y el
 navegador entra por `http://localhost`. Eso es E2E: el mismo artefacto y el mismo camino que en
 producción.
 
@@ -542,10 +542,10 @@ deduce la propiedad que acá importa: «The business rules can be tested without
 Server, or any other external element» **[B: 8]**.
 
 En el laboratorio, las tres aplicaciones de Movilidad Urbana —web, API y Android— llevan cada una sus
-capas como carpetas: `Dominio/`, `Aplicacion/`, `Infraestructura/` y la presentación
+capas como carpetas: `Domain/`, `Application/`, `Infrastructure/` y la presentación
 **[E: README.md, «Estructura»]**. El comentario de cabecera de las reglas dice para qué:
 «Viven en el dominio, no en atributos del modelo de pantalla, para que la validación no dependa de
-la interfaz que la invoque» **[E: src/MovilidadUrbana.Web/Dominio/Reglas/ReglasDeLocalidad.cs:5-8]**.
+la interfaz que la invoque» **[E: src/MovilidadUrbana.Web/Domain/Rules/LocalidadRules.cs:5-8]**.
 Esa frase es una decisión de arquitectura que es, a la vez, una decisión de prueba.
 
 ```mermaid
@@ -569,11 +569,11 @@ flowchart TB
 
 | Capa | Escenario (§2.1) | Tipo de prueba | Dobles | En el laboratorio |
 | --- | --- | --- | --- | --- |
-| **Dominio** | S1 | Unitaria pura: entrada → salida | Ninguno; no hay colaboradores | `ReglasDeLocalidadTests`, `ReglasDeEncuestaTests`: 49 casos **[V 2026-09-12]** |
-| **Aplicación** | S2 | Unitaria con dobles del repositorio, **o** integración con repositorio real | Stub/fake de `IRepositorioDeLocalidades`, o ninguno | No hay pruebas directas: se cubre desde la API y los ViewModels **[C]** |
-| **Infraestructura** | S5 | Integración contra el motor real | Ninguno: la base es la real, aislada por archivo | `FabricaDeApi` y `Entorno` crean un SQLite por corrida o por caso |
+| **Dominio** | S1 | Unitaria pura: entrada → salida | Ninguno; no hay colaboradores | `LocalidadRulesTests`, `EncuestaRulesTests`: 49 casos **[V 2026-09-12]** |
+| **Aplicación** | S2 | Unitaria con dobles del repositorio, **o** integración con repositorio real | Stub/fake de `ILocalidadRepository`, o ninguno | No hay pruebas directas: se cubre desde la API y los ViewModels **[C]** |
+| **Infraestructura** | S5 | Integración contra el motor real | Ninguno: la base es la real, aislada por archivo | `ApiWebApplicationFactory` y `TestEnvironment` crean un SQLite por corrida o por caso |
 | **Presentación — API** | S3 | Integración en proceso | Ninguno | 13 casos con `WebApplicationFactory` **[V 2026-09-12]** |
-| **Presentación — ViewModel** | S2 + S4 (lógica de pantalla) | Unitaria de la lógica con dobles de la plataforma | `NavegadorFalso`, `AvisosFalsos` **[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:55-71]** | 18 casos **[V 2026-09-12]** |
+| **Presentación — ViewModel** | S2 + S4 (lógica de pantalla) | Unitaria de la lógica con dobles de la plataforma | `FakeNavigationService`, `FakeAlertService` **[E: tests/MovilidadUrbana.MAUI.Tests/TestEnvironment.cs:55-71]** | 18 casos **[V 2026-09-12]** |
 | **Presentación — superficie** | S4, S6 | E2E: navegador o pantalla | Ninguno | 22 E2E web **[V]**; 27 capturas en el teléfono **[V]** |
 
 **El hueco de la tabla es deliberado y está declarado [C]:** la capa de aplicación no tiene suite
@@ -593,7 +593,7 @@ capa más de pruebas que verifica lo mismo dos veces.
 | MVVM (WPF, MAUI) | En el ViewModel, con la plataforma detrás de interfaces | Unitaria del ViewModel con dobles de navegación, diálogos, preferencias |
 | Reglas en la vista (atributos del modelo de pantalla, código en el evento del botón) | En la vista | Solo se alcanzan por la interfaz: E2E o refactor |
 
-La última fila es el caso que la frase de `ReglasDeLocalidad.cs` evita. Cuando las reglas viven en
+La última fila es el caso que la frase de `LocalidadRules.cs` evita. Cuando las reglas viven en
 la vista, la única prueba posible es la más cara, y la arquitectura decidió eso sin que nadie lo
 eligiera.
 
@@ -624,9 +624,9 @@ Las alternativas, con el juicio de la misma fuente:
 
 **Respuesta: SQLite real, porque el motor de producción de las tres aplicaciones es SQLite. No hay reemplazo: es la primera fila de la tabla.**
 
-`FabricaDeApi` apunta la cadena de conexión a un archivo temporal por corrida
-**[E: tests/MovilidadUrbana.ApiWeb.Tests/FabricaDeApi.cs:12,17]**; `Entorno` de las pruebas de
-ViewModels crea uno por caso **[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:20,32]**. Las
+`ApiWebApplicationFactory` apunta la cadena de conexión a un archivo temporal por corrida
+**[E: tests/MovilidadUrbana.ApiWeb.Tests/ApiWebApplicationFactory.cs:12,17]**; `TestEnvironment` de las pruebas de
+ViewModels crea uno por caso **[E: tests/MovilidadUrbana.MAUI.Tests/TestEnvironment.cs:20,32]**. Las
 consultas, el `EnsureCreated`, el `PRAGMA journal_mode=WAL` y el filtro por sesión corren contra el
 mismo motor que en la aplicación.
 
@@ -642,15 +642,15 @@ mismo motor que en la aplicación.
 
 | Nivel | Técnica | Evidencia |
 | --- | --- | --- |
-| ViewModels | Un archivo SQLite por caso, borrado en `Dispose` | **[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:20,46-52]** |
+| ViewModels | Un archivo SQLite por caso, borrado en `Dispose` | **[E: tests/MovilidadUrbana.MAUI.Tests/TestEnvironment.cs:20,46-52]** |
 | API en proceso | Un archivo por fixture, y una **sesión** por caso vía el encabezado `X-Sesion-Id` | **[E: tests/MovilidadUrbana.ApiWeb.Tests/LocalidadesTests.cs:17-22]** |
-| E2E web | Una base para toda la corrida, y una **cookie de sesión** por caso: cada prueba ve solo su juego de datos | **[E: tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs:63-78]** |
+| E2E web | Una base para toda la corrida, y una **cookie de sesión** por caso: cada prueba ve solo su juego de datos | **[E: tests/MovilidadUrbana.E2ETests/Infrastructure/E2ETestBase.cs:63-78]** |
 
 La sesión por prueba no es una técnica de testing agregada al producto: es una decisión del dominio
 —cada visitante tiene su espacio de datos— que las pruebas aprovechan. El comentario lo dice: «Cada
 prueba estrena su cookie de sesión y, con ella, su propio conjunto de datos en el servidor: por eso
 pueden correr en paralelo contra una única instancia y una única base»
-**[E: tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs:63-65]**.
+**[E: tests/MovilidadUrbana.E2ETests/Infrastructure/E2ETestBase.cs:63-65]**.
 
 ---
 
@@ -681,9 +681,9 @@ flowchart LR
 
 | Aplicación | Superficie | Cómo se entra | Cómo se localiza | Qué se espera antes de actuar |
 | --- | --- | --- | --- | --- |
-| Web Blazor | DOM | Navegador (Playwright) | `data-testid` **[E: src/MovilidadUrbana.Web/Components/Pages/Localidades.razor:11,38,42]** | El testigo `estado-app[data-interactivo=true]` **[E: tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs:156-157]** |
+| Web Blazor | DOM | Navegador (Playwright) | `data-testid` **[E: src/MovilidadUrbana.Web/Components/Pages/Localidades.razor:11,38,42]** | El testigo `estado-app[data-interactivo=true]` **[E: tests/MovilidadUrbana.E2ETests/Infrastructure/E2ETestBase.cs:156-157]** |
 | API REST | Contrato HTTP | `HttpClient` en proceso o por red | Rutas, códigos, encabezados | Nada: una respuesta HTTP está completa cuando llega |
-| App MAUI | Controles nativos | Driver de plataforma (Appium/UIAutomator2) o `adb` | `AutomationId` **[E: src/MovilidadUrbana.MAUI/Paginas/LocalidadEditorPage.xaml:21,40]**, que Android expone como `resource-id` **[V 2026-09-12]** | Que el elemento exista en el árbol; no hay «hidratación», pero sí animaciones y teclado |
+| App MAUI | Controles nativos | Driver de plataforma (Appium/UIAutomator2) o `adb` | `AutomationId` **[E: src/MovilidadUrbana.MAUI/Pages/LocalidadEditorPage.xaml:21,40]**, que Android expone como `resource-id` **[V 2026-09-12]** | Que el elemento exista en el árbol; no hay «hidratación», pero sí animaciones y teclado |
 
 Cada columna tiene su documento: la primera fila en [`E2E-Guide/`](../E2E-Guide/); la última en
 [Pruebas-De-Interfaz-Por-Pantalla.md](Pruebas-De-Interfaz-Por-Pantalla.md); la del medio, más abajo.
@@ -755,18 +755,18 @@ qué llamadas se hicieron **[B: 2]**. La elección del doble sigue de ahí:
 
 | Quiero verificar | Doble | Ejemplo del laboratorio |
 | --- | --- | --- |
-| El estado que quedó | Fake o stub, y afirmar sobre el SUT | `AvisosFalsos.RespuestaAConfirmar = false` y afirmar que la localidad sigue **[E: tests/MovilidadUrbana.MAUI.Tests/LocalidadEditorViewModelTests.cs:76-90]** |
-| Que se pidió algo a un colaborador | Spy | `NavegadorFalso.Vueltas` cuenta cuántas veces el ViewModel pidió volver **[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:58,61]** |
+| El estado que quedó | Fake o stub, y afirmar sobre el SUT | `FakeAlertService.ConfirmResult = false` y afirmar que la localidad sigue **[E: tests/MovilidadUrbana.MAUI.Tests/LocalidadEditorViewModelTests.cs:76-90]** |
+| Que se pidió algo a un colaborador | Spy | `FakeNavigationService.Vueltas` cuenta cuántas veces el ViewModel pidió volver **[E: tests/MovilidadUrbana.MAUI.Tests/TestEnvironment.cs:58,61]** |
 | Que se pidió *exactamente* eso y nada más | Mock con expectativas | No hay en el laboratorio; aparece cuando el orden o la ausencia de llamadas es la promesa |
 
-Y lo que **no** se reemplaza: la base. `Entorno` compone `AgregarInfraestructura` con SQLite real
-**[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:32]**, por la razón de la §5.1.
+Y lo que **no** se reemplaza: la base. `TestEnvironment` compone `AddInfrastructure` con SQLite real
+**[E: tests/MovilidadUrbana.MAUI.Tests/TestEnvironment.cs:32]**, por la razón de la §5.1.
 
 | | |
 | --- | --- |
-| ✅ | Doble de `INavegador`: la navegación es de la plataforma y no hay Shell en una prueba |
-| ✅ | Doble de `IAvisos` que responde «cancelar»: es la única forma de ejercitar la rama sin diálogo |
-| ❌ | Doble de `IRepositorioDeLocalidades` en una prueba del ViewModel: se pierde la única verificación de que el filtro por sesión funciona, y no se gana velocidad apreciable |
+| ✅ | Doble de `INavigationService`: la navegación es de la plataforma y no hay Shell en una prueba |
+| ✅ | Doble de `IAlertService` que responde «cancelar»: es la única forma de ejercitar la rama sin diálogo |
+| ❌ | Doble de `ILocalidadRepository` en una prueba del ViewModel: se pierde la única verificación de que el filtro por sesión funciona, y no se gana velocidad apreciable |
 
 ### 7.4 ¿Cuándo un `Mock<T>` de Moq es un mock, y cuándo es un stub?
 
@@ -811,9 +811,9 @@ public void UsuarioActivoPuedeCrearPedido()
                .Returns(new User { Id = 15, IsActive = true });
     var orderService = new OrderService(userService.Object);
 
-    bool resultado = orderService.CanCreateOrder(15);
+    bool result = orderService.CanCreateOrder(15);
 
-    Assert.That(resultado, Is.True);      // se afirma sobre el SUT
+    Assert.That(result, Is.True);      // se afirma sobre el SUT
 }
 ```
 
@@ -885,9 +885,9 @@ uno tiene su razón:
 | --- | --- | --- | --- |
 | Reglas de dominio | Real | No hay nada que doblar | — |
 | Servicios de aplicación | Real | Son la lógica que se quiere ver | — |
-| Repositorio y base SQLite | Real, un archivo por caso **[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:32]** | La promesa depende de la consulta y del filtro por sesión (§5.1) | — |
-| Navegación (`INavegador`) | Spy **[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:55-62]** | En un proceso de pruebas no hay Shell; la promesa es «vuelve», no cómo | La navegación real de Shell → las pruebas Appium en el teléfono |
-| Diálogos y avisos (`IAvisos`) | Stub **[E: tests/MovilidadUrbana.MAUI.Tests/Entorno.cs:64-71]** | Hay que poder responder «cancelar» a voluntad (fuerza *control*) | El diálogo y el Toast reales → el teléfono |
+| Repositorio y base SQLite | Real, un archivo por caso **[E: tests/MovilidadUrbana.MAUI.Tests/TestEnvironment.cs:32]** | La promesa depende de la consulta y del filtro por sesión (§5.1) | — |
+| Navegación (`INavigationService`) | Spy **[E: tests/MovilidadUrbana.MAUI.Tests/TestEnvironment.cs:55-62]** | En un proceso de pruebas no hay Shell; la promesa es «vuelve», no cómo | La navegación real de Shell → las pruebas Appium en el teléfono |
+| Diálogos y avisos (`IAlertService`) | Stub **[E: tests/MovilidadUrbana.MAUI.Tests/TestEnvironment.cs:64-71]** | Hay que poder responder «cancelar» a voluntad (fuerza *control*) | El diálogo y el Toast reales → el teléfono |
 | Teclado del sistema, enlaces XAML, estilos | Ausentes | No existen fuera del dispositivo | Todo → el teléfono |
 
 La última fila es la que muestra que el compromiso **tiene consecuencias**. Con el teclado ausente, un
@@ -938,8 +938,8 @@ Microsoft lo llama *seam* y da el ejemplo de `DateTime.Now` envuelto en `IDateTi
 
 | Costura | Dónde | Qué habilita |
 | --- | --- | --- |
-| `IContextoDeSesion`, `IRepositorio*` | `Aplicacion/Abstracciones/` | Cambiar la base o la sesión sin tocar los servicios |
-| `INavegador`, `IAvisos` | `MovilidadUrbana.MAUI/Presentacion/Abstracciones/` | Probar los ViewModels sin MAUI ni teléfono |
+| `ISessionContext`, `IRepositorio*` | `Application/Abstractions/` | Cambiar la base o la sesión sin tocar los servicios |
+| `INavigationService`, `IAlertService` | `MovilidadUrbana.MAUI/Presentation/Abstractions/` | Probar los ViewModels sin MAUI ni teléfono |
 | `data-testid` | Las páginas Blazor | Localizar sin depender del texto ni del CSS |
 | `AutomationId` | Las páginas XAML | Lo mismo, en el árbol de accesibilidad de Android |
 | `estado-app[data-interactivo]` | `MainLayout` de la web | Saber cuándo el circuito está listo |
@@ -957,7 +957,7 @@ qué—. Las cinco de la tabla existen porque una prueba las pidió.
 | --- | --- | --- | --- | --- |
 | Una regla, un cálculo, un catálogo | S1 | Unitaria | NUnit / xUnit / MSTest; `[TestCase]` | [Pruebas-Unitarias-Y-Arquitectura.md](Pruebas-Unitarias-Y-Arquitectura.md) §3 |
 | Un servicio con sus colaboradores | S2 | Unitaria con dobles, o integración | Dobles a mano o con biblioteca; base real aislada | [Pruebas-Unitarias-Y-Arquitectura.md](Pruebas-Unitarias-Y-Arquitectura.md) §4-5 |
-| Un ViewModel | S2/S4 | Unitaria con dobles de la plataforma | CommunityToolkit.Mvvm + fakes de `INavegador`/`IAvisos` | [Pruebas-Unitarias-Y-Arquitectura.md](Pruebas-Unitarias-Y-Arquitectura.md) §6 |
+| Un ViewModel | S2/S4 | Unitaria con dobles de la plataforma | CommunityToolkit.Mvvm + fakes de `INavigationService`/`IAlertService` | [Pruebas-Unitarias-Y-Arquitectura.md](Pruebas-Unitarias-Y-Arquitectura.md) §6 |
 | Un contrato HTTP | S3 | Integración en proceso | `WebApplicationFactory` (`Microsoft.AspNetCore.Mvc.Testing`) | Este documento, §6.2 |
 | Que lo guardado se recupera | S5 | Integración con la base | EF Core sobre el motor real, un archivo o sesión por prueba | Este documento, §5 |
 | Una pantalla web | S4 | E2E por navegador | Playwright.NUnit | [`E2E-Guide/`](../E2E-Guide/) |
