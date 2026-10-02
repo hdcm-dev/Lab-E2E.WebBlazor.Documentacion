@@ -62,7 +62,7 @@ tarjeta), `ErrorDeEntrada` (la banda, fuera del marco porque interrumpe). `Indis
 **declarado «no aplica»** en un comentario: la frase no viaja a ningún servicio.
 
 El `.razor` lleva comentados los llamados de Playwright de cada elemento: la superficie está escrita
-como material didáctico. Es el caso tratado en `Guides/E2E-Guide/Caso-HolaMundo-Page.md`.
+como material didáctico. Es el caso tratado en `Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/E2E-Guide/Caso-HolaMundo-Page.md`.
 
 ### Su prueba
 
@@ -76,7 +76,7 @@ Hola Mundo y de Login, todas en verde) y `corrida-casos-de-login.log`.
 ## Login
 
 La misma superficie detrás de un acceso por cookies. Es el caso tratado en
-`Guides/E2E-Guide/Caso-Login-Page.md`.
+`Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/E2E-Guide/Caso-Login-Page.md`.
 
 | Ruta | Componente | Autorización | Render |
 | --- | --- | --- | --- |

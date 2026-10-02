@@ -7,6 +7,13 @@
 > `Lab-E2E.WebBlazor.Documentacion` («Actualizar las citas de las guías a las capas dentro de
 > `MovilidadUrbana.Web`»). Inventario tomado ese día.
 
+> **Mudanza posterior (2026-10-01).** El árbol `Guides/` se retiró de `Lab-E2E.WebBlazor.Documentacion`
+> (commit `8f29d0e`): los 27 archivos viven, idénticos, en
+> [`Lab-Documentos`](https://github.com/hdcm-dev/Lab-Documentos), carpeta
+> `Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/` (commit `9162e07` de ese repositorio). La estructura interna se
+> conserva salvo `Anexos/workflows/`, que allá es `workflows/`. Las rutas `Guides/…` de este índice se
+> leen como relativas a esa carpeta; el inventario y la vigencia de arriba no se rehicieron.
+
 ## Ya no viven en el repositorio de código
 
 Desde el 2026-09-09 **toda la documentación de estudio vive en

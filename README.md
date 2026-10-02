@@ -21,56 +21,60 @@ repositorio se unificó en `Lab-E2E.WebBlazor` y su conocimiento vigente pasó a
 
 ## Guías
 
-Toda la documentación del laboratorio vive acá, en [Guides/](Guides/). Antes estaba repartida entre
-los dos repositorios de código que existían, con el riesgo de que dos copias del mismo texto
-divergieran en silencio.
+Las guías del laboratorio ya no viven en este repositorio: se mudaron a
+[Lab-Documentos](https://github.com/hdcm-dev/Lab-Documentos), en
+[`Guides/Testing/Lab-E2E.WebBlazor-Guides/`](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/), junto con las demás guías de ese repositorio,
+ordenadas por categoría. Antes habían estado acá, en `Guides/`, y antes todavía repartidas entre los dos
+repositorios de código que existían, con el riesgo de que dos copias del mismo texto divergieran en
+silencio. Los enlaces de abajo son relativos y resuelven con `Lab-Documentos` clonado como carpeta
+hermana.
 
 **Cada documento abre con un abstract** —*de qué va, para quién, qué deja*— y con su índice, así que
 la tabla de abajo alcanza para elegir cuál abrir.
 
-### [Guides/E2E-Guide/](Guides/E2E-Guide/) — pruebas de extremo a extremo
+### [E2E-Guide/](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/E2E-Guide/) — pruebas de extremo a extremo
 
 Se leen en este orden si es la primera vez; si no, por la columna del medio.
 
 | Documento | Para quién | De qué va |
 | --- | --- | --- |
-| [Mapa-Del-Conjunto.md](Guides/E2E-Guide/Mapa-Del-Conjunto.md) | Quien llega y no sabe por dónde entrar | Qué documento responde a qué pregunta, cómo se cruzan los dos vocabularios y quién es dueño de cada tema |
-| [Del-Requerimiento-Al-Caso.md](Guides/E2E-Guide/Del-Requerimiento-Al-Caso.md) | Quien recibe un pedido y no tiene nada escrito | Cómo se llega de un problema contado en desorden hasta superficies, promesas y estados, antes de que exista una pantalla. **Método propuesto**: su §10 declara qué tiene respaldo y qué no |
-| [Quick-Guide-Primer-Proyecto.md](Guides/E2E-Guide/Quick-Guide-Primer-Proyecto.md) | Quien nunca creó un proyecto de pruebas | Cómo se crea el proyecto NUnit con Playwright y se escribe la primera prueba |
-| [Beginner-Guide.md](Guides/E2E-Guide/Beginner-Guide.md) | Quien nunca escribió una prueba E2E | Qué es una E2E, cómo se arma el proyecto en .NET, cómo se escribe y se estabiliza un caso, y cómo se ata al merge |
-| [Quick-Guide-ABM.md](Guides/E2E-Guide/Quick-Guide-ABM.md) | Quien ya escribió pruebas E2E | La receta corta para montar las de un ABM, con las trampas de Blazor *interactive server* |
-| [Caso-HolaMundo-Page.md](Guides/E2E-Guide/Caso-HolaMundo-Page.md) | Quien tiene que decidir **qué** probar | El caso mínimo: superficie, estados y el testigo de hidratación |
-| [Caso-Login-Page.md](Guides/E2E-Guide/Caso-Login-Page.md) | Ídem, con postura de seguridad | La promesa negativa, que se verifica comparando dos observaciones |
-| [Caso-Encuesta-Page.md](Guides/E2E-Guide/Caso-Encuesta-Page.md) | Ídem, con un acto divisible | Por qué tres pasos de un asistente son **una** superficie y no tres |
-| [Marco-La-Superficie-Verificable.md](Guides/E2E-Guide/Marco-La-Superficie-Verificable.md) | Quien quiere ir más lejos | De qué tradición viene cada concepto, con bibliografía y con lo que se reinventó sin saberlo |
-| [Template-SDD-Aplicado.md](Guides/E2E-Guide/Template-SDD-Aplicado.md) | Quien construye la superficie | Qué se aplicó del template SDD, qué se decidió al aplicarlo y cómo se verificó |
-| [Notas.GitHub.md](Guides/E2E-Guide/Notas.GitHub.md) | Quien administra el repositorio | Cómo se evita que un pull request desde un fork corra en el runner propio |
+| [Mapa-Del-Conjunto.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/E2E-Guide/Mapa-Del-Conjunto.md) | Quien llega y no sabe por dónde entrar | Qué documento responde a qué pregunta, cómo se cruzan los dos vocabularios y quién es dueño de cada tema |
+| [Del-Requerimiento-Al-Caso.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/E2E-Guide/Del-Requerimiento-Al-Caso.md) | Quien recibe un pedido y no tiene nada escrito | Cómo se llega de un problema contado en desorden hasta superficies, promesas y estados, antes de que exista una pantalla. **Método propuesto**: su §10 declara qué tiene respaldo y qué no |
+| [Quick-Guide-Primer-Proyecto.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/E2E-Guide/Quick-Guide-Primer-Proyecto.md) | Quien nunca creó un proyecto de pruebas | Cómo se crea el proyecto NUnit con Playwright y se escribe la primera prueba |
+| [Beginner-Guide.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/E2E-Guide/Beginner-Guide.md) | Quien nunca escribió una prueba E2E | Qué es una E2E, cómo se arma el proyecto en .NET, cómo se escribe y se estabiliza un caso, y cómo se ata al merge |
+| [Quick-Guide-ABM.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/E2E-Guide/Quick-Guide-ABM.md) | Quien ya escribió pruebas E2E | La receta corta para montar las de un ABM, con las trampas de Blazor *interactive server* |
+| [Caso-HolaMundo-Page.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/E2E-Guide/Caso-HolaMundo-Page.md) | Quien tiene que decidir **qué** probar | El caso mínimo: superficie, estados y el testigo de hidratación |
+| [Caso-Login-Page.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/E2E-Guide/Caso-Login-Page.md) | Ídem, con postura de seguridad | La promesa negativa, que se verifica comparando dos observaciones |
+| [Caso-Encuesta-Page.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/E2E-Guide/Caso-Encuesta-Page.md) | Ídem, con un acto divisible | Por qué tres pasos de un asistente son **una** superficie y no tres |
+| [Marco-La-Superficie-Verificable.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/E2E-Guide/Marco-La-Superficie-Verificable.md) | Quien quiere ir más lejos | De qué tradición viene cada concepto, con bibliografía y con lo que se reinventó sin saberlo |
+| [Template-SDD-Aplicado.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/E2E-Guide/Template-SDD-Aplicado.md) | Quien construye la superficie | Qué se aplicó del template SDD, qué se decidió al aplicarlo y cómo se verificó |
+| [Notas.GitHub.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/E2E-Guide/Notas.GitHub.md) | Quien administra el repositorio | Cómo se evita que un pull request desde un fork corra en el runner propio |
 
-### [Guides/Test-Guide/](Guides/Test-Guide/) — pruebas automatizadas más allá del navegador
+### [Test-Guide/](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/Test-Guide/) — pruebas automatizadas más allá del navegador
 
 Ubica a la E2E por navegador entre los demás tipos de prueba —unitarias, de integración, de API, de
 pantalla nativa— con un marco de referencia común y todo anclado al laboratorio o a fuentes de la
-industria. Su [README](Guides/Test-Guide/README.md) trae el mapa.
+industria. Su [README](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/Test-Guide/README.md) trae el mapa.
 
 | Documento | Para quién | De qué va |
 | --- | --- | --- |
-| [Panorama-De-Pruebas-Automatizadas.md](Guides/Test-Guide/Panorama-De-Pruebas-Automatizadas.md) | Quien tiene que probar una API, una app MAUI o una capa de dominio y no sabe con qué | Los tipos de prueba con su procedencia, qué prueba cada capa de Clean Architecture, base real o doble, y el mapa «estoy acá → aplico esto». Define el marco de referencia |
-| [Pruebas-Unitarias-Y-Arquitectura.md](Guides/Test-Guide/Pruebas-Unitarias-Y-Arquitectura.md) | Quien escribe la primera prueba que no abre un navegador | Qué es una unidad según dónde vive el código; cómo elegir el doble; cómo se prueban los ViewModels de MAUI sin el workload |
-| [Pruebas-De-Interfaz-Por-Pantalla.md](Guides/Test-Guide/Pruebas-De-Interfaz-Por-Pantalla.md) | Quien tiene que probar `MovilidadUrbana.MAUI` sin `GetByTestId` | Cuando no hay DOM: árbol de accesibilidad, niveles de localización, Appium y `AutomationId`, lo que se hizo con `adb` en un teléfono físico y la suite Appium que corre contra él |
+| [Panorama-De-Pruebas-Automatizadas.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/Test-Guide/Panorama-De-Pruebas-Automatizadas.md) | Quien tiene que probar una API, una app MAUI o una capa de dominio y no sabe con qué | Los tipos de prueba con su procedencia, qué prueba cada capa de Clean Architecture, base real o doble, y el mapa «estoy acá → aplico esto». Define el marco de referencia |
+| [Pruebas-Unitarias-Y-Arquitectura.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/Test-Guide/Pruebas-Unitarias-Y-Arquitectura.md) | Quien escribe la primera prueba que no abre un navegador | Qué es una unidad según dónde vive el código; cómo elegir el doble; cómo se prueban los ViewModels de MAUI sin el workload |
+| [Pruebas-De-Interfaz-Por-Pantalla.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/Test-Guide/Pruebas-De-Interfaz-Por-Pantalla.md) | Quien tiene que probar `MovilidadUrbana.MAUI` sin `GetByTestId` | Cuando no hay DOM: árbol de accesibilidad, niveles de localización, Appium y `AutomationId`, lo que se hizo con `adb` en un teléfono físico y la suite Appium que corre contra él |
 
-### [Guides/](Guides/) — ramas, integración, releases y nombres
+### [Raíz de la carpeta](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/) — ramas, integración, releases y nombres
 
 | Documento | Para quién | De qué va |
 | --- | --- | --- |
-| [Estandares-Modelo-Ramas.md](Guides/Estandares-Modelo-Ramas.md) | El equipo entero | Qué modelos de ramas hay, cómo se elige uno y cómo se opera el ciclo de vida de las versiones |
-| [Guia-Practica-GitFlow.md](Guides/Guia-Practica-GitFlow.md) | Un equipo de tres que rota roles | Los ocho escenarios ejecutables del modelo adoptado |
-| [Guia-Practica-GitHubFlow.md](Guides/Guia-Practica-GitHubFlow.md) | Ídem | Los mismos ocho sobre el modelo que **no** se adoptó, como línea de base |
-| [GitHub-Action-Guide.md](Guides/GitHub-Action-Guide.md) | Quien nunca escribió un workflow | Vocabulario, sintaxis y escenarios completos, con ejemplos que corren en este workspace |
-| [Nomenclatura-Convensiones-Arquitecture-Dot-Net.md](Guides/Nomenclatura-Convensiones-Arquitecture-Dot-Net.md) | Quien nombra código o renombra una solución, persona o agente | La regla «arquitectura en inglés, dominio en español», la tabla de decisión, lo que no se traduce y el procedimiento de renombre con sus escollos |
-| [Anexos/workflows/](Guides/Anexos/workflows/README.md) | Quien monta la CI | Los tres workflows listos para copiar |
+| [Estandares-Modelo-Ramas.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/Estandares-Modelo-Ramas.md) | El equipo entero | Qué modelos de ramas hay, cómo se elige uno y cómo se opera el ciclo de vida de las versiones |
+| [Guia-Practica-GitFlow.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/Guia-Practica-GitFlow.md) | Un equipo de tres que rota roles | Los ocho escenarios ejecutables del modelo adoptado |
+| [Guia-Practica-GitHubFlow.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/Guia-Practica-GitHubFlow.md) | Ídem | Los mismos ocho sobre el modelo que **no** se adoptó, como línea de base |
+| [GitHub-Action-Guide.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/GitHub-Action-Guide.md) | Quien nunca escribió un workflow | Vocabulario, sintaxis y escenarios completos, con ejemplos que corren en este workspace |
+| [Nomenclatura-Convensiones-Arquitecture-Dot-Net.md](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/Nomenclatura-Convensiones-Arquitecture-Dot-Net.md) | Quien nombra código o renombra una solución, persona o agente | La regla «arquitectura en inglés, dominio en español», la tabla de decisión, lo que no se traduce y el procedimiento de renombre con sus escollos |
+| [workflows/](../Lab-Documentos/Guides/Testing/Lab-E2E.WebBlazor-Guides/workflows/README.md) | Quien monta la CI | Los tres workflows listos para copiar |
 
 Los documentos de `E2E-Guide/` citan el código del laboratorio por ruta relativa, así que se leen
-mejor con los dos repositorios —código y documentación— clonados como carpetas hermanas.
+mejor con `Lab-Documentos` y `Lab-E2E.WebBlazor` clonados como carpetas hermanas.
 
 ## PROMPTs
 
