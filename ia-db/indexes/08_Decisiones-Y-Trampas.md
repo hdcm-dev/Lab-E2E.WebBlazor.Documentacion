@@ -1,204 +1,182 @@
-# 08 — Decisiones y trampas ya pagadas
+# 08 — Decisiones y trampas
 
-> **Propósito**: reunir el porqué de las decisiones no obvias y los errores que ya se encontraron y
-> se resolvieron, para no revertirlos por «prolijidad» ni volver a pisarlos.
-> **Fuente primaria**: `README.md` (secciones «Por qué las pruebas E2E son un proyecto de la
-> solución», «Lo que cambia respecto del ejemplo estático», «Los workflows» y «Evidencia»),
-> `CHANGELOG.md`, las cabeceras de `.devcontainer/dev.sh` y `Dockerfile`, y los comentarios del
-> código citado.
-> **Vigencia**: 2026-09-12, commit `10ce735`.
+> **Propósito**: por qué el laboratorio está hecho como está, qué no hay que revertir y qué trampas ya se pagaron (web, arnés E2E, CI, renombre, Android, Appium), cada una con su síntoma, su arreglo y la evidencia o el commit que la respalda. Es lo primero que conviene leer antes de «simplificar» algo.
+> **Fuente primaria**: `README.md` (§ «Por qué las pruebas E2E son un proyecto de la solución», § «Lo que cambia respecto del ejemplo estático», § «Diseño», § «Runner», § «Evidencia»), `CHANGELOG.md`, comentarios de `tests/MovilidadUrbana.E2ETests/Infrastructure/`, `tests/MovilidadUrbana.MAUI.UITests/Infrastructure/`, `src/MovilidadUrbana.MAUI/{App.xaml.cs,Platforms/Android/MainActivity.cs,Controls/DecimalEntry.cs,Services/OnScreenKeyboard.cs}`, `pruebas.runsettings`, `.gitignore`, `evidencia/`, `git log` (de `0516139` a `8fb4c3a`).
+> **Vigencia**: versión 3.1, generada el 2026-10-25 sobre el commit `8fb4c3a` (2026-09-18).
+> **Vecinos**: la forma del template y sus desviaciones en detalle en [11](11_Template-Y-Superficies.md); cómo se corren las suites y sus variables en [05](05_Pruebas.md); workflows y corridas observadas en [06](06_CI-Y-Workflows.md); sesión por cookie/encabezado/dispositivo y la base en [03](03_Sesiones-Y-Persistencia.md); acceso y guard de Login en [10](10_Hola-Mundo-Y-Login.md); la API en [12](12_Api-REST.md); la app Android y su devcontainer en [13](13_App-Android.md); la convención inglés/español y el inventario de rastros en [01](01_Arquitectura.md).
 
-## Decisiones de fondo
+---
 
-### Playwright con el binding de .NET, no el runner de JavaScript
+## 0. Cómo leer este índice
 
-Se usan las vinculaciones oficiales `Microsoft.Playwright.NUnit` con un objetivo concreto: que las
-pruebas se **descubran, ejecuten y depuren desde Visual Studio**, sin salir del IDE ni del lenguaje
-de la aplicación.
-
-Es una decisión con costo, y conviene tenerlo a la vista. El Explorador de pruebas de Visual Studio
-soporta pruebas de JavaScript, pero solo de Mocha, Jasmine, Tape, Jest y Vitest: Playwright no está
-en esa lista. A cambio de ganar el IDE se pierden funciones que solo existen en `@playwright/test`:
-`--shard`, el reporter `blob` con `merge-reports` y el reporte HTML. Acá el reporte de cada
-configuración es un TRX y el paralelismo lo maneja NUnit.
-
-La alternativa —dejar las E2E fuera de la solución, en una carpeta `e2e/` con specs de TypeScript—
-es la que eligió `dotnet/eShop`. **Las dos son defendibles**; esta prioriza el IDE.
-
-### Tres aplicaciones independientes de Movilidad Urbana, con el código repetido
-
-La web, la API y la app Android **no comparten proyectos**: cada una lleva `Dominio/`,
-`Aplicacion/` e `Infraestructura/` como carpetas propias, y las tres copias son idénticas salvo el
-`namespace`. El `README.md` lo declara: «el código se repite a propósito: cada proyecto tiene que
-poder estudiarse, compilarse y llevarse por separado». Los proyectos por capa existieron unas horas
-(`88e5caa`) y volvieron a carpetas el mismo día (`10ce735`, `CHANGELOG.md`). Lo que quedó de ese
-paso es la separación en capas con registro propio (`AgregarAplicacion()`,
-`AgregarInfraestructura(cadena)`) y los puntos de composición que solo componen.
-
-El costo, a la vista: un cambio de regla se replica a mano en tres lugares y las unitarias cubren
-solo la copia de la web ([05](05_Pruebas.md)). **No proponer «extraer lo común»**: es exactamente lo
-que se deshizo. Un beneficio concreto: la `Infraestructura/` de la app Android se compila enlazada
-en su proyecto de pruebas, cosa que un proyecto compartido con `FrameworkReference` a ASP.NET Core
-no permitía — por eso `MiddlewareDeSesion` se mudó a `Web/Sesiones/`.
-
-### Tres aplicaciones web de complejidad creciente, cada una con su forma
-
-Hola Mundo y Login no tienen fixture, prueban contra una URL fija y tienen cada una su workflow, con
-menos piezas que el de Movilidad Urbana. **No es una deuda**: es la escalera didáctica que declara
-el `README.md` («para que la temática se pueda estudiar de a un escalón»). Uniformarlas destruiría
-el escalón.
-
-### Publicar e instalar navegadores en el fixture, no en el build
-
-Atado al build, el paso queda a merced de que el entorno decida compilar: Visual Studio evalúa por
-su cuenta si el proyecto está al día y cómo invocar targets de otro proyecto, y cuando esa decisión
-no sale como se espera **no hay publicación y todas las pruebas mueren en `OneTimeSetUp`**. En el
-fixture corre siempre y de la misma forma en consola, IDE y CI.
-
-`dotnet publish` es incremental: cuando no cambió nada tarda un par de segundos. Se paga ese costo
-una vez por corrida a cambio de no ejercitar nunca un binario viejo.
-
-Lo mismo con el navegador: la vía documentada (`pwsh playwright.ps1 install`) exige PowerShell 7
-—un producto aparte del PowerShell que trae Windows— y acordarse de correrlo. El paquete expone el
-mismo instalador como API, y se instala solo el navegador de la corrida.
-
-### `EnsureCreated` en lugar de migraciones
-
-El laboratorio no versiona el esquema, y así el binario publicado arranca en cualquier máquina sin
-pasos previos. No es una omisión: es lo apropiado para el alcance.
-
-### La política de validación vive en el dominio, no en la vista
-
-`EditForm` sin `DataAnnotationsValidator` en Movilidad Urbana: anotar el modelo de pantalla sería
-«transcribir la política de validación en la vista». Lo que la regla del template protege —error por
-campo asociado por `aria-describedby` y requisito visible antes del intento— se conserva por otra
-vía (`Politica*.cs`). Hola Mundo, que no tiene dominio, sí usa anotaciones. Ver
-[11](11_Template-Y-Superficies.md).
-
-## Las seis diferencias con el ejemplo estático
-
-Lo que sigue es lo que **aparece recién cuando la aplicación tiene servidor**. Las decisiones de
-fondo —selectores por `data-testid`, nada de esperas fijas, cuatro configuraciones de navegador con
-una móvil— se mantienen del laboratorio estático.
-
-### 1. Hay que esperar a que la página sea interactiva
-
-Una aplicación *interactive server* se entrega primero como HTML prerenderizado y recién después se
-establece el circuito por WebSocket. En el medio los botones **se ven pero no responden**: un clic
-que llegue antes de la conexión se pierde sin dejar rastro, y el síntoma es una prueba que falla de
-manera intermitente y solo en las máquinas cargadas.
-
-`MainLayout.razor` publica un testigo con `RendererInfo.IsInteractive`; `EsperarInteractivoAsync` de
-`PruebaE2E.cs` lo espera antes de tocar nada. En Hola Mundo el mismo testigo cerró una intermitencia
-de 1 en 8 — evidencia en `evidencia/2026-09-03-testigo-de-hidratacion/`.
-
-### 2. El estado es del servidor, así que hay que aislarlo
-
-Detalle propio de Blazor Server: **un circuito no tiene acceso a la petición HTTP** que lo originó,
-así que la cookie no se puede leer desde una página. El identificador se lee en `App.razor` —que sí
-se renderiza dentro de la petición— y se pasa como parámetro al componente raíz `Routes`, puente
-entre el render estático y el interactivo. Mecanismo completo en
-[03_Sesiones-Y-Persistencia.md](03_Sesiones-Y-Persistencia.md).
-
-### 3. La aplicación hay que compilarla antes de probarla
-
-En CI se publica **autocontenida** para `linux-x64`, así el binario no depende del runtime del
-ejecutor, y **una sola vez** para que todas las configuraciones la reutilicen. En la máquina de
-quien desarrolla alcanza con una publicación dependiente del framework.
-
-El fixture admite las dos formas: usa el apphost nativo si está —`MovilidadUrbana.Web.exe` en
-Windows, sin extensión en Linux y macOS— y si no arranca con `dotnet MovilidadUrbana.Web.dll`.
-**El nombre fijo de Linux era justamente lo que hacía fallar el descubrimiento en Windows.**
-
-Trampa que cuesta un rato encontrar: **ASP.NET Core toma el directorio actual como raíz de
-contenido**. Si se lanza el binario desde otra carpeta, `wwwroot` no se encuentra, los recursos
-estáticos se sirven **vacíos —con `200` y `Content-Length: 0`, no con `404`—** y el circuito nunca
-arranca porque `blazor.web.js` llega en blanco. Por eso el fixture fija `WorkingDirectory` en la
-carpeta de la publicación.
-
-### 4. Menos JavaScript, menos intermitencia
-
-En la versión estática hubo que corregir dos defectos alrededor del modal de Bootstrap: el clic que
-llegaba durante la animación de apertura y el orden del manejador de `data-bs-dismiss`. Acá el
-diálogo es el `<dialog>` nativo, abierto y cerrado por `ServicioDeDialogos` con la interoperabilidad
-mínima de `mq-dialogo.js`: el confinamiento de foco y el cierre por Escape los trae el navegador, no
-hay animación de apertura que esperar y esa clase de carrera no existe.
-
-### 5. El enlace de datos tiene que escuchar el evento correcto
-
-`FillAsync` dispara `input`, no `change`. Con el `@bind` por defecto —que escucha `onchange`— el
-valor no llega al servidor hasta que el campo pierde el foco, y la validación rechaza un formulario
-que en pantalla se ve completo. Los campos usan `@bind:event="oninput"` o `@oninput` directo — la
-tabla exacta está en [04](04_Interfaz-Y-Pantallas.md).
-
-### 6. Con el binding de .NET, el paralelismo llega hasta la clase
-
-NUnit no paraleliza por defecto. Pero subirlo a `ParallelScope.Children` —casos en paralelo dentro
-de una misma clase— rompe la integración de Playwright, que lleva un registro de servicios por
-worker: la corrida falla con `The given key 'Browser' was not present in the dictionary` y
-`Collection was modified; enumeration operation may not execute`.
-
-El límite práctico es **`ParallelScope.Fixtures`**. Es una diferencia real con `fullyParallel: true`
-del runner de JavaScript, que reparte caso por caso.
-
-Otra trampa: un `[SetUpFixture]` cubre **su** namespace y los que cuelgan de él, nunca el de arriba.
-Puesto en `MovilidadUrbana.E2ETests.Infraestructura` no se ejecuta para las pruebas de
-`MovilidadUrbana.E2ETests`, y el síntoma es desconcertante —la URL base llega vacía y Playwright se
-queja de la cookie—.
-
-## Trampas de la app Android, ya pagadas
-
-Todas están registradas en comentarios del código o en `evidencia/2026-09-12-maui/README.md`; el
-detalle de cada pieza está en [13](13_App-Android.md).
-
-| Trampa | Dónde se ve | Solución |
-| --- | --- | --- |
-| El teclado numérico de Android filtra caracteres según el idioma y puede descartar la coma: «12,5» llegaba como «125» y se registraba sin error | Captura `24-encuesta-paso3-completo.png` | `Controles/EntradaDecimal` + un mapeo de `EntryHandler` que fija `InputType` decimal y un `DigitsKeyListener` con `0123456789,.`; el ViewModel acepta coma o punto (`LeerDecimal`) |
-| MAUI aplica su propio modo de teclado a la ventana (`Pan`) y pisa el `AdjustResize` del manifiesto: enfocar un campo bajo corre toda la pantalla y corta el encabezado | `App.xaml.cs` | `UseWindowSoftInputModeAdjust(Resize)` en el constructor de `App`, además del atributo de `MainActivity` |
-| En una página **apilada** por Shell la ventana no se achica con el teclado; `SafeAreaEdges` deja un hueco que no se cierra y los insets del IME no llegan a la vista | `Servicios/TecladoEnPantalla.cs` | Medir en cada `GlobalLayout` cuánto del borde inferior de la barra quedó bajo la zona visible y corregir su margen por esa diferencia hasta converger; al desaparecer la página, margen cero |
-| Android dibuja un subrayado propio bajo `Entry`, `Picker` y `SearchBar`, que dentro de la caja con borde del estilo «Campo» queda como una segunda línea | `MauiProgram.QuitarSubrayadoNativo` | `BackgroundTintList` transparente por handler; el `search_plate` del `SearchView` se resuelve por nombre porque el binding no expone su id |
-| El teclado numérico deja tipear separadores de miles en «Habitantes» | `LocalidadEditorViewModel.LeerEntero` | Se conservan solo los dígitos |
-| `CultureInfo.DefaultThreadCurrent*` no alcanza al hilo principal, que ya existe al arrancar | `MauiProgram.cs` | Se fija además `CultureInfo.CurrentCulture` / `CurrentUICulture` |
-| El proyecto `net10.0-android` no se puede referenciar desde un proyecto de pruebas `net10.0` sin el workload | `MovilidadUrbana.MAUI.Tests.csproj` | Las carpetas `Dominio/`, `Aplicacion/`, `Infraestructura/` y `Presentacion/` se compilan como `<Compile Include=... LinkBase=...>`; queda fuera solo lo que toca la plataforma |
-| El runner de `ci.yml` no tiene el workload de MAUI y la solución completa no compila allí | `Lab-E2E.WebBlazor.SinMaui.slnf` | CI compila el filtro; `android.yml` instala el workload y construye el APK aparte |
-| Dos servidores de `adb` se disputan el mismo teléfono y el síntoma aparece en el otro contenedor | `.devcontainer/dev.sh` | `up` apaga el adb de `gda-core-app-dev` antes de levantar el propio; `devolver` lo restituye |
-| Si el keystore de Debug se regenera, el APK nuevo no se instala sobre el anterior | `devcontainer.json` | Volumen nombrado `lab-maui-keystore` para `~/.local/share/Xamarin` |
-| El nodo USB del teléfono no es escribible para el usuario normal del contenedor | `Dockerfile`, `dev.sh` | El servidor de adb corre como root (`docker exec -u 0`), con `sudo` sin contraseña para el arranque desde VS Code |
-| Sin locales reales, el runtime de build y la app se quedan sin ICU útil | `Dockerfile` | `locale-gen` de `es_AR.UTF-8` y `en_US.UTF-8`; `LANG=es_AR.UTF-8` |
-| Un Toast dura menos que un ciclo de captura y no se puede evidenciar por pantalla | `evidencia/2026-09-12-maui/toast-logcat.txt` | La prueba es la línea de `logcat` con `Toast#0 … producer=(…:ar.lab.movilidadurbana)` |
-
-## Trampas menores, ya resueltas
-
-| Trampa | Solución en el repositorio |
+| Marca | Significa |
 | --- | --- |
-| La cookie de sesión se emitía también en css y js, que el navegador pide en paralelo, y la primera visita generaba varios identificadores | `MiddlewareDeSesion.EsUnDocumento` filtra por GET, sin extensión y fuera de `/_framework` y `/_blazor` |
-| Borrar todas las localidades volvía a sembrarlas | Marca en la tabla `Sesiones` |
-| Dos peticiones de la misma sesión sembraban a la vez | `try/catch (DbUpdateException)` en `SembradorDeSesion` |
-| Con `EMULAR_MOVIL=true` la emulación podía caer en silencio a escritorio | `ContextOptions()` lanza si Playwright no conoce el descriptor `Pixel 7` |
-| El número de workers estaba declarado en dos lados y podía divergir | Se quitó `[assembly: LevelOfParallelism(3)]`; vive solo en `NumberOfTestWorkers` |
-| Las carpetas de solución de `Guides` apuntaban a rutas inexistentes | Se reordenaron el 2026-08-30, se pusieron al día el 2026-09-03 y se retiraron el 2026-09-09, cuando las guías se mudaron a `Lab-E2E.WebBlazor.Documentacion` |
-| Los artefactos de Actions pierden el bit de ejecución | `chmod +x` antes de arrancar |
-| El resumen de la encuesta variaba con el orden de tipeo | Los medios se guardan en el orden del catálogo |
-| Leer una salida del proceso con el búfer de la otra llena trababa el `dotnet publish` | Se leen ambas en paralelo |
-| `/dev/shm` a 64 MB mata Chromium a media corrida | **Medido**: a esta escala no ocurre. Si apareciera: `--disable-dev-shm-usage` o más `--shm-size` |
-| `fs.inotify.max_user_instances` agotado en la máquina del autor: la aplicación moría con código 134 al construir su configuración | No es del laboratorio: correr con `DOTNET_USE_POLLING_FILE_WATCHER=1` (`README.md` §Evidencia) |
-| Hola Mundo y Login probaban por https con un puerto fijo y ningún paso levantaba la aplicación: en su repositorio de origen su workflow tuvo 0 corridas verdes de 4 | URL `http` en los puertos de sus `launchSettings` y un workflow por proyecto que levanta la aplicación antes de probar (2026-09-12) |
-| Dos workflows se llamaban `E2E` y compartían nombre de artefacto | Se retiró el copiado (`e2e_2.yml`); los nuevos tienen nombre y artefacto propios |
-| La sección *Runner* del README decía que todo corría en `ubuntu-latest` | Corregido el texto (2026-09-12): `publicar` de `e2e.yml` usa el runner propio, y esa combinación es la que acumula las corridas en verde |
+| **No revertir** | Decisión vigente con un costo ya medido: deshacerla reabre una falla conocida |
+| **Pagada** | Trampa que ocurrió, con síntoma y arreglo registrados |
+| **Abierto** | Encontrado y no resuelto, o no verificado |
 
-## Límites conocidos
+Cada fila cita dónde está escrito. Las fechas son las del commit o de la entrada del `CHANGELOG.md`.
 
-- La ejecución desde el Explorador de pruebas de Visual Studio **no se verificó** (no hay Windows en
-  la máquina del autor), incluido el paso previo que necesitan Hola Mundo y Login: arrancar la
-  aplicación con su perfil `http`.
-- Los workflows **sí se observaron corriendo** en GitHub Actions — ver
-  [06_CI-Y-Workflows.md](06_CI-Y-Workflows.md).
-- El runner autoalojado no admite jobs con `container:`: es él mismo un contenedor y no tiene montado
-  el socket de Docker.
-- Dos promesas de la Encuesta no tienen caso de prueba (paso direccionable y fallo al registrar) —
-  ver [05](05_Pruebas.md).
-- La app Android se recorrió en **un solo teléfono** (Motorola moto e6 play, Android 9,
-  armeabi-v7a); `TecladoEnPantalla` está calibrado contra lo observado ahí. No hay pruebas de
-  interfaz sobre Android: solo los 18 casos de ViewModels y las capturas de `evidencia/2026-09-12-maui/`.
-- Las unitarias cubren la copia de las reglas de la web; las de la API y de Android se verifican
-  indirectamente ([05](05_Pruebas.md)).
+---
+
+## 1. Estructura de la solución
+
+| Decisión | Por qué | Marca | Fuente |
+| --- | --- | --- | --- |
+| Tres aplicaciones de Movilidad Urbana (Web, ApiWeb, MAUI) **independientes**, cada una con sus capas como carpetas; el código se repite a propósito | «cada proyecto tiene que poder estudiarse, compilarse y llevarse por separado» | No revertir | `README.md` § Estructura; `10ce735` |
+| Las capas fueron proyectos propios (`MovilidadUrbana.Dominio/.Aplicacion/.Infraestructura`) y el mismo día volvieron a carpetas | Hicieron falta para que la API compartiera reglas; luego se priorizó la independencia. Quedó el registro por capa (entonces `AgregarAplicacion`/`AgregarInfraestructura(cadena)`, hoy `AddApplication`/`AddInfrastructure`) y `Program.cs` que solo compone | Historia | `88e5caa` → `10ce735` (ambos 2026-09-12); `CHANGELOG.md` 2026-09-12 |
+| Tres webs de complejidad creciente: Hola Mundo → Login → Movilidad Urbana | Estudiar la temática «de a un escalón» | No revertir | `README.md` § Estructura (l. 83); `CHANGELOG.md` 2026-09-12; `11620e9` |
+| Hola Mundo y Login llegaron **byte a byte** desde `Lab-E2E.WebBlazor.Base` | «los números de línea que citan las guías siguen valiendo» | No revertir | `11620e9` |
+| `Lab-E2E.WebBlazor.SinMaui.slnf` para CI | El runner no tiene el workload de MAUI | No revertir | `CHANGELOG.md` 2026-09-12; `.github/workflows/ci.yml` l. 56–59 |
+| Las E2E son **proyecto C# de la solución** (`Microsoft.Playwright.NUnit`) y no specs de TypeScript | Descubrir, correr y **depurar** desde Visual Studio: el Explorador de pruebas no soporta Playwright JS (solo Mocha, Jasmine, Tape, Jest, Vitest). Costo: se pierden `--shard`, `blob`/`merge-reports` y el reporte HTML; queda TRX | No revertir | `README.md`; `90ad8fe` (reemplazó `e2e/`, `playwright.config.js`, `package.json`) |
+| Alternativa conocida: `e2e/` fuera de la solución, como `dotnet/eShop` | «Las dos son defendibles; esta prioriza el IDE» | — | `README.md` |
+| Las guías viven en otro repo (una sola copia) | Una sola copia en vez de «dos que pueden divergir en silencio» | No revertir | `98fde5f`; ver [07](07_Guias.md) |
+| Nombres: arquitectura en inglés, dominio en español; no se tocan texto visible, URL, contrato JSON, `data-testid`, `AutomationId` ni comentarios | Regla de la guía de nomenclatura; las pruebas y las guías citan esos literales | No revertir | `946d023`; `README.md` § Convención de nombres |
+
+---
+
+## 2. Arnés E2E de Movilidad Urbana (web)
+
+| Decisión / trampa | Síntoma si se revierte o se ignora | Arreglo vigente | Marca | Fuente |
+| --- | --- | --- | --- | --- |
+| Se prueba el binario **publicado**, no `dotnet run` | Se ejercita otra cosa que lo desplegado | `TestAppServer` lanza `publicacion/` | No revertir | `TestAppServer.cs` l. 189–192 |
+| Publicar **en el fixture**, no en el build | Con un target de MSBuild (`31c379d`) Visual Studio decide por su cuenta si compila y «todas las pruebas mueren en `OneTimeSetUp`» | `dotnet publish` incremental antes de la primera prueba; opt-out `PUBLICAR_ANTES_DE_PROBAR=false` (CI lo usa) | Pagada | `6ef117c`; `TestAppServer.cs` l. 124–136; `e2e.yml` l. 229 |
+| Instalar el navegador **en el fixture** | `pwsh playwright.ps1 install` exige PowerShell 7, producto aparte del de Windows | API del paquete `Microsoft.Playwright`, solo el navegador de la corrida; `INSTALAR_NAVEGADORES=false` | Pagada | `097692d`; `TestAppServer.cs` l. 89–122 |
+| Nombre del apphost según SO | En Windows `FileNotFoundException` en `OneTimeSetUp` (buscaba el nombre de Linux) | `.exe` en Windows; si falta, `dotnet MovilidadUrbana.Web.dll` | Pagada | `bf8b83d`; `TestAppServer.cs` l. 24–30, 201–222 |
+| `WorkingDirectory` = carpeta de la publicación | Lanzado desde otra carpeta, `wwwroot` no se encuentra: estáticos con `200` y `Content-Length: 0`, `blazor.web.js` en blanco, el circuito nunca arranca | El fixture lo fija | No revertir | `README.md` § 3; `TestAppServer.cs` l. 62–64 |
+| Leer stdout y stderr del `dotnet publish` **en paralelo** | «esperar a uno con el búfer del otro lleno traba el proceso» | Lectura simultánea | No revertir | `TestAppServer.cs` l. 172 |
+| `[SetUpFixture]` en el namespace **raíz** de las pruebas | En un namespace hijo no corre para las de arriba: URL base vacía y Playwright «se queja de la cookie» | `namespace MovilidadUrbana.E2ETests;` | Pagada | `README.md` § 6; `TestAppServer.cs` l. 16–17 |
+| Paralelismo `ParallelScope.Fixtures`, nunca `Children` | `The given key 'Browser' was not present in the dictionary` / `Collection was modified` | `[assembly: Parallelizable(ParallelScope.Fixtures)]` | No revertir | `90ad8fe`; `Infrastructure/AssemblyParallelism.cs` |
+| Cantidad de workers **solo** en `pruebas.runsettings` (`NumberOfTestWorkers` = 4) | Con `[assembly: LevelOfParallelism(3)]` además, «dos números que pueden divergir» | Se quitó el atributo | No revertir | `6f5947e`; `pruebas.runsettings` |
+| Traza de Playwright manejada a mano en `[TearDown]` | El binding .NET no tiene `trace: 'on-first-retry'`; una traza que empieza al fallar «llega tarde» | Se graba siempre, se guarda solo lo fallido en `resultados/trazas/<caso>.zip`; `TRAZAR=false`; costo ≈ 2 s sobre 22 casos | No revertir | `6f5947e`; `E2ETestBase.cs` l. 23–29, 87–114; `README.md` § Evidencia (costo) |
+| Móvil = chromium con descriptor «Pixel 7», que **falla fuerte** si Playwright no lo conoce | Degradarse en silencio a escritorio | `EMULAR_MOVIL=true` | No revertir | `90ad8fe`; `E2ETestBase.cs` l. 19, 33, 44 |
+| Esperar el **testigo de interactividad** antes del primer click | El HTML prerenderizado se ve pero no responde: clicks perdidos, intermitencia en máquinas cargadas | `estado-app[data-interactivo]` + `WaitForInteractiveAsync` | No revertir | `README.md` § 1; `src/MovilidadUrbana.Web/Components/Layout/MainLayout.razor`. La evidencia `evidencia/2026-09-03-testigo-de-hidratacion/` es de **Hola Mundo y Login** (testigo en su página), no de Movilidad Urbana: 8/8 corridas por proyecto, 0 en rojo (`corrida.log`) |
+| `@bind:event="oninput"` en los campos | `FillAsync` dispara `input`, no `change`: con `@bind` por defecto el valor llega recién al perder foco y la validación rechaza un formulario que se ve completo | 4 campos con `@bind:event="oninput"` (3 en `Encuesta.razor`, 1 en `Localidades.razor`); los de texto usan `@oninput` a mano (4) | No revertir | `README.md` § 5; `grep` en `Components/Pages` |
+| Aislamiento por **sesión** sobre una única SQLite | Las pruebas en paralelo se pisan los datos | Cookie propia por prueba y siembra por sesión | No revertir | `README.md` § 2; detalle en [03](03_Sesiones-Y-Persistencia.md) |
+| La cookie se lee en `App.razor` y viaja como parámetro de `Routes` | Un circuito no tiene la petición HTTP: la página no puede leer la cookie | Render mode en la raíz (desviación 1) | No revertir | `README.md` § 2; `Routes.razor` |
+| Cultura fija `es-AR` | Los separadores de miles y decimales son parte de lo verificado | `CultureInfo.DefaultThreadCurrentCulture`/`UICulture` en la app; `Locale = "es-AR"` en el contexto de Playwright | No revertir | `src/MovilidadUrbana.Web/Program.cs` l. 13–15; `E2ETestBase.cs` l. 56–57 |
+| Hola Mundo y Login **sin fixture**, URL fija | Es a propósito (escalón más simple); la falsificación prueba que sin la app levantada fallan (1/1 y 10/10 en rojo) | Levantar el perfil `http` antes; `scripts/pruebas.sh` con `PROYECTO` lo hace | No revertir | `README.md`; `evidencia/2026-09-12-unificacion/*falsificacion*.log` |
+| Hola Mundo y Login de **https a http** (`:5027`, `:5181`) | Con https no corren en CI sin confiar un certificado; se verificó que escuchando solo http no redirigen | perfiles http de `launchSettings` | Pagada | `f9f3ca2`; `CHANGELOG.md` 2026-09-12 |
+
+---
+
+## 3. Interfaz (template SDD)
+
+| Decisión | Por qué | Marca | Fuente |
+| --- | --- | --- | --- |
+| Template propio con tokens; sin Bootstrap ni librería | Una sola fuente de valor visual y trazabilidad catálogo ↔ código | No revertir | `b0c828e`; [11](11_Template-Y-Superficies.md) |
+| Diálogo = `<dialog>` nativo + host único + `IDialogService` | En la versión estática hubo dos defectos con el modal de Bootstrap (click durante la animación y orden de `data-bs-dismiss`); el nativo trae foco confinado y Escape, sin animación que esperar | No revertir | `README.md` § 4; `mq-dialogo.js` |
+| `EditForm` sin `DataAnnotationsValidator` en Web | Anotar el modelo sería «transcribir la política de validación en la vista»; la política vive en `Domain/Rules` con pruebas propias | No revertir | `README.md` desviación 2 |
+| Revisión del asistente como estado de éxito | `TotalDePasos` es regla de dominio | No revertir | desviación 3 |
+| Resultados como **banda**, sin avisos efímeros | Un aviso que se autodescarta haría depender la evidencia E2E de un temporizador | No revertir | `README.md` § Lo que no aplica |
+| Ids de `EmptyState`/`UnavailableState` derivados del título (Web) | «tiene que ser el mismo en el prerenderizado y en el circuito». Hola Mundo y Login siguen con `Guid.NewGuid()`: el riesgo de desajuste allí **no está verificado** | No revertir (Web) / Abierto (Base) | `src/MovilidadUrbana.Web/Components/Shared/EmptyState.razor`; `src/WebBlazor.HolaMundo/Components/Shared/EmptyState.razor` l. 40 |
+| Reconexión como banda no modal en Web | «cortar la interacción con un velo mientras el circuito vuelve no agrega nada» | No revertir | `ReconnectionNotice.razor` |
+| En Hola Mundo/Login se conserva `<dialog id="components-reconnect-modal">` | El módulo del circuito llama `showModal()` y conmuta clases sobre ese elemento: un `div` dejaría la reconexión muda | No revertir | `Template-SDD-Aplicado.md` §2 |
+| Login: ingreso en **SSR estático** y POST a endpoint | La cookie se emite en el ciclo de request; con circuito ya no hay dónde escribir la cabecera | No revertir | `Pages/Account/Login.razor`; ver [10](10_Hola-Mundo-Y-Login.md) |
+| Cuatro adaptaciones de la suite al template sin aflojar nada (sigue en 22) | Menú, ids del diálogo, indicador de pasos, acciones en la presentación visible (`Filter(Visible = true)`) | No revertir | `README.md` § Lo que cambió en las pruebas |
+
+---
+
+## 4. CI y runner (resumen; detalle en [06](06_CI-Y-Workflows.md))
+
+| Decisión / trampa | Síntoma / motivo | Marca | Fuente |
+| --- | --- | --- | --- |
+| Ningún job con `container:` | El runner `i7infra-dev` es un contenedor sin socket de Docker: falla en *Initialize containers* con `failed to connect to the docker API at unix:///var/run/docker.sock` | Pagada | `6cb167d`; `README.md` § Runner |
+| `publicar` de `e2e.yml` en `[self-hosted, i7infra-dev]`; el resto en `ubuntu-latest` | «esa combinación es la que acumula 23 corridas en verde»: se corrigió el README, no el workflow | No revertir | `7262395`; `e2e.yml` l. 89 |
+| `actions/setup-dotnet` explícito y caché de navegadores | La imagen de GitHub no garantiza .NET 10; los runners arrancan sin caché (clave: hash del csproj de pruebas, `e2e.yml` l. 200) | No revertir | `db775c5`; `README.md` § Runner |
+| `/dev/shm` de 64 MB | `6cb167d` agregó `--disable-dev-shm-usage` en `playwright.config.js` (no en los workflows); `90ad8fe` borró ese archivo y el README pasó a «a esta escala no hace falta» (`git log -S`). Medido: las 22 de chromium pasan igual. Si aparece la intermitencia: ese argumento o `--shm-size` | Abierto (vigilar) | `README.md` § Runner; `6cb167d`; `90ad8fe` |
+| `ci-ok` como único check a exigir | No actualizar la regla de protección cada vez que cambia la matriz | No revertir | `README.md` § ci.yml |
+| Se retiró `e2e_2.yml` (el workflow de Base; nunca estuvo en la historia de este repo: `git log --all` vacío) | 0 corridas exitosas de 4 en aquel repo, no levantaba la app, compartía `name` y artefacto con `e2e.yml` | Pagada | `f9f3ca2`; `CHANGELOG.md` 2026-09-12 |
+| `-warnaserror --no-incremental` para validar renombres | El build incremental local no mostró `CS1574`; la CI, que compila desde cero, sí (sobre `946d023`) | Pagada | `e9dea2a`; `CHANGELOG.md` 2026-09-18 |
+
+---
+
+## 5. Trampas del renombre (`946d023`, `e9dea2a`, 2026-09-18)
+
+| Trampa | Qué pasó | Arreglo | Fuente |
+| --- | --- | --- | --- |
+| `<see cref>` con nombres viejos | La herramienta de renombre protege los comentarios; la CI falló con `CS1574` | Segundo commit que renombra las `cref` | `e9dea2a`; `CHANGELOG.md` |
+| `Sesion` → `Session` cambia la **tabla** | Las bases SQLite de corridas anteriores quedan con el esquema viejo: `EnsureCreated` no migra | Borrar las bases (`datos-e2e/`, etc.) | `CHANGELOG.md` 2026-09-18; ver [03](03_Sesiones-Y-Persistencia.md) |
+| Dos `DependencyInjection` (Application e Infrastructure) | Ambigüedad en `Program.cs` | `Program.cs` califica (`MovilidadUrbana.Web.Infrastructure.DependencyInjection.DefaultConnectionString`) | `CHANGELOG.md`; `src/MovilidadUrbana.Web/Program.cs` |
+| Namespace `MovilidadUrbana.MAUI.Application` tapa la clase `Application` de MAUI | No compila `App : Application` | `App : Microsoft.Maui.Controls.Application` | `CHANGELOG.md`; `src/MovilidadUrbana.MAUI/App.xaml.cs` |
+| Nombres generados por `[ObservableProperty]`/`[RelayCommand]`, prefijos XAML y bindings con `RelativeSource` | Renombrar solo el origen rompe los bindings en silencio | Se renombraron junto con su origen | `CHANGELOG.md` 2026-09-18 |
+| Renombre que miente | Una traducción automática cambia el sentido (p. ej. `AlRechazarLaEntrada` → `OnSignInRejected` en una superficie sin ingreso) | Sin corregir (rastro) | casos en [10](10_Hola-Mundo-Y-Login.md) §7 y [05](05_Pruebas.md) §13 |
+| Rastros en texto (README, comentarios, mensajes) | p. ej. `README.md` dice `MovilidadUrbana.E2ETests.Infraestructura`; `pruebas.runsettings` cita `ParalelismoDelEnsamblado.cs` | Sin corregir | inventario en [01](01_Arquitectura.md); los de la vista en [11](11_Template-Y-Superficies.md) § 10 |
+| Renombre previo: prefijo `E2E.Base` (2026-09-12) | Los registros de `evidencia/` anteriores conservan `WebBlazor.E2E.Base.*`: son históricos, no se tocan | — | `e0f3e9d` (su verificación, 1/1 y 10/10, está en `evidencia/2026-09-12-renombre/`); p. ej. `evidencia/2026-09-12-unificacion/*.log` |
+
+Verificación del renombre: Release `-warnaserror --no-incremental`; 49 + 13 + 18 unitarias/API/ViewModels, 22 + 1 + 10 E2E, APK compila, Appium 5/5 (`CHANGELOG.md` 2026-09-18). No hay carpeta de evidencia propia: `evidencia/2026-09-12-renombre/` es del renombre de prefijo (`e0f3e9d`), no de `946d023`.
+
+---
+
+## 6. Trampas de Android (`MovilidadUrbana.MAUI`)
+
+Probado en un Motorola moto e6 play (Android 9, armeabi-v7a, 720×1440: `evidencia/2026-09-12-maui/dispositivo.txt`).
+
+| Trampa | Síntoma | Arreglo | Fuente / evidencia |
+| --- | --- | --- | --- |
+| MAUI pisa el `AdjustResize` del manifiesto con su modo **Pan** | Enfocar un campo bajo corre toda la pantalla y corta el encabezado | `UseWindowSoftInputModeAdjust(…Resize)` en `App` + `WindowSoftInputMode = SoftInput.AdjustResize` en `MainActivity` | `App.xaml.cs`; `MainActivity.cs` |
+| En la página **apilada** por Shell la ventana no se achica | La barra con «Guardar» queda tapada por el teclado; `SafeAreaEdges` deja un hueco que no se cierra; los insets del IME no llegan | `OnScreenKeyboard.KeepAboveKeyboard`: mide en cada `GlobalLayout` cuánto quedó tapado y corrige el margen hasta converger | `Services/OnScreenKeyboard.cs`; capturas `36`–`38` |
+| Teclado numérico descarta la coma | «12,5» llegaba como «125» y se registraba **sin error** | `DecimalEntry` acepta coma y punto; el ViewModel interpreta los dos | `Controls/DecimalEntry.cs`; capturas `24` → `35` |
+| Errores que no se borraban, sin borde rojo, error de grupo debajo de la tarjeta | Iteraciones de la UI | Corregidos en orden | `evidencia/2026-09-12-maui/README.md` (`07`→`18`, `05`→`29`, `21`→`32`) |
+| El Toast dura menos que una captura | No hay imagen que lo pruebe | La evidencia es la línea de `logcat` con `producer=(…:ar.lab.movilidadurbana)` | `evidencia/2026-09-12-maui/toast-logcat.txt` |
+| Nombre de la activity | Sin `[Register]` el nombre es un hash y Appium no puede lanzarla | `[Register("ar.lab.movilidadurbana.MainActivity")]` | `MainActivity.cs`; `3e119b8` |
+| El proyecto Android no se referencia sin el workload | Las pruebas de ViewModels no compilarían en CI | `MovilidadUrbana.MAUI.Tests` compila `Domain/`, `Application/`, `Infrastructure/`, `Presentation/` como archivos enlazados | `tests/MovilidadUrbana.MAUI.Tests/MovilidadUrbana.MAUI.Tests.csproj` l. 27–30 |
+| El teléfono es un recurso único para adb | «dos servidores de adb se lo disputan y el síntoma aparece en el otro» | `dev.sh up` apaga el adb del otro contenedor y `devolver` lo restituye | `.devcontainer/dev.sh` l. 15–18, 40–41 |
+| Tema oscuro | — | `UserAppTheme = AppTheme.Light`: «no se deriva un tema oscuro que nadie diseñó» | `App.xaml.cs` |
+
+---
+
+## 7. Trampas de Appium (`MovilidadUrbana.MAUI.UITests`)
+
+Suite: `Appium.WebDriver` 8.0.0, servidor Appium 3.7.0, `uiautomator2@8.6.4` (`evidencia/2026-09-13-uitests/README.md`). Las trampas 1–3 son las corridas en rojo que ese README no guardó («la causa era de la suite, no de la app»); la 4 sale del `CHANGELOG.md` 2026-09-18; la 5 y la 6 son decisiones de la suite:
+
+| # | Trampa | Síntoma | Arreglo | Fuente |
+| --- | --- | --- | --- | --- |
+| 1 | `[SetUpFixture]` en namespace hijo (la misma de la web) | «La sesión de Appium no está abierta» | `AppiumSession` en `namespace MovilidadUrbana.MAUI.UITests;` | README de evidencia; `AppiumSession.cs` l. 5–6 |
+| 2 | Esperas de 30 s y «Eliminar» debajo del pliegue | Timeouts | Esperas de 60 s (`ScreenTestBase.Timeout`) y `UiScrollable` | README de evidencia; `ScreenTestBase.cs` l. 16, 56–70 |
+| 3 | `NoReset` con el proceso vivo en segundo plano | «already running and noReset is enabled»: no trae la app al frente | `ActivateApp(AppPackage)` y espera de la primera pantalla | `AppiumSession.cs` |
+| 4 | Arranque en frío tras instalar en Debug | Hilo principal ocupado ~21 s (`Skipped 1272 frames`); UIAutomator2 no consigue el árbol y la sesión fallaba antes de empezar | Reintento hasta 120 s buscando `lista-localidades` o `etiqueta-paso` | `CHANGELOG.md` 2026-09-18; `946d023`; `AppiumSession.cs` |
+| 5 | Un dispositivo es una sola pantalla | — | `[assembly: NonParallelizable]` | `UITests/Infrastructure/AssemblyParallelism.cs` |
+| 6 | Prueba anterior que dejó una página apilada | La siguiente arranca en otra pantalla | El `[SetUp]` de cada clase llama `GoToTab`, que vuelve atrás (`Navigate().Back()`, hasta 4 intentos) | `ScreenTestBase.cs` l. 76–91; `LocalidadesTests.cs` l. 12–15; `EncuestaTests.cs` l. 9–12; `CHANGELOG.md` 2026-09-12 |
+
+No corren en CI (necesitan el dispositivo). Evidencia: dos corridas 5/5 (3 min 21 s y 3 min 5 s) y una falsificación (`NoAvanzaConElPaso1Vacio` esperando «Paso 2 de 3» → 1 en rojo, 4 en verde) en `evidencia/2026-09-13-uitests/`.
+
+---
+
+## 8. Trampas del entorno y del repositorio
+
+| Trampa | Síntoma | Arreglo | Fuente |
+| --- | --- | --- | --- |
+| `fs.inotify.max_user_instances = 128` agotado en la máquina | La app muere con código 134 al construir su configuración («terminó sola con código 134 antes de escuchar») | `DOTNET_USE_POLLING_FILE_WATCHER=1` (`scripts/pruebas.sh` l. 64 lo reenvía al contenedor si está definido; vacío por defecto). Es del entorno, no del laboratorio | `README.md` § Evidencia |
+| `git add -A` con carpetas de `evidencia/` ausentes del disco | El commit las registró como borradas | Restauradas desde `HEAD~1` | `910b42b` |
+| `*.log` ignorado por la plantilla de `.gitignore` | La evidencia no se versionaría | Excepción `!evidencia/**/*.log` (l. 122–123); los `.trx` siguen ignorados (consecuencia para la evidencia de UITests en [05](05_Pruebas.md) §14) | `.gitignore`; `git ls-files evidencia` |
+| Carpetas de solución del `.sln` apuntando a archivos que no existen | Explorador de soluciones lleno de enlaces rotos, «sobrevive meses porque no rompe el build» (llegaron a ser 37 archivos) | Se retiraron los nodos; los archivos sueltos se declaran uno por uno | `7a069b3`, `98fde5f`, `bd69d1e` |
+| Enlaces relativos `../../IA/...` y `../Lab-E2E.StaticHtml` del `README.md` | No resuelven desde la ubicación del clon (verificado) | Sin corregir | `README.md` l. 7, 17–19, 172–176; ver [11](11_Template-Y-Superficies.md) §1 |
+
+---
+
+## 9. Abierto / no verificado
+
+| Tema | Estado | Fuente |
+| --- | --- | --- |
+| Paso direccionable sin caso (`/encuesta/2`, `/encuesta/3`) y `catch` de `FinishAsync` / `boton-procesando` sin ejercitar; el paso se hizo direccionable «para que se pueda verificar de a uno» | Abierto; detalle y evidencia del hueco en [05](05_Pruebas.md) §11 | `CHANGELOG.md` 2026-09-04 «Encontrado, no resuelto» |
+| Cierre del `<dialog>` por **Escape** | `Dialog.razor` no maneja `cancel`/`close` y ninguna prueba usa Escape (`git grep`). Por lectura del código, `DialogService.Current` quedaría sin resolver; la consecuencia **no está verificada** en ejecución | `Dialog.razor`, `DialogService.cs` |
+| Confirmación de segundo grado (escrita) | Implementada y sin uso | `README.md` § Lo que no aplica |
+| Explorador de pruebas de Visual Studio | **No verificado** («no hay Windows ni Visual Studio en esta máquina») | `README.md` § Evidencia |
+| Comportamiento real de los workflows | El README dice que solo se validó la sintaxis; las corridas observadas están en [06](06_CI-Y-Workflows.md) | `README.md` § Evidencia |
+
+---
+
+## 10. Lista corta de «no revertir»
+
+1. Publicar e instalar el navegador en el fixture, no en el build.
+2. `ParallelScope.Fixtures` y los workers solo en `pruebas.runsettings`.
+3. `[SetUpFixture]` en el namespace raíz (web y Appium).
+4. `WorkingDirectory` del proceso = carpeta publicada.
+5. Testigo `estado-app` antes del primer click y `@bind:event="oninput"`.
+6. Render mode en la raíz de Movilidad Urbana (puente de la cookie).
+7. `<dialog>` nativo con host único; nada de avisos efímeros.
+8. Tres aplicaciones independientes con código repetido; CI sobre `SinMaui.slnf`.
+9. Jobs sin `container:`; `publicar` en el runner propio.
+10. `AdjustResize` + `OnScreenKeyboard` + `DecimalEntry` en Android; `[Register]` en `MainActivity`.
+11. No renombrar `data-testid`, `AutomationId`, URL, contrato JSON ni texto visible; validar renombres con `--no-incremental`.

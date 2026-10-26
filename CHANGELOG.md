@@ -20,6 +20,16 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   del repositorio se cuentan, sin comprobarse. Es la primera corrida de controles del repositorio, y
   es lo que necesita la guarda G3 del ciclo automático.
 
+### Cambiado
+
+- **ia-db 3.1**, regenerada por completo desde las fuentes con `Iniciar-Indexado.md`, sobre el mismo
+  commit `8fb4c3a` de `Lab-E2E.WebBlazor`. Mantiene la entrada y los catorce índices con los mismos
+  temas. La escribieron seis redactores por grupos de índices y la revisaron un verificador
+  adversarial por grupo (1077 afirmaciones contrastadas con la fuente) y un crítico de coherencia. El
+  crítico usó la 3.0 sin commitear del 2026-10-18 sólo como lista de cobertura: incorporó seis hechos
+  después de comprobarlos y dejó afuera cuatro errores de esa versión. Las corridas de CI de
+  [06](ia-db/indexes/06_CI-Y-Workflows.md) quedan observadas al 2026-10-25 (117).
+
 ## [Sin publicar] - 2026-09-18
 
 ### Agregado
