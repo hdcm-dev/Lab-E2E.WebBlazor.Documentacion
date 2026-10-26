@@ -90,3 +90,32 @@ laboratorios y esta documentación, ordenadas por el workspace al que apuntan:
 | [PROMPTs/Indexado/](PROMPTs/Indexado/) | La generación y el refresco de `ia-db/` |
 
 Los que producen artefactos los dejan en su propia carpeta `OUTPUTs/`.
+
+## Entrega por pull request
+
+Cada unidad de trabajo entra a `main` por un pull request con commit de merge (nunca `squash` ni
+`rebase`). Antes de fusionar, el control [Verificar](.github/workflows/verificar.yml) tiene que
+terminar en éxito. Ese control comprueba que los enlaces internos resuelvan y que la ia-db conserve
+la forma del Profile `Knowledge-Indexing`.
+
+### Delegación del merge al agente
+
+Rige
+[`Knowledge-Conformacion-Pull-Request-Automatico`](/IA/IA.Knowledge.Base/Knowledges/Knowledge-Conformacion-Pull-Request-Automatico.md)
+2.0, §3.1.
+
+| | |
+| --- | --- |
+| **Decidió** | Fernando Filipuzzi, responsable del laboratorio (PO) |
+| **Fecha** | 2026-10-25 20:22 -0300 |
+| **Canal** | Conversación con el agente en Claude Code (VS Code) |
+| **Literal** | «ok, sigue este conocimiento `IA/IA.Knowledge.Base/Knowledges/Knowledge-Conformacion-Pull-Request-Automatico.md` para conformar los PR» |
+| **SHA-256 del literal** | `e7dadade1612deeb62df773283e06f31f23d83ad722ac8fb4783304a92c07676` |
+| **Qué delega** | El agente que conduce la unidad abre el pull request, publica el informe con el enlace, lo fusiona si la guarda G1–G4 pasa y no hay reserva, borra la rama remota y deja `main` local al día |
+| **Techo de espera de la guarda** | 20 minutos |
+| **Intervalo de relectura** | 20 segundos |
+| **Excepción** | Si el PO plantea un cuestionamiento particular sobre una unidad, o aparece alguna reserva de §3.4 (decisión que no le toca al agente, efecto no medido, cambio irreversible no verificado, guarda que no pasa, falla que ya estaba en `main`), el agente no fusiona: entrega el enlace y el merge vuelve al PO |
+| **Revocación** | Por unidad, con sólo decirlo, sin derogar esta delegación |
+
+El techo y el intervalo los propuso el agente, porque el PO delegó sin fijar valores. El PO puede
+cambiarlos editando esta tabla.

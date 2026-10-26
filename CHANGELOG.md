@@ -4,6 +4,22 @@ Todos los cambios relevantes de este repositorio de documentación se registran 
 
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [Sin publicar] - 2026-10-25
+
+### Agregado
+
+- **Delegación del merge al agente**, asentada en la sección «Entrega por pull request» del README
+  según `Knowledge-Conformacion-Pull-Request-Automatico` 2.0 §3.1. La decidió el PO el 2026-10-25 y
+  queda registrada con su literal y su SHA-256, el techo de la guarda (20 min), el intervalo de
+  relectura (20 s) y la excepción por reserva.
+- **Control `Verificar`** (`.github/workflows/verificar.yml` y `.github/scripts/verificar.py`), que
+  corre en cada `pull_request` y en cada push a `main`, en `ubuntu-latest`. Falla si un enlace
+  relativo a un archivo del repositorio no resuelve, o si la ia-db pierde la forma del Profile
+  `Knowledge-Indexing`: entrada con manifiesto, e índices `NN_` con título numerado, propósito,
+  fuente primaria y vigencia. Los índices de más de 500 líneas sólo dan aviso. Los enlaces que salen
+  del repositorio se cuentan, sin comprobarse. Es la primera corrida de controles del repositorio, y
+  es lo que necesita la guarda G3 del ciclo automático.
+
 ## [Sin publicar] - 2026-09-18
 
 ### Agregado
