@@ -1,218 +1,235 @@
 # 06 — CI y workflows
 
-> **Propósito**: describir los seis workflows, cuándo se dispara cada uno y qué prácticas de
-> GitHub Actions aplica el laboratorio, que es una parte central de lo que enseña.
-> **Fuente primaria**: `.github/workflows/` y la sección «Los workflows» de `README.md`. Las
-> corridas observadas salen de la API pública de GitHub Actions.
-> **Vigencia**: 2026-09-12, commit `10ce735`.
+> **Propósito**: qué hace cada uno de los seis workflows de GitHub Actions del laboratorio, qué los dispara, en qué runner corre cada job, cómo se encadenan, y qué corridas se observaron realmente en la API pública de GitHub Actions.
+> **Fuente primaria**: `.github/workflows/ci.yml`, `.github/workflows/e2e.yml`, `.github/workflows/e2e-holamundo.yml`, `.github/workflows/e2e-login.yml`, `.github/workflows/android.yml`, `.github/workflows/verificacion-entorno.yml`, `pruebas.runsettings`, `scripts/publicar.sh`, `Lab-E2E.WebBlazor.SinMaui.slnf`, `README.md` (§«Los workflows», §«Runner»), `CHANGELOG.md`, `git log -- .github/workflows`; y la API pública `https://api.github.com/repos/hdcm-dev/Lab-E2E.WebBlazor/actions/…` (runs, jobs, annotations, artifacts, branches), consultada el 2026-10-25.
+> **Vigencia**: versión 3.1, generada el 2026-10-25 sobre el commit `8fb4c3a` (2026-09-18). Las corridas están fechadas al 2026-10-25.
+> **Vecinos**: qué prueba cada suite que estos workflows corren → [05](05_Pruebas.md); la compilación Android fuera de CI (devcontainer) → [13](13_App-Android.md); las pruebas sin fixture de Hola Mundo y Login → [10](10_Hola-Mundo-Y-Login.md); por qué se decidió así y qué no revertir → [08](08_Decisiones-Y-Trampas.md); dónde está la guía de GitHub Actions y sus desfasajes → [07](07_Guias.md); puertos y stack → [00](00_MASTER-INDEX.md).
 
-## El mapa
+---
 
-```mermaid
-graph TD
-    CI[ci.yml<br/>protección de rama] -->|workflow_call| E2E[e2e.yml<br/>Movilidad Urbana, reutilizable]
-    VE[verificacion-entorno.yml<br/>humo sobre un despliegue] -->|workflow_call| E2E
-    D[workflow_dispatch] --> E2E
-    S[schedule 03:15 UTC] --> E2E
-    PH[push o PR que toca Hola Mundo] --> HM[e2e-holamundo.yml]
-    PL[push o PR que toca Login] --> LG[e2e-login.yml]
-    PA[push o PR que toca la app Android] --> AN[android.yml]
+## 1. Mapa de los seis workflows
+
+| Archivo | `name:` (en Actions) | ID de workflow | Proyecto | Rol |
+| --- | --- | --- | --- | --- |
+| `ci.yml` | `CI` | 340678050 | Solución sin MAUI | Puerta de integración: compilación + unitarias + API + ViewModels, después E2E |
+| `e2e.yml` | `E2E` | 340684644 | `MovilidadUrbana.Web` | Definición **reutilizable** de las E2E de Movilidad Urbana (+ cron nocturno) |
+| `e2e-holamundo.yml` | `E2E — Hola Mundo` | 356677889 | `WebBlazor.HolaMundo` | Escalón 1: un job, un navegador |
+| `e2e-login.yml` | `E2E — Login` | 356677890 | `WebBlazor.Login` | Escalón 2: publica una vez, matriz de navegadores |
+| `android.yml` | `Android — MAUI` | 356840216 | `MovilidadUrbana.MAUI` | Pruebas de ViewModels + APK Release como artefacto |
+| `verificacion-entorno.yml` | `Verificación de entorno` | 340684647 | `MovilidadUrbana.Web` desplegada | Prueba de humo contra una URL ya desplegada, reusando `e2e.yml` |
+
+Los seis están `active` en la API (`/actions/workflows`, 2026-10-25). Los seis figuran en la carpeta de solución `github-workflow` de `Lab-E2E.WebBlazor.sln` (líneas 16–25).
+
+```
+ci.yml ──(needs: compilacion)──► uses: ./.github/workflows/e2e.yml  ◄── uses ── verificacion-entorno.yml
+   │                                    ▲ workflow_call                          (workflow_dispatch, url-base)
+   ├─ comentario-en-pr (needs: e2e)     │ también: workflow_dispatch + schedule '15 3 * * *'
+   └─ ci-ok (needs: compilacion, e2e)
+
+e2e-holamundo.yml   e2e-login.yml   android.yml      ← independientes, con filtro de rutas, no reutilizables
 ```
 
-## Un workflow E2E por proyecto web, en escalera
+La escalera es deliberada (README §«Los workflows»; cabeceras de `e2e-holamundo.yml` líneas 1–8 y `e2e-login.yml` líneas 1–11):
 
-Desde el 2026-09-12 hay un workflow de pruebas E2E **por aplicación**, y no son copias de uno solo:
-cada uno tiene la complejidad que su proyecto necesita, para estudiarlos de a un escalón.
-
-| Workflow | Aplicación | Qué suma respecto del anterior |
+| Escalón | Workflow | Qué suma respecto del anterior |
 | --- | --- | --- |
-| `e2e-holamundo.yml` («E2E — Hola Mundo») | Hola Mundo | Punto de partida: un job y un navegador que compila, levanta la aplicación y prueba |
-| `e2e-login.yml` («E2E — Login») | Login | Publica una vez y reparte la aplicación como artefacto a una matriz de navegadores |
-| `e2e.yml` («E2E») | Movilidad Urbana | Reporte unificado, invocable desde otros workflows, regresión nocturna y prueba contra un entorno desplegado |
+| 1 | `e2e-holamundo.yml` | Compila, levanta la app con `dotnet run`, prueba con chromium |
+| 2 | `e2e-login.yml` | Publica autocontenida **una vez** y reparte el artefacto a una matriz elegible a mano |
+| 3 | `e2e.yml` | Reutilizable (`workflow_call`) con inputs/outputs, cron, caché de navegadores, URL desplegada, reporte unificado |
 
-Son **independientes**: no se invocan entre sí ni desde `ci.yml`. `ci.yml` compila el filtro
-`Lab-E2E.WebBlazor.SinMaui.slnf` —Hola Mundo y Login incluidos, la app Android no— pero solo invoca
-`e2e.yml`. La app Android tiene su propio workflow, `android.yml`, que tampoco se invoca desde `ci.yml`.
+---
 
-## e2e-holamundo.yml — el escalón más simple
+## 2. Disparadores, concurrencia y permisos
 
-| Aspecto | Valor |
-| --- | --- |
-| Disparadores | `push` a `main` y `pull_request` hacia `main`, **filtrados por ruta** (`paths`) al proyecto web, su proyecto de pruebas y el propio YAML; `workflow_dispatch` |
-| Jobs | Uno, `pruebas`, en `ubuntu-latest`, `timeout-minutes: 20`, `permissions: contents: read` |
-| Navegador | Solo chromium |
-| `URL_APP` | `http://localhost:5027` |
+| Workflow | `push` | `pull_request` | Otros | `concurrency.group` | Cancela en curso |
+| --- | --- | --- | --- | --- | --- |
+| `ci.yml` | `main`, `paths-ignore: **/*.md, docs/**, .gitignore` | a `main` o `develop`; `types: opened, synchronize, reopened, ready_for_review` | `merge_group` | `ci-${{ github.ref }}` | solo si `pull_request` |
+| `e2e.yml` | — | — | `workflow_call`, `workflow_dispatch`, `schedule: '15 3 * * *'` | `e2e-${{ github.workflow }}-${{ github.ref }}` | solo si `pull_request` |
+| `e2e-holamundo.yml` | `main`, `paths: src/WebBlazor.HolaMundo/**, tests/WebBlazor.HolaMundo.E2ETests/**, el propio yml` | a `main`, mismas rutas | `workflow_dispatch` | *(no declara)* | — |
+| `e2e-login.yml` | `main`, `paths: src/WebBlazor.Login/**, tests/WebBlazor.Login.E2ETests/**, el propio yml` | a `main`, mismas rutas | `workflow_dispatch` con input `navegadores` | `e2e-login-${{ github.ref }}` | solo si `pull_request` |
+| `android.yml` | `main`, `paths: src/MovilidadUrbana.MAUI/**, tests/MovilidadUrbana.MAUI.Tests/**, el propio yml` | a `main`, mismas rutas | `workflow_dispatch` | `android-${{ github.ref }}` | solo si `pull_request` |
+| `verificacion-entorno.yml` | — | — | `workflow_dispatch` (inputs `entorno` tipo `environment`, `url-base`, ambos requeridos); `workflow_run` solo como comentario (línea 19–20) | *(no declara)* | — |
 
-Pasos: checkout · `setup-dotnet` · compila aplicación y pruebas en Release · instala chromium
-con `--with-deps` usando el CLI del paquete · **levanta la aplicación** con `dotnet run` en
-`http://localhost:5027` y espera a que responda · `dotnet test` con `--settings pruebas.runsettings`
-y TRX · sube resultados y el log de la aplicación **solo si algo falla**.
+- **Permisos**: todos declaran `permissions: contents: read`; solo el job `comentario-en-pr` de `ci.yml` suma `pull-requests: write` (`ci.yml` líneas 121–123).
+- **`paths-ignore` de `ci.yml`** incluye `docs/**`, carpeta que no existe en el repo (verificado con `ls` sobre `8fb4c3a`). Efecto observado: el commit `8fb4c3a` (solo `README.md` y `CHANGELOG.md`) **no disparó CI**; la última corrida de CI es la de `e9dea2a`.
+- **`e2e.yml` cron**: `15 3 * * *` (comentario: «03:15 UTC ≈ 00:15 en Argentina», línea 61). Ver §6.3 sobre el atraso real.
 
-La prueba no tiene fixture, así que el workflow levanta la aplicación por ella, en la URL que la
-prueba tiene escrita.
+---
 
-## e2e-login.yml — compilar una vez, probar muchas
+## 3. Jobs, por workflow
 
-| Aspecto | Valor |
-| --- | --- |
-| Disparadores | `push` y `pull_request` sobre `main`, filtrados por las rutas de Login; `workflow_dispatch` con la entrada `navegadores` |
-| `concurrency` | Por ref, cancelando la corrida anterior solo en pull requests |
-| Jobs | `publicar` (15 min) y `pruebas` (matriz, 20 min), en `ubuntu-latest` |
-| `URL_APP` | `http://localhost:5181` |
+### 3.1 `ci.yml`
 
-| Job | Qué hace |
-| --- | --- |
-| `publicar` | `dotnet publish` autocontenido para `linux-x64`, sube el artefacto de la aplicación (`retention-days: 7`) y arma la lista de navegadores (un `push` o un PR prueban con chromium) |
-| `pruebas` | Por navegador, `fail-fast: false`: compila las pruebas, instala el navegador con `--with-deps`, baja el artefacto, `chmod +x`, **arranca el binario publicado** desde su carpeta en `http://localhost:5181`, espera `/login`, corre `dotnet test -- Playwright.BrowserName=<navegador>` y sube resultados solo si falla |
+| Job (id → nombre visible) | `needs` | Runner activo | Timeout | Qué hace |
+| --- | --- | --- | --- | --- |
+| `compilacion` → «Compilación y unitarias» | — | `ubuntu-latest` (propio comentado) | 15 | `if: draft != true`; `setup-dotnet 10.0.x`; `dotnet restore/build Lab-E2E.WebBlazor.SinMaui.slnf -c Release -warnaserror`; `dotnet test` de `MovilidadUrbana.UnitTests` (`unitarias.trx`), `MovilidadUrbana.ApiWeb.Tests` (`api.trx`), `MovilidadUrbana.MAUI.Tests` (`maui-viewmodels.trx`); sube `resultados-unitarias` (7 días); `dotnet test tests/MovilidadUrbana.E2ETests --list-tests` |
+| `e2e` → «E2E» | `compilacion` | (los de `e2e.yml`) | — | `uses: ./.github/workflows/e2e.yml`; `navegadores`: `chromium` en PR, `chromium,firefox,webkit,mobile-chrome` en el resto; `referencia`: `pull_request.head.sha \|\| github.sha` |
+| `comentario-en-pr` → «Comentar en el PR» | `e2e` | `ubuntu-latest` | — | Solo en PR desde el mismo repo (no forks); `actions/github-script@v9` crea o **actualiza** un comentario marcado `<!-- e2e-playwright -->` con resultado, commit y enlace a la corrida |
+| `ci-ok` → «CI aprobada» | `compilacion`, `e2e` | `ubuntu-latest` | — | `if: always()`; falla si algún resultado no es `success` ni `skipped`. Comentario: «Único job que las reglas de protección de rama necesitan exigir» |
 
-No junta los TRX en un reporte ni se deja invocar desde otro workflow: eso es lo que agrega
-`e2e.yml`.
+`MovilidadUrbana.MAUI` queda fuera porque compilarla pide el workload (comentario líneas 54–55); de eso se ocupa `android.yml`. `MovilidadUrbana.MAUI.UITests` **no corre en CI**: ningún `dotnet test` de `ci.yml` lo invoca (casos «con Appium sobre la app instalada en el teléfono», README línea 64), aunque sí se compila, porque figura en `Lab-E2E.WebBlazor.SinMaui.slnf`. Ningún job corre las E2E de Hola Mundo ni de Login: tienen sus propios workflows.
 
-## e2e.yml — Movilidad Urbana, la definición reutilizable
+### 3.2 `e2e.yml` (reutilizable)
 
-Es el único lugar donde está escrito cómo se corren las pruebas **de Movilidad Urbana**. Los otros
-dos consumidores —`ci.yml` y `verificacion-entorno.yml`— solo lo invocan con entradas distintas.
+Entradas `workflow_call`: `navegadores` (default `chromium`), `url-base` (vacío = publicar y levantar local), `referencia`, `retencion-dias` (default 7). Salida: `resultado` ← `jobs.reporte.outputs.resultado`. En `workflow_dispatch` `navegadores` es un `choice` de 4 combinaciones. Variables globales: `CI=true`, `NAVEGADORES` (default `chromium,firefox,webkit,mobile-chrome`, que es lo que corre el cron), `ARTEFACTO_APLICACION=aplicacion-publicada`, `PROYECTO_PRUEBAS=tests/MovilidadUrbana.E2ETests`.
 
-### Disparadores
+| Job | `needs` | Runner activo | Timeout | Pasos clave |
+| --- | --- | --- | --- | --- |
+| `publicar` | — | **`[self-hosted, i7infra-dev]`** (línea 89; `ubuntu-latest` comentado) | 20 | `if: inputs.url-base == ''`; checkout de `referencia`; `setup-dotnet`; **verifica que el SDK (`net$(dotnet --version major).0`) coincida con el `<TargetFramework>` de `MovilidadUrbana.Web.csproj`**; `dotnet publish` autocontenido `linux-x64` → `publicacion/`; sube `aplicacion-publicada` |
+| `preparar` → «Preparar matriz» | — | `ubuntu-latest` | 5 | Convierte la lista separada por comas en JSON para la matriz; la escribe en el resumen |
+| `pruebas` → «Pruebas (<configuración>)» | `publicar`, `preparar` | `ubuntu-latest` | 30 | `fail-fast: false`; `mobile-chrome` ⇒ `NAVEGADOR=chromium` + `EMULAR_MOVIL=true`; compila las pruebas; `actions/cache@v6` sobre `~/.cache/ms-playwright` con clave `playwright-<os>-<navegador>-<hash del csproj de E2E>`; instala el navegador con el CLI embebido (`bin/Release/net10.0/.playwright/…/cli.js install --with-deps`); baja el artefacto y hace `chmod +x publicacion/MovilidadUrbana.Web` (el zip pierde el bit); `dotnet test --settings pruebas.runsettings -- Playwright.BrowserName=$NAVEGADOR` con `PUBLICAR_ANTES_DE_PROBAR=false`; sube `resultados-<configuración>` (TRX + `trazas/*.zip`) |
+| `reporte` → «Reporte unificado» | `preparar`, `pruebas` | `ubuntu-latest` | 15 | Junta `resultados-*`, lee los `<Counters>` de cada TRX con `node -e` y arma una tabla Total/Pasaron/Fallaron en `$GITHUB_STEP_SUMMARY`; `exit 1` si `pruebas` no fue `success` |
 
-| Disparador | Para qué |
-| --- | --- |
-| `workflow_call` | Lo invocan `ci.yml` y `verificacion-entorno.yml`; también podría invocarlo otro repositorio |
-| `workflow_dispatch` | Corrida a pedido desde *Actions*, eligiendo navegadores (`choice`) y entorno |
-| `schedule` | `cron: '15 3 * * *'` — regresión completa todas las noches (03:15 UTC ≈ 00:15 en Argentina) |
+- El `if` de `pruebas` (`!cancelled() && preparar == success && publicar != failure`) es lo que permite que `publicar` se saltee contra una URL desplegada sin arrastrar a la matriz (comentario línea 155).
+- Nada corre en un contenedor de job (`container:`): el runner propio es él mismo un contenedor sin socket de Docker (cabecera, líneas 15–17). Origen: ver §5.
 
-### Entradas y salida
+### 3.3 `e2e-holamundo.yml`
 
-| Entrada | Tipo | Por defecto |
+Un job, «Pruebas (chromium)», `ubuntu-latest`, 20 min: `dotnet build` de app y pruebas → instala chromium con el CLI embebido → `dotnet run --no-build --no-launch-profile` con `ASPNETCORE_URLS=http://localhost:5027`, `ASPNETCORE_ENVIRONMENT=Development`, en segundo plano, sondeando `/` hasta 60 s → `dotnet test --settings pruebas.runsettings` (`holamundo.trx`). Sube `resultados-holamundo` + `aplicacion.log` **solo si falla**. La URL está duplicada a propósito con la prueba (cabecera del yml, líneas 7–8): `http://localhost:5027` también figura en `tests/WebBlazor.HolaMundo.E2ETests/HolaMundoE2ETests.cs:12`.
+
+### 3.4 `e2e-login.yml`
+
+| Job | Runner | Timeout | Qué hace |
+| --- | --- | --- | --- |
+| `publicar` → «Publicar la aplicación» | `ubuntu-latest` | 15 | `dotnet publish` autocontenido `linux-x64`; sube `aplicacion-login` (7 días); arma la matriz desde `inputs.navegadores \|\| 'chromium'` |
+| `pruebas` → «Pruebas (<navegador>)» | `ubuntu-latest` | 20 | `fail-fast: false`; compila pruebas, instala el navegador, baja el artefacto, `chmod +x`, arranca `./WebBlazor.Login` **desde su carpeta** con `ASPNETCORE_URLS=http://localhost:5181` (sondea `/login`), corre `dotnet test -- Playwright.BrowserName=<navegador>`; sube resultados + log solo si falla |
+
+Sin reporte unificado ni `workflow_call` (cabecera, líneas 7–8). La URL se copia de `PruebaDeSuperficie.UrlBase` (línea 11) — ese nombre de clase en el comentario es anterior al renombre: ver §8.
+
+### 3.5 `android.yml`
+
+Un job, «Pruebas y APK», `ubuntu-latest`, 45 min: `setup-dotnet 10.0.x` → `dotnet test tests/MovilidadUrbana.MAUI.Tests -c Release` → `setup-java@v6` Temurin 17 → `dotnet workload install maui-android` → `dotnet build … -t:InstallAndroidDependencies -f net10.0-android -p:AndroidSdkDirectory=$ANDROID_HOME -p:AcceptAndroidSDKLicenses=True` → `dotnet publish -c Release -f net10.0-android -p:AndroidPackageFormat=apk -o apk` → sube `apk/*-Signed.apk` como `movilidad-urbana-apk` (14 días, `if-no-files-found: error`). Firmado con la clave de depuración del runner: sirve para un teléfono de prueba, no para una tienda (cabecera, líneas 5–6).
+
+### 3.6 `verificacion-entorno.yml`
+
+Un job `humo` → «Prueba de humo»: `uses: ./.github/workflows/e2e.yml` con `navegadores: chromium`, `url-base: ${{ inputs.url-base }}`, `retencion-dias: 30`. Con `url-base` cargada, `e2e.yml` no publica y prueba la URL. El input `entorno` (tipo `environment`) se declara pero **no se pasa** a `e2e.yml` (líneas 10–14 contra 26–32).
+
+---
+
+## 4. Artefactos
+
+| Artefacto | Lo sube | Retención | Contenido |
+| --- | --- | --- | --- |
+| `resultados-unitarias` | `ci.yml` / `compilacion` | 7 | TRX de unitarias, API y ViewModels |
+| `aplicacion-publicada` | `e2e.yml` / `publicar` | `retencion-dias` (7; 30 desde `verificacion-entorno`) | Publicación autocontenida de `MovilidadUrbana.Web` |
+| `resultados-<configuración>` | `e2e.yml` / `pruebas` | ídem | TRX + `trazas/*.zip` de casos fallidos |
+| `aplicacion-login` | `e2e-login.yml` / `publicar` | 7 | Publicación autocontenida de `WebBlazor.Login` |
+| `resultados-login-<navegador>`, `resultados-holamundo` | escalones 1 y 2 | default de GitHub | Solo si falla: TRX + `aplicacion.log` |
+| `movilidad-urbana-apk` | `android.yml` | 14 | APK Release firmado con clave de depuración |
+
+Observado 2026-10-25 (`/actions/artifacts`): 35 artefactos listados, todos de `e2e.yml` y no vencidos — 7 por nombre: `aplicacion-publicada`, `resultados-chromium`, `resultados-firefox`, `resultados-webkit`, `resultados-mobile-chrome` (consistente con 7 cron diarios × retención 7). No queda ningún `movilidad-urbana-apk` (la última corrida de `android.yml` es del 2026-09-18; retención 14 días).
+
+---
+
+## 5. Runner: historia y estado al commit `8fb4c3a`
+
+| Fecha | Commit | Cambio | Evidencia |
+| --- | --- | --- | --- |
+| 2026-08-23 | `0516139` | Todo en `[self-hosted, i7infra-dev]`, con jobs dentro de `container:` | CI run #1 (32654172882): jobs «Compilación» y «Verificación rápida» fallan en *Initialize containers*, runner `i7infra-runner-dev` |
+| 2026-08-23 | `6cb167d` | «Correr los jobs sobre el runner en vez de dentro de contenedores» | CI run #2 en verde |
+| 2026-08-23 | `90ad8fe` | La suite E2E de JavaScript pasa a proyecto C# | CI run #3 (23d0ef3) todavía muestra 16 jobs «Pruebas (<nav> · shard N)», 4×4, todos en el runner propio; después de este commit desaparecen los shards |
+| 2026-08-24 | `db775c5` (PR #10) | Todos los jobs a `ubuntu-latest`, el propio queda comentado como ejemplo | CI run #21 (35841f3): los 9 jobs que corrieron, con runner «GitHub Actions …» y etiqueta `ubuntu-latest` (el décimo, «Comentar en el PR», `skipped`) |
+| 2026-09-03 | `4815823` | **`publicar` de `e2e.yml` vuelve al runner propio** (línea 89 descomentada) | CI run #39 (e9dea2a, 2026-09-18) y E2E #66 (cron 2026-10-25): «Publicar la aplicación» en `i7infra-runner-dev`, el resto en `ubuntu-latest` |
+| 2026-09-12 | `7262395` | Se corrige el README §«Runner» para declarar esa excepción | `CHANGELOG.md` 2026-09-12 «Corregido» |
+
+Estado vigente: **solo `e2e.yml` / `publicar` usa el runner propio**; los otros 5 workflows y los demás jobs de `e2e.yml` corren en `ubuntu-latest`. Como `ci.yml` llama a `e2e.yml` sin `url-base`, toda corrida de CI que llega al job `e2e` pasa por `i7infra-dev`; `verificacion-entorno.yml` siempre carga `url-base` (input requerido), así que `publicar` se saltea y no lo usaría. El repo es público (API `/repos`, `visibility: public`); el guardarraíl contra forks es la aprobación de workflows de GitHub (`CHANGELOG.md` 2026-09-03; guía `Notas.GitHub.md`, ver [07](07_Guias.md)). Si esa opción está activada en Settings **no es verificable** sin credenciales.
+
+---
+
+## 6. Corridas observadas (API pública, al 2026-10-25)
+
+Fuente: `GET /repos/hdcm-dev/Lab-E2E.WebBlazor/actions/runs?per_page=100` páginas 1–2 (`total_count` 117), más `/runs/{id}/jobs` y `/check-runs/{id}/annotations` para las corridas citadas. Todas las corridas: `run_attempt` 1, actor `fernandofilipuzzi-utn`, rama `main` salvo los PR.
+
+### 6.1 Totales
+
+| Workflow | Corridas | Evento → conclusión | Primera | Última |
+| --- | ---: | --- | --- | --- |
+| `E2E` | 66 | 63 `schedule` → success · 3 `workflow_dispatch` → success | 2026-08-24 04:02Z | 2026-10-25 08:20Z |
+| `CI` | 39 | push: 24 success, 1 failure, 2 cancelled · pull_request: 11 success, 1 failure | 2026-08-23 17:14Z | 2026-09-18 12:27Z |
+| `Android — MAUI` | 4 | 4 push → success | 2026-09-13 01:21Z | 2026-09-18 12:27Z |
+| `E2E — Hola Mundo` | 4 | 4 push → success | 2026-09-12 18:27Z | 2026-09-18 12:27Z |
+| `E2E — Login` | 4 | 4 push → success | 2026-09-12 18:27Z | 2026-09-18 12:27Z |
+| `Verificación de entorno` | **0** | nunca se disparó | — | — |
+| **Total** | **117** | 113 success · 2 failure · 2 cancelled | | |
+
+Ninguna corrida de `workflow_dispatch` de Hola Mundo, Login ni Android: las cuatro de cada uno son `push`, sobre los commits `f9f3ca2`, `e0f3e9d`, `946d023`, `e9dea2a` (escalones) y `10ce735`, `3e119b8`, `946d023`, `e9dea2a` (Android). No hay `merge_group` observado. Las 12 corridas de `pull_request` son de 2026-08-23 a 2026-09-04 (la última, rama `feature/template-sdd-en-la-interfaz`, que entró como PR #11 en `7a9edaa`); desde entonces todo entra por `push` a `main`.
+
+### 6.2 Las cuatro corridas que no fueron verdes
+
+| Corrida | Fecha | Commit | Qué pasó | Evidencia |
+| --- | --- | --- | --- | --- |
+| CI #1 (pull_request) | 2026-08-23 | `0516139` | *Initialize containers* falla en el runner propio (sin socket de Docker) | jobs de 32654172882 |
+| CI #17 (push) | 2026-08-24 | `825afdf` | `cancelled`, sin ningún job registrado (`total_count: 0`) | jobs de 32768434103 |
+| CI #19 (push) | 2026-08-24 → 2026-08-25 | `5afcb36` | En el runner propio: firefox y mobile-chrome pasan; chromium y webkit quedan `cancelled` sin runner asignado, con `completed_at` exactamente 24 h después de `started_at`; reporte y `ci-ok` en `failure` | jobs de 32769264675. Interpretación (cola de 24 h de un runner autoalojado sin tomar el job): **no verificada** |
+| CI #38 (push) | 2026-09-18 | `946d023` | «Compilar con los avisos tratados como error» falla: `CS1574` *XML comment has cref attribute … that could not be resolved* en `src/MovilidadUrbana.ApiWeb/Application/Result.cs:5`, `Localidades/LocalidadPolicy.cs:8`, `Encuestas/EncuestaPolicy.cs:7` (crefs `Errores`, `ReglasDeLocalidad`, `ReglasDeEncuesta`, nombres previos al renombre). Corregido en `e9dea2a` (CI #39 verde, 5 min después) | annotations del job; `CHANGELOG.md` 2026-09-18 |
+
+### 6.3 Regresión nocturna (`schedule` de `e2e.yml`)
+
+- 63 corridas, **una por día sin huecos** del 2026-08-24 al 2026-10-25, las 63 en verde, siempre sobre `main`. Desde el 2026-09-19 todas prueban `8fb4c3a`.
+- **Atraso respecto del cron** (03:15 UTC): mínimo 42 min, mediana 317 min (~08:30 UTC), máximo 722 min (arranque 2026-08-28 15:17Z). Ninguna arrancó a la hora.
+- Duración (`run_started_at` → `updated_at`): mínimo 1,95 min, mediana 2,6, máximo 14,3.
+- Forma de la última (40176198598, 2026-10-25): 7 jobs — «Preparar matriz», «Publicar la aplicación» (`i7infra-runner-dev`), 4 × «Pruebas (…)» y «Reporte unificado» (`ubuntu-latest`).
+- Los 3 `workflow_dispatch` de `E2E` son del 2026-08-24/25 (commits `390a77c`, `35841f3`).
+
+### 6.4 Duraciones de las corridas verdes
+
+| Workflow | Mediana | Rango |
 | --- | --- | --- |
-| `navegadores` | string (`workflow_call`) / choice (`dispatch`) | `chromium`; en `schedule`, las cuatro configuraciones por el `env` |
-| `url-base` | string | vacío = se publica y se levanta localmente |
-| `referencia` | string | vacío = el ref del evento |
-| `retencion-dias` | number | 7 |
+| `CI` | 4,6 min | 2,5 min – 1659,8 min (la #21, creada 2026-08-24 20:05Z, cuyos jobs recién arrancaron 2026-08-25 23:41Z, cuando terminó la #19; que esperó por el `concurrency` de `main`, que no cancela, es inferencia **no verificada**) |
+| `Android — MAUI` | 3,1 min | 3,1 |
+| `E2E — Hola Mundo` | 1,0 min | 0,9 – 1,0 |
+| `E2E — Login` | 1,6 min | 1,6 |
 
-Salida: `resultado` — el resultado agregado, tomado de `jobs.reporte.outputs.resultado`. En
-`schedule` los `inputs` llegan vacíos, de ahí los valores por defecto explícitos del bloque `env`
-(`NAVEGADORES: inputs.navegadores || 'chromium,firefox,webkit,mobile-chrome'`).
+### 6.5 Aviso pendiente de la imagen del runner
 
-### Los cuatro jobs
+El check-run de CI #38 (2026-09-18) trae la anotación *notice*: «The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026». Las corridas del cron posteriores al 2026-10-19 siguen en verde; **qué imagen usaron no se verificó** (los logs piden autenticación).
 
-| Job | Runner | Qué hace |
+---
+
+## 7. Protección de rama
+
+`ci.yml` se presenta como «el workflow que se ata a las reglas de protección de rama» (línea 1) y `ci-ok` como el único check a exigir (línea 160). Observado (API `/branches`, 2026-10-25): **`main` tiene `protected: false`**, y `main` es la única rama remota (`git branch -a`: no existe `develop`, aunque `ci.yml` la acepta como destino de PR). El diseño está listo; la regla no está configurada.
+
+---
+
+## 8. Desfasajes y rastros en los workflows y su documentación
+
+| Dónde | Dice | Lo verificado |
 | --- | --- | --- |
-| `publicar` | **`[self-hosted, i7infra-dev]`** | `dotnet publish` autocontenido para `linux-x64` y sube `aplicacion-publicada`. Se saltea con `url-base`. Antes verifica que el SDK del runner coincida con el `<TargetFramework>` del `.csproj` |
-| `preparar` | `ubuntu-latest` | Convierte `chromium,firefox,…` en el JSON de la matriz |
-| `pruebas` | `ubuntu-latest` | Un job por configuración (30 min): compila las pruebas, traduce `mobile-chrome` a chromium + `EMULAR_MOVIL=true`, cachea (`actions/cache` sobre `~/.cache/ms-playwright`) e instala el navegador, baja el artefacto, `chmod +x`, corre `dotnet test` con `PUBLICAR_ANTES_DE_PROBAR=false` y sube el TRX. `fail-fast: false` |
-| `reporte` | `ubuntu-latest` | Junta los TRX en una tabla del `$GITHUB_STEP_SUMMARY` leyendo el `<Counters>` de cada uno, y falla si `needs.pruebas.result != 'success'` |
+| `e2e.yml` líneas 11–13 (cabecera) | Los jobs corren en `ubuntu-latest`, con el runner propio comentado | `publicar` tiene activo `[self-hosted, i7infra-dev]` (línea 89) |
+| `e2e.yml` líneas 87–88 | «Se deja comentado como ejemplo» | Encima de la línea **descomentada**; el comentario quedó del estado de `db775c5` |
+| `e2e.yml` línea 205 | «El runner conserva la caché entre corridas» | Contradice el comentario de líneas 193–196 (los de GitHub arrancan limpios); `pruebas` corre en `ubuntu-latest` |
+| `e2e-login.yml` línea 11 | «`PruebaDeSuperficie.UrlBase`» | Rastro en prosa del renombre `946d023` (hoy `SurfaceTestBase.UrlBase`); inventario en [01](01_Arquitectura.md) §8.3 |
+| `ci.yml` línea 1 y README §`ci.yml` | Se ata a la protección de rama | `main` sin protección (§7) |
+| `ci.yml` `paths-ignore: docs/**` | — | No hay carpeta `docs/`; inocuo |
+| `verificacion-entorno.yml` | Input `entorno` requerido | No se usa; 0 corridas |
+| README §Evidencia (última línea) y `CHANGELOG.md` 2026-08-30 | «el comportamiento real de los workflows, del que solo se validó la sintaxis YAML» | 117 corridas reales observadas (§6); la afirmación es de antes y nadie la actualizó |
+| `CHANGELOG.md` 2026-09-12 | Se retiró `e2e_2.yml` (workflow de Base, «0 corridas exitosas de 4») | Ese archivo nunca estuvo en la historia de este repo (`git log --all -- .github/workflows/e2e_2.yml` vacío) y la API no lista sus corridas: **no verificable desde acá** |
+| `CHANGELOG.md` 2026-09-12 | `publicar` en el runner propio «acumula 23 corridas en verde» | No recontado a esa fecha; **no verificado** |
 
-Detalles que valen para cualquier proyecto:
+---
 
-- `mobile-chrome` **no es un navegador**: es chromium con el descriptor de un Pixel 7.
-- Los artefactos de Actions se empaquetan en zip y **pierden el bit de ejecución**: de ahí el
-  `chmod +x` —también en `e2e-login.yml`—.
-- El navegador lo instala el CLI que viene **dentro del paquete** `Microsoft.Playwright`
-  (`node/linux-x64/node package/cli.js install --with-deps`), que baja la build de su propia
-  versión: biblioteca y navegador no se pueden desincronizar.
-- El binding de .NET no tiene `merge-reports`: el job `reporte` junta los contadores a mano.
+## 9. Cómo reproducir lo que corre CI, en local
 
-Invocación desde otro repositorio:
-
-```yaml
-jobs:
-  e2e:
-    uses: hdcm-dev/Lab-E2E.WebBlazor/.github/workflows/e2e.yml@main
-    with:
-      navegadores: chromium,firefox
-```
-
-## ci.yml — lo que se ata a la protección de rama
-
-| Disparador | Alcance |
-| --- | --- |
-| `pull_request` hacia `main` o `develop` (`opened`, `synchronize`, `reopened`, `ready_for_review`) | Verificación rápida: solo `chromium` |
-| `push` a `main` (con `paths-ignore` de `**/*.md`, `docs/**`, `.gitignore`) | Las 4 configuraciones |
-| `merge_group` | Igual que `push`, al entrar en la cola de merge |
-
-`concurrency: ci-<ref>`, cancelando solo en pull requests. `permissions: contents: read` en la raíz.
-
-| Job | Qué hace |
-| --- | --- |
-| `compilacion` («Compilación y unitarias», 15 min) | `restore` → `build Lab-E2E.WebBlazor.SinMaui.slnf -warnaserror` —diez proyectos: todos menos la app Android, que pide el workload de MAUI— → **pruebas unitarias** (`unitarias.trx`) → **pruebas de la API** en proceso (`api.trx`) → **pruebas de los ViewModels de Android** (`maui-viewmodels.trx`, sin emulador: las capas van enlazadas) → sube `resultados` como `resultados-unitarias` (7 días) → `dotnet test --list-tests` sobre las E2E **de Movilidad Urbana** |
-| `e2e` | Invoca `./.github/workflows/e2e.yml` con `navegadores` según el evento y `referencia` = SHA de la cabeza del PR |
-| `comentario-en-pr` | Deja **o actualiza** un comentario con el resultado y el enlace a la corrida; solo para ramas del propio repositorio (un fork no tiene permisos de escritura) |
-| `ci-ok` («CI aprobada») | Resume todos los jobs en un único check |
-
-`ci-ok` es **el único check que conviene exigir** en la regla de protección de rama. Acepta
-`success` y `skipped`. Si esa regla está o no configurada en GitHub **no se pudo verificar** desde
-esta máquina: la API de protección de rama exige autenticación.
-
-## android.yml — pruebas de los ViewModels y APK
-
-| Aspecto | Valor |
-| --- | --- |
-| Disparadores | `push` a `main` y `pull_request` hacia `main`, filtrados por ruta a `src/MovilidadUrbana.MAUI/**`, `tests/MovilidadUrbana.MAUI.Tests/**` y el propio YAML; `workflow_dispatch` |
-| `concurrency` | `android-<ref>`, cancelando solo en pull requests |
-| Jobs | Uno, `compilar` («Pruebas y APK»), `ubuntu-latest`, `timeout-minutes: 45`, `permissions: contents: read` |
-
-Pasos: checkout · `setup-dotnet` 10 · **pruebas de los ViewModels** (`dotnet test
-tests/MovilidadUrbana.MAUI.Tests`, antes de instalar nada de Android: no necesitan el workload) ·
-`setup-java@v6` Temurin 17 · `dotnet workload install maui-android` · `dotnet build
--t:InstallAndroidDependencies` con `AcceptAndroidSDKLicenses=True` (la imagen del runner trae un SDK
-de Android pero no garantiza la plataforma ni las build-tools que espera `net10.0-android`) ·
-`dotnet publish -c Release -f net10.0-android -p:AndroidPackageFormat=apk -o apk` · sube
-`apk/*-Signed.apk` como artefacto **`movilidad-urbana-apk`** por 14 días (`if-no-files-found: error`).
-
-El APK va firmado con la clave de depuración del runner: sirve para instalarlo en un teléfono de
-prueba, no para una tienda (cabecera del YAML). Es el único workflow que instala el workload; por
-eso `ci.yml` compila el filtro sin la app.
-
-## verificacion-entorno.yml
-
-Prueba de humo a pedido contra un entorno ya desplegado. Entradas: `entorno` (tipo `environment`) y
-`url-base`, las dos requeridas. Un solo job, `humo`, que invoca `e2e.yml` con
-`navegadores: chromium` y `retencion-dias: 30`.
-
-## Prácticas aplicadas
-
-No todas están en los tres workflows E2E: repartirlas es parte de la escalera.
-
-| Práctica | Cómo | Dónde |
+| Lo de CI | Equivalente local | Fuente |
 | --- | --- | --- |
-| `concurrency` por rama | Cancela en pull requests, conserva en `main` | `ci.yml`, `e2e.yml`, `e2e-login.yml` |
-| `permissions` mínimos | `contents: read`; `pull-requests: write` solo en el job que comenta | todos |
-| Compilar una vez, probar muchas | Se publica en un job y se reutiliza como artefacto | `e2e.yml`, `e2e-login.yml` |
-| Filtro de rutas | `paths-ignore` de documentación; `paths` del proyecto | `ci.yml`; `e2e-holamundo.yml`, `e2e-login.yml`, `android.yml` |
-| `timeout-minutes` en todos los jobs y `fail-fast: false` en las matrices | | todos |
-| Coincidencia SDK ↔ framework | Compara `<TargetFramework>` con el SDK del runner | `e2e.yml` |
-| SDK explícito | `actions/setup-dotnet`, porque la imagen de GitHub no garantiza la versión | todos |
+| `dotnet build …SinMaui.slnf -warnaserror` | `scripts/dotnet.sh dotnet build Lab-E2E.WebBlazor.SinMaui.slnf --configuration Release -warnaserror` (agregar `--no-incremental`: el `CS1574` de `946d023` no apareció en un build incremental) | README §Evidencia 2026-09-12; `CHANGELOG.md` 2026-09-18 |
+| `publicar` de `e2e.yml` | `scripts/publicar.sh` (mismo `dotnet publish` autocontenido `linux-x64` a `publicacion/`) | `scripts/publicar.sh` líneas 11–16 |
+| `pruebas` (una configuración) | `scripts/pruebas.sh <navegador>`, `EMULAR_MOVIL=true scripts/pruebas.sh` | README §«Sin nada instalado» |
+| `--list-tests` | `dotnet test tests/MovilidadUrbana.E2ETests --list-tests` | `ci.yml` líneas 93–98 |
 
-## Runner
+Configuración común de las corridas: `pruebas.runsettings` — `BrowserName` chromium, `ExpectTimeout` 5000, `Headless` true, `NumberOfTestWorkers` 4, `ResultsDirectory` `resultados`. Detalle de suites y variables (`PUBLICAR_ANTES_DE_PROBAR`, `INSTALAR_NAVEGADORES`, `EMULAR_MOVIL`, `TRAZAR`, `URL_BASE`) → [05](05_Pruebas.md).
 
-Casi todos los jobs corren en `runs-on: ubuntu-latest`. **La excepción es `publicar` de
-`e2e.yml`** (línea 89), con el runner propio `[self-hosted, i7infra-dev]` activo; en los demás jobs
-de `e2e.yml` y de `ci.yml` esa línea queda comentada encima de `ubuntu-latest`, para volver al runner
-propio descomentando una y comentando la otra. `e2e-holamundo.yml`, `e2e-login.yml` y `android.yml`
-corren enteros en `ubuntu-latest`.
+---
 
-Nada corre dentro de un contenedor de job: el runner autoalojado es él mismo un contenedor sin el
-socket de Docker, y un job con `container:` falla en *Initialize containers*.
+## 10. Versiones de acciones usadas
 
-Sobre `/dev/shm`: **se midió** que con 64 MB las 22 pruebas de chromium de Movilidad Urbana pasan
-igual, así que a esta escala no hace falta `--disable-dev-shm-usage` (fuente: `README.md`).
-
-## Corridas observadas
-
-Consultadas en la API pública de GitHub Actions
-(`/repos/hdcm-dev/Lab-E2E.WebBlazor/actions/workflows/<archivo>/runs`) el 2026-09-12 (hora local;
-las corridas más recientes figuran con fecha 2026-09-13 UTC).
-
-| Workflow | Corridas | Resultado |
+| Acción | Versión | Dónde |
 | --- | --- | --- |
-| `ci.yml` | 36 | 33 en verde (22 `push`, 11 `pull_request`), 2 `push` canceladas por `concurrency`, 1 `pull_request` en rojo; las últimas tres, sobre `88e5caa`, `3b53d14` y **`10ce735`**, en verde |
-| `e2e.yml` | 23 | Las 23 en verde: 20 programadas y 3 manuales; la última programada (2026-09-12) sobre `98fde5f`. Ninguna todavía sobre `10ce735` por `schedule`; las E2E de ese commit corrieron vía `ci.yml` |
-| `e2e-holamundo.yml` | 2 | En verde, `push` sobre `f9f3ca2` y `e0f3e9d` (el renombre) |
-| `e2e-login.yml` | 2 | En verde, `push` sobre `f9f3ca2` y `e0f3e9d` |
-| `android.yml` | 1 | En verde, `push` sobre `10ce735`: los 18 casos y el APK como artefacto |
-| `verificacion-entorno.yml` | 0 | Nunca se disparó |
-
-El workflow que Hola Mundo traía de su repositorio de origen (`e2e_2.yml`) tuvo **0 corridas verdes
-de 4**: no levantaba la aplicación y compartía `name` y nombre de artefacto con `e2e.yml`. Se retiró
-el 2026-09-12 (`CHANGELOG.md`).
+| `actions/checkout` | v7 | los cinco con pasos propios (`verificacion-entorno` solo llama a `e2e.yml`) |
+| `actions/setup-dotnet` | v6 (`dotnet-version: 10.0.x`) | todos los que compilan |
+| `actions/upload-artifact` | v7 | `ci`, `e2e`, `e2e-holamundo`, `e2e-login`, `android` |
+| `actions/download-artifact` | v8 | `e2e`, `e2e-login` |
+| `actions/cache` | v6 | `e2e` |
+| `actions/github-script` | v9 | `ci` |
+| `actions/setup-java` | v6 (Temurin 17) | `android` |
